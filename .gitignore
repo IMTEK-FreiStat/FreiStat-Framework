@@ -1,0 +1,8 @@
+.build/*
+.Python/FreiStat/__pycache__/*
+.Python/FreiStat/JSON_parser/__pycache__/*
+Measurements/*/*
+Persistent_Data_Objects/*/*
+*.pyc
+*.pyo
+.cortex*

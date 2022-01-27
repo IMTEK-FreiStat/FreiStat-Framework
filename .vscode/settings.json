@@ -1,0 +1,13 @@
+{
+    "editor.rulers": [
+    80,120
+    ],
+    "cortex-debug.armToolchainPath": "P:\\ArmEmbeddedToolchain\\10_2020-q4-major\\bin",
+    "cortex-debug.JLinkGDBServerPath": "P:\\Segger\\JLinkGDBServer.exe",
+    "files.associations": {
+        "typeinfo": "cpp",
+        "ad5940.h": "c",
+        "constants.c": "cpp",
+        "spi.h": "c"
+    }
+}

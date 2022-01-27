@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "executable": ".//.build/${fileBasename}.elf",
+            "serverpath": "P:\\Segger\\JLinkGDBServer.exe", 
+            "servertype": "jlink",
+            "device": "ATSAMD21G18",
+            "runToMain": true
+            }
+    ]
+}
