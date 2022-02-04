@@ -5,7 +5,9 @@
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 
- * @copyright Copyright (c) 2022 Mark Jasper
+ * @copyright MIT Liscene
+ * 
+ *  Copyright (c) 2022 University of Freiburg, IMTEK
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
