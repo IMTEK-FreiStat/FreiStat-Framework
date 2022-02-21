@@ -177,6 +177,12 @@
 #define FIXED_WE_POTENTIAL_B        1       // Parameter Fixed Working electrode Potential
 #define MAINS_FILTER_B              1       // Parameter mains filter
 
+#define BUFFER_ENTRIES              3       // Amount of entries in the following arrays
+// Parameter for CA Standalone potential steps
+const float POTENTIAL_STEPS_F[] =   {800.0, -400.0, -300.0}; 
+// Parameter for CA Standalone pulse lengths in ms
+const float PULSE_LENGTHS_F[] =     {4000, 3000, 3000};         
+
 /******************************************************************************
  * Electrochemical parameters: Abbreviations for telegram exchange
  *

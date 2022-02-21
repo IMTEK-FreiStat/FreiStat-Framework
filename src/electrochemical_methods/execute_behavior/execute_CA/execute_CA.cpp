@@ -31,7 +31,7 @@ void C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     bEosInterruptOccured_ = false;
 
     iStepCounter_ = 0;   
-   
+
     // Save reference of data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
 
@@ -55,7 +55,7 @@ void C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
     // Set system status to experiment running
     c_DataSoftwareStorage_->set_SystemStatus(FREISTAT_EXP_RUNNING);
-
+ 
     // Control the application
     this->funControlApplication(FREISTAT_START_TIMER);      
 
@@ -262,13 +262,13 @@ int C_Execute_CA::funProcessExperimentData(uint32_t * pData,
 
         S_DataContainer S_ExperimentData2 = 
             c_DataStorageGeneral_->get_ExperimentData(
-            this->funGetDataPosition(iStepCounter_ - 2));
+            this->funGetDataPosition(iStepCounter_ - 1));
 
         // Calculate current in uA
         S_ExperimentData2.fCurrent = 1000.0f * fVoltage / fRtiaMagnitude;
 
         c_DataStorageGeneral_->set_ExperimentData(S_ExperimentData2, 
-            this->funGetDataPosition(iStepCounter_ - 2));        
+            this->funGetDataPosition(iStepCounter_ - 1));        
 
         // Store voltage
         S_ExperimentData.fVoltage = c_DataStorageLocal_->

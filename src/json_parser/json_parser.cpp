@@ -643,35 +643,41 @@ int C_JSONParser::funHandleCAParameter(String strParameter, String strNumber){
     if (strParameter == POTENTIAL_STEPS){
         for (int iPosition = 0; iPosition < strNumber.length(); iPosition ++){
             // Check for ','
-            if (strNumber[iPosition] == ','){
-                c_DataStorageLocal_->set_PotentialSteps(strNumber.substring(
-                    iTempPosition + 1, iPosition).toFloat(), iEntry);
+            if (strNumber[iPosition] == ',' || strNumber[iPosition] == ' '){
+                if (iPosition > iTempPosition + 1){
+                    c_DataStorageLocal_->set_PotentialSteps(strNumber.substring(
+                        iTempPosition + 1, iPosition).toFloat(), iEntry);
 
-                // Increment counters
-                iEntry += 1;
-                iTempPosition = iPosition + 1;
+                    iEntry += 1;
+                }
+                iTempPosition = iPosition;
             }
         }
-        c_DataStorageLocal_->set_PotentialSteps(strNumber.substring(
-            iTempPosition + 1, strNumber.length()).toFloat(), iEntry);
 
+        if (strNumber.length() > iTempPosition + 1){
+            c_DataStorageLocal_->set_PotentialSteps(strNumber.substring(
+                iTempPosition + 1, strNumber.length()).toFloat(), iEntry);
+        }
         // Save amount of entries
         c_DataStorageLocal_->set_BufferEntries(iEntry + 1);
     }
     else if (strParameter == PULSE_LENGTH){
         for (int iPosition = 0; iPosition < strNumber.length(); iPosition ++){
             // Check for ','
-            if (strNumber[iPosition] == ','){
-                c_DataStorageLocal_->set_PulseDurations(strNumber.substring(
-                    iTempPosition + 1, iPosition).toFloat(), iEntry);
-                
-                // Increment counters
-                iEntry += 1;
-                iTempPosition = iPosition + 1;
+            if (strNumber[iPosition] == ',' || strNumber[iPosition] == ' '){
+                if (iPosition > iTempPosition + 1){
+                    c_DataStorageLocal_->set_PulseDurations(strNumber.substring(
+                        iTempPosition + 1, iPosition).toFloat(), iEntry);
+
+                    iEntry += 1;
+                }
+                iTempPosition = iPosition;
             }
         }
-        c_DataStorageLocal_->set_PulseDurations(strNumber.substring(
-            iTempPosition, strNumber.length()).toFloat(), iEntry);
+        if (strNumber.length() > iTempPosition + 1){
+            c_DataStorageLocal_->set_PulseDurations(strNumber.substring(
+                iTempPosition + 1, strNumber.length()).toFloat(), iEntry);
+        }
     }
     else if (strParameter == SAMPLING_RATE){
         float fTempSamplingRate = strNumber.toFloat();

@@ -115,6 +115,11 @@ void loop(){
             {
             case 0:
                 c_DataStorageLocal.set_ExperimentType(CA);
+                c_DataStorageLocal.set_BufferEntries(BUFFER_ENTRIES);
+                for (int i=0; i<c_DataStorageLocal.get_BufferEntries(); i++){
+                    c_DataStorageLocal.set_PotentialSteps(POTENTIAL_STEPS_F[i],i);
+                    c_DataStorageLocal.set_PulseDurations(PULSE_LENGTHS_F[i],i);
+                }
                 break;
             case 1:
                 c_DataStorageLocal.set_ExperimentType(LSV);
