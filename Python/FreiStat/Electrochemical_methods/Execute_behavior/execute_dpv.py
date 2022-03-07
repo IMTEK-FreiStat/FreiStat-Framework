@@ -13,6 +13,7 @@ __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
+import multiprocessing as mp
 from multiprocessing.queues import Queue
 
 # Import internal dependencies
@@ -30,6 +31,7 @@ class ExecuteDPV(ExecuteBehavior):
 
     def execute(self, 
                 dataQueue : Queue,
+                event : mp.Event(),
                 iTelegrams : int = 3,
                 bEnableReading : bool = True,
                 bPorgressiveMesurement : bool = False) -> int:
@@ -42,6 +44,9 @@ class ExecuteDPV(ExecuteBehavior):
         ----------
         `dataQueue` : Queue
             Data queue which is used as a pipe between processes
+
+        `event` : Event
+            Multiprocessing event to indicate termination event
 
         `iTelegrams` : int 
             Number of telegrams which should be send by the ec-method
@@ -71,6 +76,8 @@ class ExecuteDPV(ExecuteBehavior):
         """
         # Initialize class variables
         self._referenceTime : float = -1
+
+        self._event = event
 
         # Intialize variables
         bErrorflag : bool = False
@@ -175,6 +182,12 @@ class ExecuteDPV(ExecuteBehavior):
                 # Set system status to running experiment
                 self._dataSoftwareStorage.set_SystemStatus(
                     FREISTAT_EXP_RUNNING)
+
+            # Check if termination event occured
+            if (self._event.is_set()):
+                # Export data storage object
+                self._dataHandling.export_DataStorage()      
+                break    
 
             # Check if send telegram is a data telegram
             if (listReadData[0][0] == ("\"" + RUN + "\"")):

@@ -79,6 +79,7 @@ class Run_Electrochemical_Method:
     def P_DataCollection(self, 
                          strMethod : str,
                          dataQueue : mp.Queue, 
+                         event : mp.Event(),
                          listTempExperimentParameters : list, 
                          bLowPerformanceMode : bool,
                          sharedMemoryLocation_name : str) -> None:
@@ -114,6 +115,9 @@ class Run_Electrochemical_Method:
         """
         self._logger = logging.Logger("FreiStat_Library")
 
+        # Save event reference
+        self._event = event
+
         # Creating an object which stores all references to other objects
         self._dataSoftwareStorage = DataSoftwareStorage()
 
@@ -144,7 +148,7 @@ class Run_Electrochemical_Method:
             return iErrorCode
 
         # Start thread to run execute behavior
-        self._ecMethod.execute(dataQueue)
+        self._ecMethod.execute(dataQueue, self._event)
 
         # Set system status to starting experiment
         self._dataSoftwareStorage.set_SystemStatus(FREISTAT_EXP_STARTED)
@@ -371,8 +375,8 @@ class Run_Electrochemical_Method:
         Method used to terminate the current experiment 
 
         """
-        # Terminate the data processing process
-        self._process.terminate()
+        # Set event flag to true to end child process
+        self._event.set()
 
         # Join the process to prevent zombie processes
         self._process.join() 

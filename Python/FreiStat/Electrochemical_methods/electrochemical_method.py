@@ -13,6 +13,7 @@ __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
+import multiprocessing as mp
 from multiprocessing.queues import Queue
 
 # Import internal dependencies
@@ -136,6 +137,7 @@ class ElectrochemicalMethod:
 
     def execute(self, 
                 dataQueue : Queue,
+                event : mp.Event(),
                 iTelegrams : int = 3,
                 bEnableReading : bool = True,
                 bPorgressiveMesurement : bool = False) -> None:
@@ -149,6 +151,9 @@ class ElectrochemicalMethod:
         `dataQueue` : Queue
             Data queue which is used as a pipe between processes
 
+        `event` : Event
+            Multiprocessing event to indicate termination event
+
         `iTelegrams` : int 
             Number of telegrams which should be send by the ec-method
 
@@ -160,6 +165,6 @@ class ElectrochemicalMethod:
             if each cycle should start at time = 0
 
         """
-        self._executeBehavior.execute(dataQueue = dataQueue,
+        self._executeBehavior.execute(dataQueue = dataQueue, event= event,
             iTelegrams= iTelegrams, bEnableReading= bEnableReading,
             bPorgressiveMesurement= bPorgressiveMesurement)

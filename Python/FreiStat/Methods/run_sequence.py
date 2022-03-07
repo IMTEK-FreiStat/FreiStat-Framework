@@ -172,6 +172,9 @@ class Run_Sequence(Run_Electrochemical_Method):
         manager = mp.Manager()
         dataQueue = manager.Queue()
 
+        # Define event
+        self._event = mp.Event()
+
         # Define location in the RAM as shared memory between processes
         sharedMemoryLocation = shared_memory.SharedMemory(create= True, size= 200)
 
@@ -183,6 +186,7 @@ class Run_Sequence(Run_Electrochemical_Method):
         # Serial connection and the storage of the data
         self._process = mp.Process(target= self.P_DataCollection, 
                                    args=(dataQueue, 
+                                         self._event,
                                          SequenceCycles,
                                          listTempExperimentParameters,
                                          LowPerformanceMode,  
@@ -278,6 +282,7 @@ class Run_Sequence(Run_Electrochemical_Method):
 
     def P_DataCollection(self, 
                          dataQueue : mp.Queue, 
+                         event : mp.Event(),
                          SequenceCycles : int,
                          listTempExperimentParameters : list, 
                          bLowPerformanceMode : bool,
@@ -309,6 +314,9 @@ class Run_Sequence(Run_Electrochemical_Method):
             to return later the name of the file-path back to the user.
 
         """
+        # Save event reference
+        self._event = event
+
         # Create an object for handling communication
         self._serialConnection = Communication(self._dataSoftwareStorage,
                                                self._iCommunicationMode,
@@ -339,7 +347,7 @@ class Run_Sequence(Run_Electrochemical_Method):
             # Run execute behavior (only send the first two telegrams)
             # 1. Experiment type
             # 2. Experiment parameters
-            self._listEcMethod[iPosition].execute(dataQueue, iTelegrams= 2, 
+            self._listEcMethod[iPosition].execute(dataQueue, event= self._event, iTelegrams= 2, 
                 bEnableReading= False, bPorgressiveMesurement= False)
 
             # Move to the next stored data object
@@ -350,7 +358,7 @@ class Run_Sequence(Run_Electrochemical_Method):
 
         # Execute behavior for sequence needed -> thread reading data 
         # Persistant data export , etc. 
-        self._ecMethod.execute(dataQueue, iTelegrams= 2, bEnableReading= True,
+        self._ecMethod.execute(dataQueue, event= self._event, iTelegrams= 2, bEnableReading= True,
             bPorgressiveMesurement= False)
 
         # Set system status to starting experiment

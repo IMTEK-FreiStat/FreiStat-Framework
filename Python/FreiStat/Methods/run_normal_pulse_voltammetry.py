@@ -218,6 +218,9 @@ class Run_NPV(Run_Electrochemical_Method):
         manager = mp.Manager()
         dataQueue = manager.Queue()
 
+        # Define event
+        self._event = mp.Event()
+
         # Define location in the RAM as shared memory between processes
         sharedMemoryLocation = shared_memory.SharedMemory(create= True, size= 200)
 
@@ -228,7 +231,7 @@ class Run_NPV(Run_Electrochemical_Method):
         # Define a process which deals with the reading of the data from the 
         # Serial connection and the storage of the data
         self._process = mp.Process(target= self.P_DataCollection,
-            args=(strMethod, dataQueue, self._listExperimentParameters, 
+            args=(strMethod, dataQueue, self._event, self._listExperimentParameters, 
                   LowPerformanceMode, sharedMemoryLocation.name))
 
         # Start the process                                                 

@@ -281,42 +281,44 @@ class DataHandling:
             # Write header line
             writer = csv.writer(csvFile)
 
-            # Check which electrochemical method should be exported
-            if (strExperimentType == LSV or
-                strExperimentType == CV or
-                strExperimentType == NPV or
-                strExperimentType == SWV or
-                strExperimentType == DPV):
-                # Check if sequence or single method should be exported
-                if (len(self.get_StoredData()[0]) <= 5):
-                    # Write header in csv file
-                    writer.writerow(FREISTAT_CV_LABEL)
+            # Check if there is data to write
+            if (len(self.get_StoredData()) > 0):
+                # Check which electrochemical method should be exported
+                if (strExperimentType == LSV or
+                    strExperimentType == CV or
+                    strExperimentType == NPV or
+                    strExperimentType == SWV or
+                    strExperimentType == DPV):
+                    # Check if sequence or single method should be exported
+                    if (len(self.get_StoredData()[0]) <= 5):
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_CV_LABEL)
+                    else :
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_CV_LABEL_SEQ)                    
+
+                    # Loop over every entry
+                    for iEntry in range(len(listStoredData)):
+                        # Write new row
+                        writer.writerow(listStoredData[iEntry])
+
+                elif (strExperimentType == CA):
+                    # Check if sequence or single method should be exported
+                    if (len(self.get_StoredData()[0]) <= 5):
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_CA_LABEL)
+                    else :
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_CA_LABEL_SEQ)  
+
+                    # Loop over every entry
+                    for iEntry in range(len(listStoredData)):
+                        # Write new row
+                        writer.writerow(listStoredData[iEntry])
                 else :
-                    # Write header in csv file
-                    writer.writerow(FREISTAT_CV_LABEL_SEQ)                    
-
-                # Loop over every entry
-                for iEntry in range(len(listStoredData)):
-                    # Write new row
-                    writer.writerow(listStoredData[iEntry])
-
-            elif (strExperimentType == CA):
-                # Check if sequence or single method should be exported
-                if (len(self.get_StoredData()[0]) <= 5):
-                    # Write header in csv file
-                    writer.writerow(FREISTAT_CA_LABEL)
-                else :
-                    # Write header in csv file
-                    writer.writerow(FREISTAT_CA_LABEL_SEQ)  
-
-                # Loop over every entry
-                for iEntry in range(len(listStoredData)):
-                    # Write new row
-                    writer.writerow(listStoredData[iEntry])
-            else :
-                # Method not known 
-                iErrorcode = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
-                return str(iErrorcode)
+                    # Method not known 
+                    iErrorcode = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
+                    return str(iErrorcode)
             
         # Close file writer
         csvFile.close

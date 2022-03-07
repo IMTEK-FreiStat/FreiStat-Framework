@@ -193,17 +193,20 @@ class Run_CA(Run_Electrochemical_Method):
         manager = mp.Manager()
         dataQueue = manager.Queue()
 
+        # Define event
+        self._event = mp.Event()
+
         # Define location in the RAM as shared memory between processes
         sharedMemoryLocation = shared_memory.SharedMemory(create= True, size= 200)
 
         # Define byte array which accesses the prviously defined memory spacee
-        np_arrbSharedMemory = np.ndarray((1,200), dtype='|S1', 
-            buffer=sharedMemoryLocation.buf)
+        np_arrbSharedMemory = np.ndarray((1,200), dtype= '|S1', 
+            buffer= sharedMemoryLocation.buf)
 
         # Define a process which deals with the reading of the data from the 
         # Serial connection and the storage of the data
-        self._process = mp.Process(target= self.P_DataCollection, 
-            args=(strMethod, dataQueue, self._listExperimentParameters, 
+        self._process = mp.Process(target= self.P_DataCollection,
+            args=(strMethod, dataQueue, self._event, self._listExperimentParameters, 
                   LowPerformanceMode, sharedMemoryLocation.name))
 
         # Start the process 
