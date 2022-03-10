@@ -111,57 +111,6 @@ SINC2_OVERSAMPLING      = "pOS2"        # Parameter oversampling rate sinc2 filt
 SINC3_OVERSAMPLING      = "pOS3"        # Parameter oversampling rate sinc3 filter
 
 """-----------------------------------------------------------------------------
-| Configuration parameters: Names
-|   
-|   Constant              Value
------------------------------------------------------------------------------"""
-SEQUENCE_LENGTH_STR     = "Sequence Length"   
-BASE_POTENTIAL_STR      = "Base Potential"     
-START_POTENTIAL_STR     = "Start potential"   
-STOP_POTENTIAL_STR      = "Stop potential"       
-LOWER_POTENTIAL_STR     = "Lower turning potential"        
-UPPER_POTENTIAL_STR     = "Upper turning potential"      
-POTENTIAL_STEPS_STR     = "Potential steps" 
-PULSE_LENGTH_STR        = "Pulse lengths"   
-SAMPLING_RATE_STR       = "Sampling rate" 
-SAMPLING_DURATION_STR   = "Sampling duration"
-STEP_SIZE_STR           = "Step size"    
-SCAN_RATE_STR           = "Scan rate"  
-DELTA_V_STAIRCASE_STR   = "Delta V staircase"
-DELTA_V_PEAK_STR        = "Delta V peak"
-CYCLE_STR               = "Cycles"      
-LPTIA_RTIA_SIZE_STR     = "Current range"  
-FIXED_WE_POTENTIAL_STR  = "Fixed WE potential"    
-MAINS_FILTER_STR        = "Mains filter"  
-SINC2_OVERSAMPLING_STR  = "Sinc2 Oversampling rate"       
-SINC3_OVERSAMPLING_STR  = "Sinc3 Oversampling rate"    
-
-"""-----------------------------------------------------------------------------
-| Configuration parameters: Text
-|   
-|   Constant              Value                  
------------------------------------------------------------------------------"""
-BASE_POTENTIAL_TEXT     = "Base potential in mV"
-START_POTENTIAL_TEXT    = "Starting potential in mV"      
-STOP_POTENTIAL_TEXT     = "Stop potential in mV"        
-LOWER_POTENTIAL_TEXT    = "Lower potential in mV"        
-UPPER_POTENTIAL_TEXT    = "Upper potential in mV"
-POTENTIAL_STEPS_TEXT    = "Potential steps in mV"
-PULSE_LENGTH_TEXT       = "Pulse lengths in ms"
-SAMPLING_RATE_TEXT      = "Sampling rate in ms" 
-SAMPLING_DURATION_TEXT  = "Sampling duration in ms"      
-STEP_SIZE_TEXT          = "Stepsize in mV"         
-SCAN_RATE_TEXT          = "Scanratie in mV/s"  
-DELTA_V_STAIRCASE_TEXT  = "Delta V staircase in mV"
-DELTA_V_PEAK_TEXT       = "Delta V peak in mV"      
-CYCLE_TEXT              = "Number of cycles"      
-LPTIA_RTIA_SIZE_TEXT    = "Rtia resistor size encoded as integer"    
-FIXED_WE_POTENTIAL_TEXT = "Working electrode using fixed potential (1: True | 0: False)"       
-MAINS_FILTER_TEXT       = "50 Hz/ 60 Hz mains filter enabled (1: True | 0 : False)"
-SINC2_OVERSAMPLING_TEXT = "Oversampling rate sinc2 filter encoded as integer"
-SINC3_OVERSAMPLING_TEXT = "Oversampling rate sinc3 filter encoded as integer" 
-
-"""-----------------------------------------------------------------------------
 | Configuration parameters: Default values
 |   
 |   Constant                 Value                     Meaning

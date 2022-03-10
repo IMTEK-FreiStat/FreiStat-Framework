@@ -46,7 +46,7 @@ def ExampleImplementation():
     """
     # Change this parameter to switch between the different electrochemical
     # methods (see top for more information)
-    iExperiment : int = 0
+    iExperiment : int = 1
 
     if (iExperiment == 0):
         # Run sequence on FreiStat

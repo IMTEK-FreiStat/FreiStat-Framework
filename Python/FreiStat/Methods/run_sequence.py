@@ -379,6 +379,7 @@ class Run_Sequence(Run_Electrochemical_Method):
 
             # Export experiment parameters 
             self._dataHandling.export_ExperimentParameters_csv(
+                self._dataHandling.get_ExperimentType(),
                 self._dataHandling.get_ExperimentParameters())
 
             # Move to the next stored data object

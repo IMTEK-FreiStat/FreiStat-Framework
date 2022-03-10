@@ -73,6 +73,7 @@ import time
 
 # Import internal dependencies
 from .constants import *
+from .dictionaries import *
 from .data_storage import DataStorage
 from .data_software_storage import DataSoftwareStorage
 
@@ -326,7 +327,8 @@ class DataHandling:
         # Return file-path location of the exported csv-file
         return strExportPath
 
-    def export_ExperimentParameters_csv(self, listStoredParameters : list) -> None:    
+    def export_ExperimentParameters_csv(self, strExperimentType : str, 
+                                        listStoredParameters : list) -> None:    
         """
         Description
         -----------
@@ -335,6 +337,9 @@ class DataHandling:
 
         Parameters
         ----------
+        `strExperimentType` : str
+            Experiment type encoded as string
+
         `listStoredParameters` : list
             List containing all stored data which should be exported in a csv
             file
@@ -342,12 +347,6 @@ class DataHandling:
         """
         # Initialzie variables
         iErrorcode : int = 0
-
-        strExperimentType : str = ""
-        
-        # Get current experiment type
-        strExperimentType = self._listDataObject[self._currentDataObject]. \
-                                get_ExperimentType()
 
         # Check if setup was called
         if (self._workingDirectory[FREISTAT_CSV_EXPORT] == ""):
@@ -367,91 +366,14 @@ class DataHandling:
             csvFile:
             writer = csv.writer(csvFile)
 
-            # Check which electrochemical method should be exported and
-            # intialize reference list
-            if (strExperimentType == CA):
-                listReferenceList = [                
-                    [POTENTIAL_STEPS, POTENTIAL_STEPS_TEXT],
-                    [PULSE_LENGTH, PULSE_LENGTH_TEXT],
-                    [SAMPLING_RATE, SAMPLING_RATE_TEXT],
-                    [CYCLE, CYCLE_TEXT],
-                    [LPTIA_RTIA_SIZE, LPTIA_RTIA_SIZE_TEXT],
-                    [MAINS_FILTER, MAINS_FILTER_TEXT],
-                    [SINC2_OVERSAMPLING, SINC2_OVERSAMPLING_TEXT],
-                    [SINC3_OVERSAMPLING, SINC3_OVERSAMPLING_TEXT]
-                ]
-
-            elif (strExperimentType == LSV):
-                listReferenceList = [
-                    [START_POTENTIAL, START_POTENTIAL_TEXT],
-                    [STOP_POTENTIAL, STOP_POTENTIAL],
-                    [STEP_SIZE, STEP_SIZE_TEXT],
-                    [SCAN_RATE, SCAN_RATE_TEXT],
-                    [CYCLE, CYCLE_TEXT],
-                    [LPTIA_RTIA_SIZE, LPTIA_RTIA_SIZE_TEXT],
-                    [FIXED_WE_POTENTIAL, FIXED_WE_POTENTIAL_TEXT],
-                    [MAINS_FILTER, MAINS_FILTER_TEXT],
-                    [SINC2_OVERSAMPLING, SINC2_OVERSAMPLING_TEXT],
-                    [SINC3_OVERSAMPLING, SINC3_OVERSAMPLING_TEXT]
-                ]
-
-            elif (strExperimentType == CV):
-                listReferenceList = [
-                    [START_POTENTIAL, START_POTENTIAL_TEXT],
-                    [LOWER_POTENTIAL, LOWER_POTENTIAL_TEXT],
-                    [UPPER_POTENTIAL, UPPER_POTENTIAL_TEXT],
-                    [STEP_SIZE, STEP_SIZE_TEXT],
-                    [SCAN_RATE, SCAN_RATE_TEXT],
-                    [CYCLE, CYCLE_TEXT],
-                    [LPTIA_RTIA_SIZE, LPTIA_RTIA_SIZE_TEXT],
-                    [FIXED_WE_POTENTIAL, FIXED_WE_POTENTIAL_TEXT],
-                    [MAINS_FILTER, MAINS_FILTER_TEXT],
-                    [SINC2_OVERSAMPLING, SINC2_OVERSAMPLING_TEXT],
-                    [SINC3_OVERSAMPLING, SINC3_OVERSAMPLING_TEXT]
-                ]   
-
-            elif (strExperimentType == NPV):
-                listReferenceList = [
-                    [BASE_POTENTIAL, BASE_POTENTIAL_TEXT],
-                    [START_POTENTIAL, START_POTENTIAL_TEXT],
-                    [STOP_POTENTIAL, STOP_POTENTIAL_TEXT],
-                    [DELTA_V_STAIRCASE, DELTA_V_STAIRCASE_TEXT],
-                    [PULSE_LENGTH,PULSE_LENGTH_TEXT],
-                    [SAMPLING_DURATION, SAMPLING_DURATION_TEXT],
-                    [CYCLE, CYCLE_TEXT],
-                    [LPTIA_RTIA_SIZE, LPTIA_RTIA_SIZE_TEXT],
-                    [FIXED_WE_POTENTIAL, FIXED_WE_POTENTIAL_TEXT],
-                    [MAINS_FILTER, MAINS_FILTER_TEXT],
-                    [SINC2_OVERSAMPLING, SINC2_OVERSAMPLING_TEXT],
-                    [SINC3_OVERSAMPLING, SINC3_OVERSAMPLING_TEXT]
-                ]     
-
-            elif (strExperimentType == DPV or
-                  strExperimentType == SWV):
-                listReferenceList = [
-                    [START_POTENTIAL, START_POTENTIAL_TEXT],
-                    [STOP_POTENTIAL, STOP_POTENTIAL_TEXT],
-                    [DELTA_V_STAIRCASE, DELTA_V_STAIRCASE_TEXT],
-                    [DELTA_V_PEAK, DELTA_V_PEAK_TEXT],
-                    [PULSE_LENGTH,PULSE_LENGTH_TEXT],
-                    [SAMPLING_DURATION, SAMPLING_DURATION_TEXT],
-                    [CYCLE, CYCLE_TEXT],
-                    [LPTIA_RTIA_SIZE, LPTIA_RTIA_SIZE_TEXT],
-                    [FIXED_WE_POTENTIAL, FIXED_WE_POTENTIAL_TEXT],
-                    [MAINS_FILTER, MAINS_FILTER_TEXT],
-                    [SINC2_OVERSAMPLING, SINC2_OVERSAMPLING_TEXT],
-                    [SINC3_OVERSAMPLING, SINC3_OVERSAMPLING_TEXT]
-                ]             
+            # Write experiment type
+            writer.writerow(["Electrochemical method", strExperimentType])
 
             # Loop over every entry 
             for iEntry in range(len(listStoredParameters)):
-                # Check if entry is found
-                if(listStoredParameters[iEntry][0] == 
-                    listReferenceList[iEntry][0]):
-                    # Write new row
-                    writer.writerow([listReferenceList[iEntry][1], 
-                                        listStoredParameters[iEntry][1]])
-                
+                # Write new row
+                writer.writerow([dic_configParameters[listStoredParameters[iEntry][0]][1],  
+                                 listStoredParameters[iEntry][1]])            
         # Close file
         csvFile.close
 

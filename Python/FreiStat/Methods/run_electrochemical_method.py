@@ -158,8 +158,9 @@ class Run_Electrochemical_Method:
         strExportPath = self._dataHandling. \
             export_Data_csv(self._dataHandling.get_StoredData())
 
-        # Export experiment parameters 
+        # Export experiment type and parameters 
         self._dataHandling.export_ExperimentParameters_csv(
+            self._dataHandling.get_ExperimentType(),
             self._dataHandling.get_ExperimentParameters())
 
         # Save data object persistent
