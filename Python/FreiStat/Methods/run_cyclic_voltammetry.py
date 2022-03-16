@@ -176,7 +176,7 @@ class Run_CV(Run_Electrochemical_Method):
             _Optimizer = Optimizer(self._logger, self._iCommunicationMode)
 
             # Start optimization
-            iErrorcodeq = _Optimizer.start(CV, self._listExperimentParameters)
+            iErrorcode = _Optimizer.start(CV, self._listExperimentParameters)
 
             # Check for error
             if (iErrorcode != EC_NO_ERROR):

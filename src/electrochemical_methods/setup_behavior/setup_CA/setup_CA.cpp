@@ -583,8 +583,9 @@ int C_Setup_CA::funSequencerExecuteSequence(){
     AD5940_SEQGenCtrl(bTRUE);
 
     // Insert blank command
-    AD5940_SEQGenInsert(SEQ_NOP());
-
+    //AD5940_SEQGenInsert(SEQ_NOP());
+    AD5940_AFECtrlS(AFECTRL_ADCCNV, bFALSE);
+    
     // Create custom interrupt 1
     AD5940_SEQGenInsert(SEQ_INT1());
 
@@ -666,7 +667,11 @@ int C_Setup_CA::funSequencerExecuteSequence(){
 
     // Write command to SRAM
     AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
-    
+    /*
+    // Set remaining pulse length
+    c_DataStorageLocal_->set_StepsRemaining(
+        c_DataStorageLocal_->get_StepsRemaining() - c_DataStorageLocal_->get_Scanrate());
+    */
     return EC_NO_ERROR;
 }
 

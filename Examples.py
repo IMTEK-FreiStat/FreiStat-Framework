@@ -135,16 +135,16 @@ def ExampleImplementation():
 
     elif (iExperiment == 1):
         # Run chronoamperometry on FreiStat
-        strExportpath = Run_CA().start(Potential_Steps= [1, -.4],
-                                       Pulse_Lengths=[2, 1],
-                                       Sampling_Rate= 0.003,
-                                       Cycle= 2,
-                                       CurrentRange= 10e-6, 
+        strExportpath = Run_CA().start(Potential_Steps= [0.5, -.5],
+                                       Pulse_Lengths=[5, 5],
+                                       Sampling_Rate= 0.01,
+                                       Cycle= 3,
+                                       CurrentRange= 45e-5, 
                                        MainsFilter= False,
-                                       Sinc2_Oversampling = 1333,
-                                       Sinc3_Oversampling = 4,
+                                       Sinc2_Oversampling = 22,
+                                       Sinc3_Oversampling = 2,
                                        LowPerformanceMode= False,
-                                       EnableOptimizer= True,
+                                       EnableOptimizer= False,
                                        Progressive_Measurement = False)
     elif (iExperiment == 2):
         # Run chronoamperometry on FreiStat

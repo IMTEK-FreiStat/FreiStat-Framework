@@ -55,7 +55,7 @@ void C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
     // Set system status to experiment running
     c_DataSoftwareStorage_->set_SystemStatus(FREISTAT_EXP_RUNNING);
- 
+
     // Control the application
     this->funControlApplication(FREISTAT_START_TIMER);      
 
@@ -144,7 +144,7 @@ int C_Execute_CA::funInterruptServiceRoutine(){
         if (uiInterruptFlag & AFEINTSRC_CUSTOMINT1){
             // Reset interrupt flag
             AD5940_INTCClrFlag(AFEINTSRC_CUSTOMINT1);
-
+            
             // Read amount of data which is currently stored in FIFO
             uiFiFoCount = AD5940_FIFOGetCnt();
 
@@ -198,6 +198,16 @@ int C_Execute_CA::funInterruptServiceRoutine(){
         if (uiInterruptFlag & AFEINTSRC_ENDSEQ){
             // Reset interrupt flag
             AD5940_INTCClrFlag(AFEINTSRC_ENDSEQ);
+
+            // Read amount of data which is currently stored in FIFO
+            uiFiFoCount = AD5940_FIFOGetCnt();
+
+            // Read data from FIFO and store in temporary buffer
+            AD5940_FIFORd(c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
+
+            // Call the function to process data
+            this->funProcessExperimentData(
+                c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Control the application
             this->funControlApplication(FREISTAT_STOP_TIMER);    
@@ -332,7 +342,7 @@ int C_Execute_CA::funControlApplication(uint32_t uiCommand){
             S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1] = 1;
             S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1] = 
                     (uint32_t)(c_DataStorageGeneral_->get_LFOSCFrequency() * 
-                    c_DataStorageLocal_->get_Scanrate() / 1000.0) - 1 - 1;
+                    c_DataStorageLocal_->get_Scanrate() / 1000.0) - 1;
             S_WakeUpTimer_Config.SeqxSleepTime[SEQID_2] = 
                     S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1];
             S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_2] = 
@@ -392,8 +402,28 @@ int C_Execute_CA::funUpdateSequence(){
     // Get sampling rate
     float fSamplingRate = c_DataStorageLocal_->get_Scanrate();
 
+    // Generate stop sequence if experiment is done
+    if (c_DataStorageLocal_->get_StepNumber() + 1 > c_DataStorageLocal_->get_Cycle()){
+        // Read the current values of the AFE Control register
+        uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
+        // Clear ADC conversion bit
+        AfeControlRegister &= ~AFECTRL_ADCCNV;
+        iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
+        iCommandBuffer[1] = SEQ_STOP();
+        iCommandBuffer[2] = SEQ_NOP();
+
+        iCommandBuffer[3] = SEQ_NOP();
+        iCommandBuffer[4] = SEQ_NOP();
+        iCommandBuffer[5] = SEQ_NOP();
+
+        // Write command to SRAM
+        AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
+
+       return EC_NO_ERROR;
+    }
+
     // Check if current step has to be changed
-    if (c_DataStorageLocal_->get_StepsRemaining() < 0){
+    if (c_DataStorageLocal_->get_StepsRemaining() < fSamplingRate / 2){
         // Check if new cycle begins
         if (iCurrentStep + 1 >= c_DataStorageLocal_->get_BufferEntries()){
             // Increment step number
@@ -413,7 +443,7 @@ int C_Execute_CA::funUpdateSequence(){
 
             // Set remaining pulse length
             c_DataStorageLocal_->set_StepsRemaining(
-                c_DataStorageLocal_->get_PulseDurations(iCurrentStep + 1)-fSamplingRate);
+                c_DataStorageLocal_->get_PulseDurations(iCurrentStep + 1));
         }
         // Get updated current step number
         iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
@@ -444,48 +474,27 @@ int C_Execute_CA::funUpdateSequence(){
     c_DataStorageLocal_->set_StepsRemaining(
         c_DataStorageLocal_->get_StepsRemaining() - fSamplingRate);
 
-    // Generate stop sequence if experiment is done
-    if (c_DataStorageLocal_->get_StepNumber() + 1> c_DataStorageLocal_->get_Cycle()){
-        // Enable sequencer
-        AD5940_SEQGenCtrl(bTRUE);
 
-        // Stop ADC
-        AD5940_AFECtrlS(AFECTRL_ADCCNV, bFALSE);
+    // Read the current values of the AFE Control register
+    uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
+    // Clear ADC conversion bit
+    AfeControlRegister &= ~AFECTRL_ADCCNV;
+    iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
+    iCommandBuffer[1] = SEQ_INT1();
 
-        // Insert stop command
-        AD5940_SEQGenInsert(SEQ_STOP());
+    // Enbale ADC conversion bit
+    AfeControlRegister |= AFECTRL_ADCCNV;
+    iCommandBuffer[2] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
 
-        // Generate sequence
-        AD5940_SEQGenFetchSeq(&uiSequenceCommand, &uiSequenceLength);
+    iCommandBuffer[3] = SEQ_WR(REG_AFE_LPDACDAT0, uiVzeroCode << 12 | uiVbiasCode);
+    iCommandBuffer[4] = SEQ_WAIT(10);
+    iCommandBuffer[5] = SEQ_WR(bSeqBlockUsed ? REG_AFE_SEQ1INFO : 
+                        REG_AFE_SEQ2INFO, (iSRAMAddress << 
+                        BITP_AFE_SEQ1INFO_ADDR) | (AD5940_BUFFER_CA << 
+                        BITP_AFE_SEQ1INFO_LEN));
 
-        // Disable sequence generator
-        AD5940_SEQGenCtrl(bFALSE);
-
-        // Write command to SRAM
-        AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
-    }
-    else {
-        // Read the current values of the AFE Control register
-        uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
-        // Clear ADC conversion bit
-        AfeControlRegister &= ~AFECTRL_ADCCNV;
-        iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-        iCommandBuffer[1] = SEQ_INT1();
-
-        // Enbale ADC conversion bit
-        AfeControlRegister |= AFECTRL_ADCCNV;
-        iCommandBuffer[2] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-
-        iCommandBuffer[3] = SEQ_WR(REG_AFE_LPDACDAT0, uiVzeroCode << 12 | uiVbiasCode);
-        iCommandBuffer[4] = SEQ_WAIT(10);
-        iCommandBuffer[5] = SEQ_WR(bSeqBlockUsed ? REG_AFE_SEQ1INFO : 
-                            REG_AFE_SEQ2INFO, (iSRAMAddress << 
-                            BITP_AFE_SEQ1INFO_ADDR) | (AD5940_BUFFER_CA << 
-                            BITP_AFE_SEQ1INFO_LEN));
-
-        // Write command to SRAM
-        AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
-    }
+    // Write command to SRAM
+    AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
     
     // Switch between block 0 and block 1
     iDacCurrentBlock = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 

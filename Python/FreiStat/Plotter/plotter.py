@@ -91,7 +91,7 @@ class Plotter:
 
         # Enable grid
         self._ax.grid()
-
+        
         # Check if FreiStat is used as backend
         if (self._strMode == FREISTAT_BACKEND):
             self._StyleConfig = Style()
@@ -1116,7 +1116,6 @@ class Plotter:
                 fDuration += listExperimentParameters[1][1][iIndex]
             iDatapoints = fDuration / listExperimentParameters[2][1] * \
                           listExperimentParameters[3][1]  
-            print(iDatapoints)
         elif (strMethod == LSV):
             iDatapoints = int(abs(listExperimentParameters[0][1] - 
                                   listExperimentParameters[1][1]) / 

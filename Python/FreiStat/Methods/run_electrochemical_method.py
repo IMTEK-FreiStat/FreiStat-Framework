@@ -114,7 +114,7 @@ class Run_Electrochemical_Method:
 
         """
         self._logger = logging.Logger("FreiStat_Library")
-
+        
         # Save event reference
         self._event = event
 
@@ -146,7 +146,7 @@ class Run_Electrochemical_Method:
             self._logger.warning(strMethod + "setup failed: Error code: " + 
                 str(iErrorCode) + " Check error list for further informations.")
             return iErrorCode
-
+        
         # Start thread to run execute behavior
         self._ecMethod.execute(dataQueue, self._event)
 
@@ -378,28 +378,6 @@ class Run_Electrochemical_Method:
         """
         # Set event flag to true to end child process
         self._event.set()
-
-        # Join the process to prevent zombie processes
-        self._process.join() 
-
-        # Creating an object which stores all references to other objects
-        self._dataSoftwareStorage = DataSoftwareStorage()
-        
-        # Create an object for handling communication
-        self._serialConnection = Communication(self._dataSoftwareStorage,
-                                               self._iCommunicationMode,
-                                               self._listWLANSetting)
-
-        # Send stop command
-        self._serialConnection.write_Data("{\"C\":3,\"ExC\":\"Stop\"}")
-
-        while(self._serialConnection.get_SerialConnection().in_waiting > 0 and
-              self._iCommunicationMode == FREISTAT_SERIAL):
-            # Read JSON-telegram
-            self._serialConnection.read_Data("JSON").decode("utf-8")
-
-        # Close port
-        self._serialConnection._closeConnection()
 
     def get_plotter(self) -> Plotter:
         """

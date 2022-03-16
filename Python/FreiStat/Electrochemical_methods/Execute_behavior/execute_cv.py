@@ -185,6 +185,14 @@ class ExecuteCV(ExecuteBehavior):
 
             # Check if termination event occured
             if (self._event.is_set()):
+                # Send stop command
+                self._serialConnection.write_Data("{\"C\":3,\"ExC\":\"Stop\"}")
+
+                while(self._serialConnection.get_SerialConnection().in_waiting > 0 and
+                    self._iCommunicationMode == FREISTAT_SERIAL):
+                    # Read JSON-telegram
+                    self._serialConnection.read_Data("JSON").decode("utf-8")
+                    
                 # Export data storage object
                 self._dataHandling.export_DataStorage()      
                 break    
