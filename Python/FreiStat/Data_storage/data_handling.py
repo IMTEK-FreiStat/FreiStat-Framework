@@ -64,18 +64,40 @@ __version__ = "1.0.0"
 __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
-# Import dependencies
 import csv
-import os
 import glob
+import os
 import pickle
 import time
+from typing import List, Optional
 
-# Import internal dependencies
-from .constants import *
-from .dictionaries import *
-from .data_storage import DataStorage
+from .constants import SEQUENCE
 from .data_software_storage import DataSoftwareStorage
+from .data_storage import DataStorage
+from .dictionaries import (
+    CA,
+    CV,
+    DPV,
+    EC_DATASTORAGE,
+    EC_DS_EXPORT_SETUP_ERR,
+    EC_DS_METHOD_UNKOWN,
+    FREISTAT_CA_LABEL,
+    FREISTAT_CA_LABEL_SEQ,
+    FREISTAT_CORE_DATA_FOLDER,
+    FREISTAT_CORE_OBJECT_FOLDER,
+    FREISTAT_CSV_EXPORT,
+    FREISTAT_CV_LABEL,
+    FREISTAT_CV_LABEL_SEQ,
+    FREISTAT_DATA,
+    FREISTAT_DATA_STORAGE,
+    FREISTAT_EXPERIMENT_PARAMETERS,
+    FREISTAT_OBJECT_EXPORT,
+    FREISTAT_SEQUENCE_POSITION,
+    LSV,
+    NPV,
+    SWV,
+    dic_configParameters,
+)
 
 
 class DataHandling:
@@ -90,7 +112,7 @@ class DataHandling:
 
     """
 
-    def __init__(self, dataSoftwareStorage: DataSoftwareStorage) -> None:
+    def __init__(self, data_software_storage: DataSoftwareStorage) -> None:
         """
         Description
         -----------
@@ -103,17 +125,19 @@ class DataHandling:
 
         """
         # Safe data software storage reference and set own reference
-        self._dataSoftwareStorage = dataSoftwareStorage
-        self._dataSoftwareStorage.setDataHandling(self)
+        self._data_software_storage = data_software_storage
+        self._data_software_storage.setDataHandling(self)
 
         # Initialize class variables
-        self._listDataObject: list = []
-        self._currentDataObject: int = 0
+        self._data_objects: List[DataStorage] = []
+        self._current_data_object = 0
 
-        self._baseDirectory: str = os.getcwd()
-        self._workingDirectory: list = ["", ""]
+        self._base_directory = os.getcwd()
+        self._working_directory = ["", ""]
 
-    def create_DataObject(self) -> None:
+        self._output_file = ""
+
+    def create_data_object(self) -> None:
         """
         Description
         -----------
@@ -124,12 +148,12 @@ class DataHandling:
 
         """
         # Create data object and append it to the list
-        self._listDataObject.append(DataStorage())
+        self._data_objects.append(DataStorage())
 
         # Set reference to this new Data object
-        self._currentDataObject = len(self._listDataObject) - 1
+        self._current_data_object = len(self._data_objects) - 1
 
-    def move_first_DataObject(self) -> None:
+    def move_first_data_object(self) -> None:
         """
         Description
         -----------
@@ -137,9 +161,9 @@ class DataHandling:
 
         """
         # Move to first entry in the list
-        self._currentDataObject = 0
+        self._current_data_object = 0
 
-    def move_next_DataObject(self) -> None:
+    def move_next_data_object(self) -> None:
         """
         Description
         -----------
@@ -150,23 +174,23 @@ class DataHandling:
         """
         # Check if last element is sequence element
         if (
-            self._listDataObject[len(self._listDataObject) - 1].get_ExperimentType()
+            self._data_objects[len(self._data_objects) - 1].get_ExperimentType()
             == SEQUENCE
         ):
-            iUpperBoundary = 2
+            upper_boundary = 2
         else:
-            iUpperBoundary = 1
+            upper_boundary = 1
 
         # Check if the second last data object is reached
         # (Last element contains information regarding sequence and is skipped)
-        if self._currentDataObject == len(self._listDataObject) - iUpperBoundary:
+        if self._current_data_object == len(self._data_objects) - upper_boundary:
             # Jump to first object
-            self._currentDataObject = 0
+            self._current_data_object = 0
         else:
             # Jump to next object
-            self._currentDataObject += 1
+            self._current_data_object += 1
 
-    def move_previous_DataObject(self) -> None:
+    def move_previous_data_object(self) -> None:
         """
         Description
         -----------
@@ -177,22 +201,22 @@ class DataHandling:
         """
         # Check if last element is sequence element
         if (
-            self._listDataObject[len(self._listDataObject) - 1].get_ExperimentType()
+            self._data_objects[len(self._data_objects) - 1].get_ExperimentType()
             == SEQUENCE
         ):
-            iUpperBoundary = 2
+            upper_boundary = 2
         else:
-            iUpperBoundary = 1
+            upper_boundary = 1
 
         # Check if first data object is reached
-        if self._currentDataObject == 0:
+        if self._current_data_object == 0:
             # Jump to second last object (see `move_next_DataObject`)
-            self._currentDataObject = len(self._listDataObject) - iUpperBoundary
+            self._current_data_object = len(self._data_objects) - upper_boundary
         else:
             # Jump to previous object
-            self._currentDataObject -= 1
+            self._current_data_object -= 1
 
-    def setup_ExportFiles(self) -> None:
+    def setup_export_files(self) -> None:
         """
         Description
         -----------
@@ -201,41 +225,41 @@ class DataHandling:
 
         """
         # Initialize variables
-        strFolderName: str = ""
+        folder_name = ""
 
         # Storing csv-files
         # Create directory for storing all experiment data
-        self._create_WorkDirectory(FREISTAT_CSV_EXPORT, FREISTAT_CORE_DATA_FOLDER)
+        self._create_work_directory(FREISTAT_CSV_EXPORT, FREISTAT_CORE_DATA_FOLDER)
 
         # Create sub directory for the current day (YEAR-MONTH-DAY)
-        strFolderName = time.strftime("%y_%m_%d")
-        self._create_WorkDirectory(FREISTAT_CSV_EXPORT, strFolderName)
+        folder_name = time.strftime("%y_%m_%d")
+        self._create_work_directory(FREISTAT_CSV_EXPORT, folder_name)
 
         # Create sub directory for the current experiment
         # (HOUR-MINUTE-SECOND)
-        strFolderName = time.strftime("%H_%M_%S")
-        self._create_WorkDirectory(FREISTAT_CSV_EXPORT, strFolderName)
+        folder_name = time.strftime("%H_%M_%S")
+        self._create_work_directory(FREISTAT_CSV_EXPORT, folder_name)
 
         # Change back to back to base directory
-        os.chdir(self._baseDirectory)
+        os.chdir(self._base_directory)
 
         # Storing object-files
         # Create directory for storing the data storage object
-        self._create_WorkDirectory(FREISTAT_OBJECT_EXPORT, FREISTAT_CORE_OBJECT_FOLDER)
+        self._create_work_directory(FREISTAT_OBJECT_EXPORT, FREISTAT_CORE_OBJECT_FOLDER)
 
         # Create sub directory for the current day (YEAR-MONTH-DAY)
-        strFolderName = time.strftime("%y_%m_%d")
-        self._create_WorkDirectory(FREISTAT_OBJECT_EXPORT, strFolderName)
+        folder_name = time.strftime("%y_%m_%d")
+        self._create_work_directory(FREISTAT_OBJECT_EXPORT, folder_name)
 
         # Create sub directory for the current experiment
         # (HOUR-MINUTE-SECOND)
-        strFolderName = time.strftime("%H_%M_%S")
-        self._create_WorkDirectory(FREISTAT_OBJECT_EXPORT, strFolderName)
+        folder_name = time.strftime("%H_%M_%S")
+        self._create_work_directory(FREISTAT_OBJECT_EXPORT, folder_name)
 
         # Change back to back to base directory
-        os.chdir(self._baseDirectory)
+        os.chdir(self._base_directory)
 
-    def export_Data_csv(self, listStoredData: list) -> str:
+    def export_data_csv(self, stored_data: list) -> str:
         """
         Description
         -----------
@@ -255,54 +279,48 @@ class DataHandling:
 
         """
         # Initialize variables
-        iErrorcode: int = 0
+        error_code = 0
 
-        strExperimentType: str = ""
+        experiment_type = ""
 
         # Get current experiment type
-        strExperimentType = self._listDataObject[
-            self._currentDataObject
+        experiment_type = self._data_objects[
+            self._current_data_object
         ].get_ExperimentType()
 
         # Check if setup was called
-        if self._workingDirectory[FREISTAT_CSV_EXPORT] == "":
-            iErrorcode = EC_DATASTORAGE + EC_DS_EXPORT_SETUP_ERR
-            return str(iErrorcode)
+        if self._working_directory[FREISTAT_CSV_EXPORT] == "":
+            error_code = EC_DATASTORAGE + EC_DS_EXPORT_SETUP_ERR
+            return str(error_code)
 
         # Change working directory
-        os.chdir(self._workingDirectory[FREISTAT_CSV_EXPORT])
+        os.chdir(self._working_directory[FREISTAT_CSV_EXPORT])
 
         # Save export path
-        strExportPath = os.getcwd()
+        export_path = os.getcwd()
 
         # Create csv-file
-        self._outputFile = (
+        self._output_file = (
             FREISTAT_DATA
             + "_"
             + FREISTAT_SEQUENCE_POSITION
-            + str(self._currentDataObject)
+            + str(self._current_data_object)
             + "_"
-            + strExperimentType
+            + experiment_type
             + ".csv"
         )
 
         # Open writer who is used to write into csv file
-        with open(self._outputFile, "w", newline="", encoding="utf-8") as csvFile:
+        with open(self._output_file, "w", newline="", encoding="utf-8") as csv_file:
             # Write header line
-            writer = csv.writer(csvFile)
+            writer = csv.writer(csv_file)
 
             # Check if there is data to write
-            if len(self.get_StoredData()) > 0:
+            if len(self.get_stored_data()) > 0:
                 # Check which electrochemical method should be exported
-                if (
-                    strExperimentType == LSV
-                    or strExperimentType == CV
-                    or strExperimentType == NPV
-                    or strExperimentType == SWV
-                    or strExperimentType == DPV
-                ):
+                if experiment_type in (LSV, CV, NPV, SWV, DPV):
                     # Check if sequence or single method should be exported
-                    if len(self.get_StoredData()[0]) <= 5:
+                    if len(self.get_stored_data()[0]) <= 5:
                         # Write header in csv file
                         writer.writerow(FREISTAT_CV_LABEL)
                     else:
@@ -310,13 +328,13 @@ class DataHandling:
                         writer.writerow(FREISTAT_CV_LABEL_SEQ)
 
                     # Loop over every entry
-                    for iEntry in range(len(listStoredData)):
+                    for data in stored_data:
                         # Write new row
-                        writer.writerow(listStoredData[iEntry])
+                        writer.writerow(data)
 
-                elif strExperimentType == CA:
+                elif experiment_type == CA:
                     # Check if sequence or single method should be exported
-                    if len(self.get_StoredData()[0]) <= 5:
+                    if len(self.get_stored_data()[0]) <= 5:
                         # Write header in csv file
                         writer.writerow(FREISTAT_CA_LABEL)
                     else:
@@ -324,23 +342,20 @@ class DataHandling:
                         writer.writerow(FREISTAT_CA_LABEL_SEQ)
 
                     # Loop over every entry
-                    for iEntry in range(len(listStoredData)):
+                    for data in stored_data:
                         # Write new row
-                        writer.writerow(listStoredData[iEntry])
+                        writer.writerow(data)
                 else:
                     # Method not known
-                    iErrorcode = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
-                    return str(iErrorcode)
-
-        # Close file writer
-        csvFile.close
+                    error_code = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
+                    return str(error_code)
 
         # Return file-path location of the exported csv-file
-        return strExportPath
+        return export_path
 
-    def export_ExperimentParameters_csv(
-        self, strExperimentType: str, listStoredParameters: list
-    ) -> None:
+    def export_experiment_parameters_csv(
+        self, experiment_type: str, stored_parameters: list
+    ) -> Optional[str]:
         """
         Description
         -----------
@@ -358,47 +373,42 @@ class DataHandling:
 
         """
         # Initialzie variables
-        iErrorcode: int = 0
+        errorcode = 0
 
         # Check if setup was called
-        if self._workingDirectory[FREISTAT_CSV_EXPORT] == "":
-            iErrorcode = EC_DATASTORAGE + EC_DS_EXPORT_SETUP_ERR
-            return str(iErrorcode)
+        if self._working_directory[FREISTAT_CSV_EXPORT] == "":
+            errorcode = EC_DATASTORAGE + EC_DS_EXPORT_SETUP_ERR
+            return str(errorcode)
 
         # Change working directory
-        os.chdir(self._workingDirectory[FREISTAT_CSV_EXPORT])
+        os.chdir(self._working_directory[FREISTAT_CSV_EXPORT])
 
         # Create csv-file
-        self._outputFile = (
+        self._output_file = (
             FREISTAT_EXPERIMENT_PARAMETERS
             + "_"
             + FREISTAT_SEQUENCE_POSITION
-            + str(self._currentDataObject)
+            + str(self._current_data_object)
             + "_"
-            + strExperimentType
+            + experiment_type
             + ".csv"
         )
 
         # Write header line
-        with open(self._outputFile, "w", newline="", encoding="utf-8") as csvFile:
-            writer = csv.writer(csvFile)
+        with open(self._output_file, "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file)
 
             # Write experiment type
-            writer.writerow(["Electrochemical method", strExperimentType])
+            writer.writerow(["Electrochemical method", experiment_type])
 
             # Loop over every entry
-            for iEntry in range(len(listStoredParameters)):
+            for parameters in stored_parameters:
                 # Write new row
-                writer.writerow(
-                    [
-                        dic_configParameters[listStoredParameters[iEntry][0]][1],
-                        listStoredParameters[iEntry][1],
-                    ]
-                )
-        # Close file
-        csvFile.close
+                writer.writerow([dic_configParameters[parameters[0]][1], parameters[1]])
 
-    def _create_WorkDirectory(self, iDirectorySelect: int, strName: str):
+        return None
+
+    def _create_work_directory(self, directory_select: int, name: str):
         """
         Description
         -----------
@@ -417,25 +427,16 @@ class DataHandling:
 
         """
         # Check if work directory is already created
-        self._workingDirectory[iDirectorySelect] = os.getcwd()
-        if not os.path.exists(strName):
+        self._working_directory[directory_select] = os.getcwd()
+        if not os.path.exists(name):
             # If folder doesn't exist, create it
-            os.mkdir(strName)
+            os.mkdir(name)
 
         # Change working directory to new folder
-        self._workingDirectory[iDirectorySelect] += "\\" + strName + "\\"
-        os.chdir(self._workingDirectory[iDirectorySelect])
+        self._working_directory[directory_select] += "\\" + name + "\\"
+        os.chdir(self._working_directory[directory_select])
 
-    def export_JSON(self) -> None:
-        """
-        Description
-        -----------
-        Exporting stored experiment data as a JSON file
-
-        """
-        # TODO planned feature
-
-    def export_DataStorage(self) -> None:
+    def export_data_storage(self) -> None:
         """
         Description
         -----------
@@ -443,20 +444,12 @@ class DataHandling:
         software crash.
 
         """
-        # Initialzie variables
-        iErrorcode: int = 0
-
-        # Check if setup was called
-        if self._workingDirectory[FREISTAT_CSV_EXPORT] == "":
-            iErrorcode = EC_DATASTORAGE + EC_DS_EXPORT_SETUP_ERR
-            # TODO return value
-
         # Change working directory
-        os.chdir(self._workingDirectory[FREISTAT_OBJECT_EXPORT])
+        os.chdir(self._working_directory[FREISTAT_OBJECT_EXPORT])
 
         # Get current experiment type
-        strExperimentType = self._listDataObject[
-            self._currentDataObject
+        experiment_type = self._data_objects[
+            self._current_data_object
         ].get_ExperimentType()
 
         # Overwrite existing external object with newest iteration
@@ -464,22 +457,19 @@ class DataHandling:
             FREISTAT_DATA_STORAGE
             + "_"
             + FREISTAT_SEQUENCE_POSITION
-            + str(self._currentDataObject)
+            + str(self._current_data_object)
             + "_"
-            + strExperimentType,
+            + experiment_type,
             "wb",
         ) as output:
             # Write data object as data file into the chosen directory.
             pickle.dump(
-                self._listDataObject[self._currentDataObject].get_StoredData(),
+                self._data_objects[self._current_data_object].get_StoredData(),
                 output,
                 pickle.HIGHEST_PROTOCOL,
             )
 
-        # Close output writer
-        output.close
-
-    def import_DataStorage(self, strPath: str) -> None:
+    def import_data_storage(self, path: str) -> None:
         """
         Description
         -----------
@@ -496,46 +486,43 @@ class DataHandling:
 
         """
         # Initialzie variables
-        listData: list = []
+        data = []
 
         # Change working directory
-        os.chdir(strPath)
+        os.chdir(path)
 
         # Get all files in the folder
-        listData = glob.glob(FREISTAT_DATA_STORAGE + "*")
+        data = glob.glob(FREISTAT_DATA_STORAGE + "*")
 
-        print(listData)
+        print(data)
 
         # Loop over every found file
-        for iIndex in range(len(listData)):
+        for entry in data:
             # Create Data storage
-            self.create_DataObject()
+            self.create_data_object()
 
             # Fill new datastorage with the external data
-            with open(listData[iIndex], "rb") as input:
-                self._listDataObject[self._currentDataObject].set_StoredData(
-                    pickle.load(input)
+            with open(entry, "rb") as exernal_data:
+                self._data_objects[self._current_data_object].set_StoredData(
+                    pickle.load(exernal_data)
                 )
-
-            # Close input reader
-            input.close
 
             # Export data as csv
             with open(
-                listData[iIndex] + "_recovery.csv", "w", newline="", encoding="utf-8"
-            ) as csvFile:
+                entry + "_recovery.csv", "w", newline="", encoding="utf-8"
+            ) as csv_file:
                 # Write header line
-                writer = csv.writer(csvFile)
+                writer = csv.writer(csv_file)
 
-                listStoredData = self._listDataObject[
-                    self._currentDataObject
+                stored_data = self._data_objects[
+                    self._current_data_object
                 ].get_StoredData()
                 # Loop over every entry
-                for iEntry in range(len(listStoredData)):
+                for s_data in stored_data:
                     # Write new row
-                    writer.writerow(listStoredData[iEntry])
+                    writer.writerow(s_data)
 
-    def append_StoredData(self, listTemp: list) -> None:
+    def append_stored_data(self, temp: list) -> None:
         """
         Description
         -----------
@@ -548,9 +535,9 @@ class DataHandling:
 
         """
         # Add list of data to the current referenced data object
-        self._listDataObject[self._currentDataObject].append_Data(listTemp)
+        self._data_objects[self._current_data_object].append_Data(temp)
 
-    def save_ExperimentParmeters(self, listExperimentParameters: list) -> None:
+    def save_experiment_parmeters(self, experiment_parameters: list) -> None:
         """
         Description
         -----------
@@ -565,11 +552,11 @@ class DataHandling:
         """
         # Add list of experiment parameters to the current referenced data
         # object
-        self._listDataObject[self._currentDataObject].save_ExperimentParameters(
-            listExperimentParameters
+        self._data_objects[self._current_data_object].save_ExperimentParameters(
+            experiment_parameters
         )
 
-    def save_ExperimentType(self, strExperimentType: str) -> None:
+    def save_experiment_type(self, experiment_type: str) -> None:
         """
         Description
         -----------
@@ -582,12 +569,12 @@ class DataHandling:
 
         """
         # Save experiment type in the current referenced data object
-        self._listDataObject[self._currentDataObject].save_ExperimentType(
-            strExperimentType
+        self._data_objects[self._current_data_object].save_ExperimentType(
+            experiment_type
         )
 
     # Getter methods
-    def get_StoredData(self) -> list:
+    def get_stored_data(self) -> list:
         """
         Description
         -----------
@@ -600,9 +587,9 @@ class DataHandling:
             referenced data storage object
 
         """
-        return self._listDataObject[self._currentDataObject].get_StoredData()
+        return self._data_objects[self._current_data_object].get_StoredData()
 
-    def get_ExperimentParameters(self) -> list:
+    def get_experiment_parameters(self) -> list:
         """
         Description
         -----------
@@ -614,9 +601,9 @@ class DataHandling:
             List cotaining all experiment parameters
 
         """
-        return self._listDataObject[self._currentDataObject].get_ExperimentParameters()
+        return self._data_objects[self._current_data_object].get_ExperimentParameters()
 
-    def get_ExperimentType(self) -> str:
+    def get_experiment_type(self) -> str:
         """
         Description
         -----------
@@ -628,9 +615,9 @@ class DataHandling:
             String containing experiment type
 
         """
-        return self._listDataObject[self._currentDataObject].get_ExperimentType()
+        return self._data_objects[self._current_data_object].get_ExperimentType()
 
-    def get_SequenceLength(self) -> int:
+    def get_sequence_length(self) -> int:
         """
         Description
         -----------
@@ -642,4 +629,4 @@ class DataHandling:
             Integer containing the length of the current experiment sequence
 
         """
-        return len(self._listDataObject)
+        return len(self._data_objects)

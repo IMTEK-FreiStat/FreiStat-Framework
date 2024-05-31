@@ -166,18 +166,18 @@ class Run_Electrochemical_Method:
 
         # Post processing of experiment data
         # Export data to previously setup csv export after experiment is done
-        strExportPath = self._dataHandling.export_Data_csv(
-            self._dataHandling.get_StoredData()
+        strExportPath = self._dataHandling.export_data_csv(
+            self._dataHandling.get_stored_data()
         )
 
         # Export experiment type and parameters
-        self._dataHandling.export_ExperimentParameters_csv(
-            self._dataHandling.get_ExperimentType(),
-            self._dataHandling.get_ExperimentParameters(),
+        self._dataHandling.export_experiment_parameters_csv(
+            self._dataHandling.get_experiment_type(),
+            self._dataHandling.get_experiment_parameters(),
         )
 
         # Save data object persistent
-        self._dataHandling.export_DataStorage()
+        self._dataHandling.export_data_storage()
 
         # Get address of the shared memory in the RAM through the unique name
         existing_shm = shared_memory.SharedMemory(

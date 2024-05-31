@@ -49,4 +49,4 @@ class Recovery_Data:
         self._DataHandling = DataHandling(self._DataSoftwareStorage)
 
         # Import external data
-        self._DataHandling.import_DataStorage(Path)
+        self._DataHandling.import_data_storage(Path)
