@@ -174,7 +174,7 @@ class DataHandling:
         """
         # Check if last element is sequence element
         if (
-            self._data_objects[len(self._data_objects) - 1].get_ExperimentType()
+            self._data_objects[len(self._data_objects) - 1].get_experiment_type()
             == SEQUENCE
         ):
             upper_boundary = 2
@@ -201,7 +201,7 @@ class DataHandling:
         """
         # Check if last element is sequence element
         if (
-            self._data_objects[len(self._data_objects) - 1].get_ExperimentType()
+            self._data_objects[len(self._data_objects) - 1].get_experiment_type()
             == SEQUENCE
         ):
             upper_boundary = 2
@@ -286,7 +286,7 @@ class DataHandling:
         # Get current experiment type
         experiment_type = self._data_objects[
             self._current_data_object
-        ].get_ExperimentType()
+        ].get_experiment_type()
 
         # Check if setup was called
         if self._working_directory[FREISTAT_CSV_EXPORT] == "":
@@ -450,7 +450,7 @@ class DataHandling:
         # Get current experiment type
         experiment_type = self._data_objects[
             self._current_data_object
-        ].get_ExperimentType()
+        ].get_experiment_type()
 
         # Overwrite existing external object with newest iteration
         with open(
@@ -464,7 +464,7 @@ class DataHandling:
         ) as output:
             # Write data object as data file into the chosen directory.
             pickle.dump(
-                self._data_objects[self._current_data_object].get_StoredData(),
+                self._data_objects[self._current_data_object].get_stored_data(),
                 output,
                 pickle.HIGHEST_PROTOCOL,
             )
@@ -503,7 +503,7 @@ class DataHandling:
 
             # Fill new datastorage with the external data
             with open(entry, "rb") as exernal_data:
-                self._data_objects[self._current_data_object].set_StoredData(
+                self._data_objects[self._current_data_object].set_stored_data(
                     pickle.load(exernal_data)
                 )
 
@@ -516,7 +516,7 @@ class DataHandling:
 
                 stored_data = self._data_objects[
                     self._current_data_object
-                ].get_StoredData()
+                ].get_stored_data()
                 # Loop over every entry
                 for s_data in stored_data:
                     # Write new row
@@ -535,7 +535,7 @@ class DataHandling:
 
         """
         # Add list of data to the current referenced data object
-        self._data_objects[self._current_data_object].append_Data(temp)
+        self._data_objects[self._current_data_object].append_data(temp)
 
     def save_experiment_parmeters(self, experiment_parameters: list) -> None:
         """
@@ -552,7 +552,7 @@ class DataHandling:
         """
         # Add list of experiment parameters to the current referenced data
         # object
-        self._data_objects[self._current_data_object].save_ExperimentParameters(
+        self._data_objects[self._current_data_object].save_experiment_parameters(
             experiment_parameters
         )
 
@@ -569,7 +569,7 @@ class DataHandling:
 
         """
         # Save experiment type in the current referenced data object
-        self._data_objects[self._current_data_object].save_ExperimentType(
+        self._data_objects[self._current_data_object].save_experiment_type(
             experiment_type
         )
 
@@ -587,7 +587,7 @@ class DataHandling:
             referenced data storage object
 
         """
-        return self._data_objects[self._current_data_object].get_StoredData()
+        return self._data_objects[self._current_data_object].get_stored_data()
 
     def get_experiment_parameters(self) -> list:
         """
@@ -601,7 +601,7 @@ class DataHandling:
             List cotaining all experiment parameters
 
         """
-        return self._data_objects[self._current_data_object].get_ExperimentParameters()
+        return self._data_objects[self._current_data_object].get_experiment_parameters()
 
     def get_experiment_type(self) -> str:
         """
@@ -615,7 +615,7 @@ class DataHandling:
             String containing experiment type
 
         """
-        return self._data_objects[self._current_data_object].get_ExperimentType()
+        return self._data_objects[self._current_data_object].get_experiment_type()
 
     def get_sequence_length(self) -> int:
         """
