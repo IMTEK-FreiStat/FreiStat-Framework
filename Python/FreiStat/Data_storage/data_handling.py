@@ -126,7 +126,7 @@ class DataHandling:
         """
         # Safe data software storage reference and set own reference
         self._data_software_storage = data_software_storage
-        self._data_software_storage.setDataHandling(self)
+        self._data_software_storage.set_data_handling(self)
 
         # Initialize class variables
         self._data_objects: List[DataStorage] = []
