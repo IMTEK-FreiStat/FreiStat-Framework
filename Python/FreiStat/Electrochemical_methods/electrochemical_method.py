@@ -17,33 +17,33 @@ import multiprocessing as mp
 from multiprocessing.queues import Queue
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.constants import *
+from ..data_storage.data_software_storage import DataSoftwareStorage
 
-from .Setup_behavior.setup_ca import SetupCA
-from .Execute_behavior.execute_ca import ExecuteCA
+from .setup_behavior.setup_ca import SetupCA
+from .execute_behavior.execute_ca import ExecuteCA
 
-from .Setup_behavior.setup_ocp import SetupOCP
-from .Execute_behavior.execute_ocp import ExecuteOCP
+from .setup_behavior.setup_ocp import SetupOCP
+from .execute_behavior.execute_ocp import ExecuteOCP
 
-from .Setup_behavior.setup_lsv import SetupLSV
+from .setup_behavior.setup_lsv import SetupLSV
 
-from .Setup_behavior.setup_cv import SetupCV
-from .Execute_behavior.execute_cv import ExecuteCV
+from .setup_behavior.setup_cv import SetupCV
+from .execute_behavior.execute_cv import ExecuteCV
 
-from .Setup_behavior.setup_npv import SetupNPV
+from .setup_behavior.setup_npv import SetupNPV
 
 # from .Execute_behavior.execute_npv import ExecuteNPV
 
-from .Setup_behavior.setup_dpv import SetupDPV
-from .Execute_behavior.execute_dpv import ExecuteDPV
+from .setup_behavior.setup_dpv import SetupDPV
+from .execute_behavior.execute_dpv import ExecuteDPV
 
-from .Setup_behavior.setup_swv import SetupSWV
+from .setup_behavior.setup_swv import SetupSWV
 
 # from .Execute_behavior.execute_swv import ExecuteSWV
 
-from .Setup_behavior.setup_sequence import SetupSequence
-from .Execute_behavior.execute_sequence import ExecuteSequence
+from .setup_behavior.setup_sequence import SetupSequence
+from .execute_behavior.execute_sequence import ExecuteSequence
 
 
 class ElectrochemicalMethod:

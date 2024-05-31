@@ -17,7 +17,7 @@ import unittest
 
 # Import internal dependencies
 from .optimizer import Optimizer
-from ..Data_storage.constants import *
+from ..data_storage.constants import *
 
 
 class Optimizer_UnitTest(unittest.TestCase):

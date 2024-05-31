@@ -18,13 +18,13 @@ from multiprocessing import shared_memory
 import numpy as np
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Plotter.plotter import Plotter
+from ..data_storage.constants import *
+from ..plotter.plotter import Plotter
 from .run_electrochemical_method import Run_Electrochemical_Method
-from ..Utility.optimizer import Optimizer
-from ..Utility.encoder import _encode_Bool_Flag
-from ..Utility.encoder import _encode_LPTIA_Resistor_Size
-from ..Utility.encoder import _encode_Sinc_Oversampling_Rate
+from ..utility.optimizer import Optimizer
+from ..utility.encoder import _encode_Bool_Flag
+from ..utility.encoder import _encode_LPTIA_Resistor_Size
+from ..utility.encoder import _encode_Sinc_Oversampling_Rate
 
 
 class Run_DPV(Run_Electrochemical_Method):

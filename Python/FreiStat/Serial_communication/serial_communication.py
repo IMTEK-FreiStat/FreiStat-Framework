@@ -20,8 +20,8 @@ import serial.tools.list_ports
 import socket
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.constants import *
+from ..data_storage.data_software_storage import DataSoftwareStorage
 
 
 class Communication:

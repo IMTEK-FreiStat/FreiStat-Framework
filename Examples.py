@@ -25,18 +25,18 @@ __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import internal dependencies
-from Python.FreiStat.Data_storage.constants import *
-from Python.FreiStat.Methods.run_chronoamperometry import Run_CA
-from Python.FreiStat.Methods.run_open_circuit_potential import Run_OCP
-from Python.FreiStat.Methods.run_linear_sweep_voltammetry import Run_LSV
-from Python.FreiStat.Methods.run_cyclic_voltammetry import Run_CV
-from Python.FreiStat.Methods.run_normal_pulse_voltammetry import Run_NPV
-from Python.FreiStat.Methods.run_differential_pulse_voltammetry import Run_DPV
-from Python.FreiStat.Methods.run_square_wave_voltammetry import Run_SWV
+from Python.FreiStat.data_storage.constants import *
+from Python.FreiStat.methods.run_chronoamperometry import Run_CA
+from Python.FreiStat.methods.run_open_circuit_potential import Run_OCP
+from Python.FreiStat.methods.run_linear_sweep_voltammetry import Run_LSV
+from Python.FreiStat.methods.run_cyclic_voltammetry import Run_CV
+from Python.FreiStat.methods.run_normal_pulse_voltammetry import Run_NPV
+from Python.FreiStat.methods.run_differential_pulse_voltammetry import Run_DPV
+from Python.FreiStat.methods.run_square_wave_voltammetry import Run_SWV
 
-from Python.FreiStat.Methods.run_sequence import Run_Sequence
+from Python.FreiStat.methods.run_sequence import Run_Sequence
 
-from Python.FreiStat.Utility.recovery import Recovery_Data
+from Python.FreiStat.utility.recovery import Recovery_Data
 
 
 def ExampleImplementation():

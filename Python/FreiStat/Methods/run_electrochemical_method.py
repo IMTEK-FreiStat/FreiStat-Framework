@@ -19,13 +19,13 @@ import numpy as np
 import platform
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Serial_communication.serial_communication import Communication
-from ..Data_storage.data_handling import DataHandling
-from ..Data_storage.data_software_storage import DataSoftwareStorage
-from ..Electrochemical_methods.electrochemical_method import ElectrochemicalMethod
-from ..JSON_parser.json_parser import JSON_Parser
-from ..Plotter.plotter import Plotter
+from ..data_storage.constants import *
+from ..serial_communication.serial_communication import Communication
+from ..data_storage.data_handling import DataHandling
+from ..data_storage.data_software_storage import DataSoftwareStorage
+from ..electrochemical_methods.electrochemical_method import ElectrochemicalMethod
+from ..json_parser.json_parser import JSON_Parser
+from ..plotter.plotter import Plotter
 
 
 class Run_Electrochemical_Method:

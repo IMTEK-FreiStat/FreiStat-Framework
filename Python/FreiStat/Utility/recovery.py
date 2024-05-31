@@ -15,9 +15,9 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 # Import dependencies
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Data_storage.data_software_storage import DataSoftwareStorage
-from ..Data_storage.data_handling import DataHandling
+from ..data_storage.constants import *
+from ..data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.data_handling import DataHandling
 
 
 class Recovery_Data:

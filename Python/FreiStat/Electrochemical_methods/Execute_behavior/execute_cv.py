@@ -17,7 +17,7 @@ import multiprocessing as mp
 from multiprocessing.queues import Queue
 
 # Import internal dependencies
-from ...Data_storage.constants import *
+from ...data_storage.constants import *
 from .execute_behavior import ExecuteBehavior
 
 

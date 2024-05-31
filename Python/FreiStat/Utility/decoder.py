@@ -14,7 +14,7 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 # Import dependencies
 
 # Import internal dependencies
-from ..Data_storage.constants import *
+from ..data_storage.constants import *
 
 
 def _decode_SincXOSR(iSincXOSR: int, strSincName: str) -> int:

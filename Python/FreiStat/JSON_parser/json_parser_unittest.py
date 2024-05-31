@@ -16,7 +16,7 @@ import logging
 import unittest
 
 # Import internal dependencies
-from ..Data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.data_software_storage import DataSoftwareStorage
 from .json_parser import JSON_Parser
 
 
