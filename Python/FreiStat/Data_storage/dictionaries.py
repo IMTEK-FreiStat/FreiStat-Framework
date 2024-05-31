@@ -11,8 +11,28 @@ __version__ = "1.0.0"
 __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
-# Import internal dependencies
-from .constants import *
+from .constants import (
+    BASE_POTENTIAL,
+    CYCLE,
+    DELTA_V_PEAK,
+    DELTA_V_STAIRCASE,
+    FIXED_WE_POTENTIAL,
+    LOWER_POTENTIAL,
+    LPTIA_RTIA_SIZE,
+    MAINS_FILTER,
+    POTENTIAL_STEPS,
+    PULSE_LENGTH,
+    SAMPLING_DURATION,
+    SAMPLING_RATE,
+    SCAN_RATE,
+    SEQUENCE_LENGTH,
+    SINC2_OVERSAMPLING,
+    SINC3_OVERSAMPLING,
+    START_POTENTIAL,
+    STEP_SIZE,
+    STOP_POTENTIAL,
+    UPPER_POTENTIAL,
+)
 
 dic_configParameters = {
     SEQUENCE_LENGTH: ["Sequence Length", "Length of the sequence"],
