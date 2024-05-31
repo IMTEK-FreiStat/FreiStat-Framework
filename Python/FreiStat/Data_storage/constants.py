@@ -404,12 +404,6 @@ EC_PLOTTER = 16000  # Errorcode for the plotter
 EC_UTILITY = 17000  # Errorcode for misc. functions
 
 """-----------------------------------------------------------------------------
-| Error Codes : Facade (FA)
-|   
-|   Constant              Value                     Meaning
------------------------------------------------------------------------------"""
-
-"""-----------------------------------------------------------------------------
 | Error Codes : Setup (SE)
 |   
 |   Constant              Value                     Meaning
@@ -443,11 +437,6 @@ EC_EX_INHERIT_ERROR = (
 -----------------------------------------------------------------------------"""
 EC_JP_CODEID_UNDEF = 1  # Passed CodeID is undefiend
 
-"""-----------------------------------------------------------------------------
-| Error Codes : Serial communication (SC)
-|   
-|   Constant              Value                     Meaning
------------------------------------------------------------------------------"""
 
 """-----------------------------------------------------------------------------
 | Error Codes : Data storage (DS)
@@ -456,12 +445,6 @@ EC_JP_CODEID_UNDEF = 1  # Passed CodeID is undefiend
 -----------------------------------------------------------------------------"""
 EC_DS_METHOD_UNKOWN = 1  # Electrochemical method not known
 EC_DS_EXPORT_SETUP_ERR = 2  # Export setup not called before calling export method
-
-"""-----------------------------------------------------------------------------
-| Error Codes : Plotter (PT)
-|   
-|   Constant              Value                     Meaning
------------------------------------------------------------------------------"""
 
 """-----------------------------------------------------------------------------
 | Error Codes : Utility (UT)
