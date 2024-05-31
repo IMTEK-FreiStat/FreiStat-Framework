@@ -20,21 +20,24 @@ from multiprocessing.queues import Queue
 from ...Data_storage.constants import *
 from .execute_behavior import ExecuteBehavior
 
+
 class ExecuteSequence(ExecuteBehavior):
     """
     Description
     -----------
     Behavior class implementing the functionality of the execute function when
     running a sequence of electrochemical methods.
-    
+
     """
 
-    def execute(self, 
-                dataQueue : Queue,
-                event : mp.Event(),
-                iTelegrams : int = 2,
-                bEnableReading : bool = True,
-                bPorgressiveMesurement : bool = False) -> int:
+    def execute(
+        self,
+        dataQueue: Queue,
+        event: mp.Event(),
+        iTelegrams: int = 2,
+        bEnableReading: bool = True,
+        bPorgressiveMesurement: bool = False,
+    ) -> int:
         """
         Description
         -----------
@@ -48,7 +51,7 @@ class ExecuteSequence(ExecuteBehavior):
         `event` : Event
             Multiprocessing event to indicate termination event
 
-        `iTelegrams` : int 
+        `iTelegrams` : int
             Number of telegrams which should be send by the ec-method
 
         `bEnableReading` : bool
@@ -69,28 +72,28 @@ class ExecuteSequence(ExecuteBehavior):
         -----------
         The following table shows all error codes
 
-        iErrorCode  :   Description                                                                                  
-        0           :   No error                                              
+        iErrorCode  :   Description
+        0           :   No error
         12001       :   Mismatch between send command ID and received acknowledge ID
 
         """
         # Initialize class variables
-        self._referenceTime : float = -1
-        self._referenceTimeCycle : float = -1
-        self._referenceTimeSequenceCycle : float = -1
+        self._referenceTime: float = -1
+        self._referenceTimeCycle: float = -1
+        self._referenceTimeSequenceCycle: float = -1
 
         self._event = event
 
         # Intialize variables
-        bErrorflag : bool = False
+        bErrorflag: bool = False
 
-        iCurrenPosition : int = 0
+        iCurrenPosition: int = 0
 
-        strReadTelegram : str = ""
+        strReadTelegram: str = ""
 
-        listReadData : list = []
+        listReadData: list = []
         listCommandIDs: list = [COMMAND_EXS, COMMAND_EXC]
-        listCommandSubIDs : list = [2, FREISTAT_START_I]
+        listCommandSubIDs: list = [2, FREISTAT_START_I]
 
         # Save reference to serial connection object
         self._serialConnection = self._dataSoftwareStorage.getCommunication()
@@ -99,38 +102,40 @@ class ExecuteSequence(ExecuteBehavior):
         # Execute the following commands after another
         # 1: Disable sequence mode
         # 2: Send start command
-        for iIndex in range (iTelegrams):
+        for iIndex in range(iTelegrams):
             # Write command telegram with command type
-            self._serialConnection.write_Data(self._jsonTelegramGenerator
-            .generateCommandTelegram(listCommandIDs[iIndex], 
-                                     listCommandSubIDs[iIndex])[1])
+            self._serialConnection.write_Data(
+                self._jsonTelegramGenerator.generateCommandTelegram(
+                    listCommandIDs[iIndex], listCommandSubIDs[iIndex]
+                )[1]
+            )
 
             # Wait as long as the input buffer is empty
-            while(self._communicationMode == FREISTAT_SERIAL):
-                if (self._serialConnection.get_SerialConnection().in_waiting > 0):
+            while self._communicationMode == FREISTAT_SERIAL:
+                if self._serialConnection.get_SerialConnection().in_waiting > 0:
                     break
                 pass
 
             # Read acknowledge telegram
-            strReadTelegram = self._serialConnection.read_Data("JSON"). \
-                decode("utf-8")
+            strReadTelegram = self._serialConnection.read_Data("JSON").decode("utf-8")
 
             # Print received acknowledge telegram
             print(strReadTelegram)
 
             # Parse read telegram
-            iCurrenPosition, bErrorflag, listReadData = \
-            self._jsonParser.parse_JSON_string(listReadData, strReadTelegram)
+            iCurrenPosition, bErrorflag, listReadData = (
+                self._jsonParser.parse_JSON_string(listReadData, strReadTelegram)
+            )
 
             # Compare code to previously send code
-            if (int(listReadData[0][1]) != listCommandIDs[iIndex]):
+            if int(listReadData[0][1]) != listCommandIDs[iIndex]:
                 return EC_EXECUTE + EC_EX_C_A_MISMATCH
 
             # Reset list containing read data
             listReadData = []
 
         # Check if reading is enabled
-        if (bEnableReading == True):
+        if bEnableReading == True:
             # Start thread to handle data exchange
             self._handleSequenceData(dataQueue)
 
@@ -141,7 +146,7 @@ class ExecuteSequence(ExecuteBehavior):
         """
         Description
         -----------
-        Function which runs periodically to read data from serialConnection, 
+        Function which runs periodically to read data from serialConnection,
         parse them and store the data.
 
         Parameters
@@ -151,96 +156,101 @@ class ExecuteSequence(ExecuteBehavior):
 
         """
         # Initialize variables
-        iDataPoint : int = 0
-        iMethodCount : int = 1
-        iSequenceCycle : int = 1
+        iDataPoint: int = 0
+        iMethodCount: int = 1
+        iSequenceCycle: int = 1
 
-        fCurrent : float = 0
-        fVoltage : float = 0
-        fTimeStamp : float = 0
+        fCurrent: float = 0
+        fVoltage: float = 0
+        fTimeStamp: float = 0
 
-        strRun : str = ""
-        strReadData : str = ""
+        strRun: str = ""
+        strReadData: str = ""
 
-        while(True):
+        while True:
             # Initialize variables
-            listReadData : list = []
+            listReadData: list = []
 
-            while(self._communicationMode == FREISTAT_SERIAL):
-                if(self._serialConnection.get_SerialConnection().in_waiting > 0):
+            while self._communicationMode == FREISTAT_SERIAL:
+                if self._serialConnection.get_SerialConnection().in_waiting > 0:
                     break
                 pass
 
             # Read byte stream from serial connection and convert into string
             strReadData = self._serialConnection.read_Data("JSON").decode("utf-8")
 
-            iCurrenPosition, bErrorflag, listReadData = \
-            self._jsonParser.parse_JSON_string(listReadData, strReadData)
+            iCurrenPosition, bErrorflag, listReadData = (
+                self._jsonParser.parse_JSON_string(listReadData, strReadData)
+            )
 
             # Set FreiStat status into running if not done yet
-            if (self._dataSoftwareStorage.get_SystemStatus() == FREISTAT_EXP_STARTED):
+            if self._dataSoftwareStorage.get_SystemStatus() == FREISTAT_EXP_STARTED:
                 # Set system status to starting experiment
                 self._dataSoftwareStorage.set_SystemStatus(FREISTAT_EXP_RUNNING)
 
             # Check if termination event occured
-            if (self._event.is_set()):
+            if self._event.is_set():
                 # Send stop command
-                self._serialConnection.write_Data("{\"C\":3,\"ExC\":\"Stop\"}")
+                self._serialConnection.write_Data('{"C":3,"ExC":"Stop"}')
 
-                while(self._serialConnection.get_SerialConnection().in_waiting > 0 and
-                    self._iCommunicationMode == FREISTAT_SERIAL):
+                while (
+                    self._serialConnection.get_SerialConnection().in_waiting > 0
+                    and self._iCommunicationMode == FREISTAT_SERIAL
+                ):
                     # Read JSON-telegram
                     self._serialConnection.read_Data("JSON").decode("utf-8")
-                    
+
                 # Export data storage object
-                self._dataHandling.export_DataStorage()      
-                break    
+                self._dataHandling.export_DataStorage()
+                break
 
             # Check if send telegram is a data telegram
-            if (listReadData[0][0] == ("\"" + RUN + "\"")):
+            if listReadData[0][0] == ('"' + RUN + '"'):
                 # Set reference time for the whole experiment
-                if (self._referenceTime == -1):
+                if self._referenceTime == -1:
                     self._referenceTime = float(listReadData[1][1][3][1])
 
                 # Set reference time for the cycle of the ec-method
-                if (self._referenceTimeCycle == -1):
+                if self._referenceTimeCycle == -1:
                     self._referenceTimeCycle = float(listReadData[1][1][3][1])
 
                 # Set reference time for the cycle of the sequence
-                if (self._referenceTimeSequenceCycle == -1):
-                    self._referenceTimeSequenceCycle = \
-                        float(listReadData[1][1][3][1])
+                if self._referenceTimeSequenceCycle == -1:
+                    self._referenceTimeSequenceCycle = float(listReadData[1][1][3][1])
 
                 # Check if a new run started
-                if (strRun != listReadData[0][1]):
+                if strRun != listReadData[0][1]:
                     # Export data storage object
                     self._dataHandling.export_DataStorage()
 
                     # Reset reference time for a cycle
-                    self._referenceTimeCycle = float(listReadData[1][1][3][1]) 
+                    self._referenceTimeCycle = float(listReadData[1][1][3][1])
 
                     # Check if low performance mode is enabled
-                    if (self._lowPerformaneMode == True):
+                    if self._lowPerformaneMode == True:
                         print("Cycle: " + strRun)
 
                 # Check if new method has started
-                if (iDataPoint > int(listReadData[1][1][0][1])):
+                if iDataPoint > int(listReadData[1][1][0][1]):
                     # Catching case a method only has one cycle
                     # Export data storage object
                     self._dataHandling.export_DataStorage()
 
                     # Reset reference time for a cycle
-                    self._referenceTimeCycle = float(listReadData[1][1][3][1]) 
+                    self._referenceTimeCycle = float(listReadData[1][1][3][1])
 
                     # Check if new sequence cycle has started
-                    if (iMethodCount % (self._dataHandling.\
-                        get_SequenceLength() - 1) == 0):
+                    if (
+                        iMethodCount % (self._dataHandling.get_SequenceLength() - 1)
+                        == 0
+                    ):
                         # Increase sequence cycle
                         iSequenceCycle += 1
 
                         # Reset reference time of sequence cycle
-                        self._referenceTimeSequenceCycle = \
-                            float(listReadData[1][1][3][1])
+                        self._referenceTimeSequenceCycle = float(
+                            listReadData[1][1][3][1]
+                        )
 
                     # Increase method counter
                     iMethodCount += 1
@@ -255,44 +265,48 @@ class ExecuteSequence(ExecuteBehavior):
                 iDataPoint = int(listReadData[1][1][0][1])
 
                 # Convert data
-                fCurrent = float(listReadData[1][1][2][1])          
-                fVoltage = float(listReadData[1][1][1][1])        
-                fTimeStamp : float = float(listReadData[1][1][3][1]) - \
-                    self._referenceTimeCycle
+                fCurrent = float(listReadData[1][1][2][1])
+                fVoltage = float(listReadData[1][1][1][1])
+                fTimeStamp: float = (
+                    float(listReadData[1][1][3][1]) - self._referenceTimeCycle
+                )
 
                 # Add data to data storage
                 self._dataHandling.append_StoredData(
-                                [iSequenceCycle,
-                                int(strRun,10),
-                                iDataPoint,
-                                fVoltage,
-                                fCurrent,
-                                fTimeStamp,
-                                float(listReadData[1][1][3][1]) - 
-                                self._referenceTimeSequenceCycle,
-                                float(listReadData[1][1][3][1]) - 
-                                self._referenceTime])
-                
+                    [
+                        iSequenceCycle,
+                        int(strRun, 10),
+                        iDataPoint,
+                        fVoltage,
+                        fCurrent,
+                        fTimeStamp,
+                        float(listReadData[1][1][3][1])
+                        - self._referenceTimeSequenceCycle,
+                        float(listReadData[1][1][3][1]) - self._referenceTime,
+                    ]
+                )
+
                 # Add data to dataQueue
-                dataQueue.put([iSequenceCycle,
-                                int(strRun,10),
-                                iDataPoint,
-                                fVoltage,
-                                fCurrent,
-                                fTimeStamp,
-                                float(listReadData[1][1][3][1]) - 
-                                self._referenceTimeSequenceCycle,
-                                float(listReadData[1][1][3][1]) - 
-                                self._referenceTime,
-                                self._dataHandling.get_ExperimentType()])
+                dataQueue.put(
+                    [
+                        iSequenceCycle,
+                        int(strRun, 10),
+                        iDataPoint,
+                        fVoltage,
+                        fCurrent,
+                        fTimeStamp,
+                        float(listReadData[1][1][3][1])
+                        - self._referenceTimeSequenceCycle,
+                        float(listReadData[1][1][3][1]) - self._referenceTime,
+                        self._dataHandling.get_ExperimentType(),
+                    ]
+                )
 
             # Check if send telegram is a command telegram
-            elif (listReadData[0][0] == ("\"" + COMMAND_TELEGRAM + "\"")):
+            elif listReadData[0][0] == ('"' + COMMAND_TELEGRAM + '"'):
                 self._dataSoftwareStorage.set_SystemStatus(FREISTAT_EXP_COMPLETED)
 
                 # Fill in Blank command to stop plotter
-                dataQueue.put([iSequenceCycle, 0, 0, 0, 0, 0, 0, 0,
-                                UNDEFIEND])
-                dataQueue.put([iSequenceCycle, 0, 0, 0, 0, 0, 0, 0,
-                                UNDEFIEND])
+                dataQueue.put([iSequenceCycle, 0, 0, 0, 0, 0, 0, 0, UNDEFIEND])
+                dataQueue.put([iSequenceCycle, 0, 0, 0, 0, 0, 0, 0, UNDEFIEND])
                 break

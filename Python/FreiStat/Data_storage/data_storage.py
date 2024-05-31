@@ -28,6 +28,7 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Include internal dependencies
 
+
 class DataStorage:
     """
     Descirption
@@ -44,20 +45,20 @@ class DataStorage:
 
         """
         # Initalize class variable
-        self._strElectrochemicalMethod : str = ""
-        self._listStoredData : list = []
-        self._listExperimentParameters : list = []
+        self._strElectrochemicalMethod: str = ""
+        self._listStoredData: list = []
+        self._listExperimentParameters: list = []
 
     def save_ExperimentParameters(self, listExperimentParameters: list) -> None:
         """
         Descirption
         -----------
         Save experiment parameters in the data object.
-        
+
         Parameters
         ----------
         `listExperimentParameters` : list
-            List which contains every experiment parameter required for the 
+            List which contains every experiment parameter required for the
             chosen electrochemical method
 
         """
@@ -68,7 +69,7 @@ class DataStorage:
         Descirption
         -----------
         Save experiment type in the data object.
-        
+
         Parameters
         ----------
         `strExperimentType` : string
@@ -83,17 +84,17 @@ class DataStorage:
         -----------
         Extend data in the data storage by appending a new list of arbitrary
         data.
-        
+
         Parameters
         ----------
         `listTemp` : list
             List with new data which should be appended to the existing data
-        
+
         """
         self._listStoredData.append(listTemp)
 
     # Setter methods
-    def set_StoredData(self, listStoredData : list) -> None:
+    def set_StoredData(self, listStoredData: list) -> None:
         """
         Descirption
         -----------
@@ -106,7 +107,7 @@ class DataStorage:
             List which consists of experiment data entries
 
         """
-        self._listStoredData = listStoredData    
+        self._listStoredData = listStoredData
 
     # Getter methods
     def get_StoredData(self) -> list:
@@ -128,25 +129,25 @@ class DataStorage:
         Descirption
         -----------
         Get stored experiment parameters.
-        
+
         Return
         ------
         `listExperimentParameters` : list
             Return list cotaining all experiment parameters
 
         """
-        return self._listExperimentParameters 
+        return self._listExperimentParameters
 
     def get_ExperimentType(self) -> str:
         """
         Descirption
         -----------
         Get stored experiment type.
-        
+
         Return
         ------
         `strElectrochemicalMethod` : string
             Return string containing experiment type
-            
+
         """
         return self._strElectrochemicalMethod

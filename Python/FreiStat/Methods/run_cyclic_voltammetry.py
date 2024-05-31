@@ -12,7 +12,7 @@ __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
-import multiprocessing  as mp
+import multiprocessing as mp
 from multiprocessing import shared_memory
 import numpy as np
 
@@ -25,6 +25,7 @@ from ..Utility.encoder import _encode_Bool_Flag
 from ..Utility.encoder import _encode_LPTIA_Resistor_Size
 from ..Utility.encoder import _encode_Sinc_Oversampling_Rate
 
+
 class Run_CV(Run_Electrochemical_Method):
     """
     Description
@@ -32,25 +33,28 @@ class Run_CV(Run_Electrochemical_Method):
     Facade which implements cyclic voltammetry on the FreiStat.
 
     """
-    def start(self, 
-              StartVoltage : float = START_POTENTIAL_F , 
-              FirstVertex : float = LOWER_POTENTIAL_F, 
-              SecondVertex : float = UPPER_POTENTIAL_F, 
-              Stepsize : float = STEP_SIZE_F,
-              Scanrate : float = SCAN_RATE_F,
-              Cycle : int = CYCLE_I,
-              CurrentRange : float = CURRENT_RANGE_F,
-              FixedWEPotential : bool = True,
-              MainsFilter : bool = False,
-              Sinc2_Oversampling : int = SINC2_OVERSAMPLING_I,
-              Sinc3_Oversampling : int = SINC3_OVERSAMPLING_I,
-              EnableOptimizer : bool = True,
-              LowPerformanceMode : bool = False) -> str :
+
+    def start(
+        self,
+        StartVoltage: float = START_POTENTIAL_F,
+        FirstVertex: float = LOWER_POTENTIAL_F,
+        SecondVertex: float = UPPER_POTENTIAL_F,
+        Stepsize: float = STEP_SIZE_F,
+        Scanrate: float = SCAN_RATE_F,
+        Cycle: int = CYCLE_I,
+        CurrentRange: float = CURRENT_RANGE_F,
+        FixedWEPotential: bool = True,
+        MainsFilter: bool = False,
+        Sinc2_Oversampling: int = SINC2_OVERSAMPLING_I,
+        Sinc3_Oversampling: int = SINC3_OVERSAMPLING_I,
+        EnableOptimizer: bool = True,
+        LowPerformanceMode: bool = False,
+    ) -> str:
         """
         Description
         -----------
         Start cyclic voltammetry with defined parameters.
-        
+
         Parameters
         ----------
         `StartVoltage` : float
@@ -62,13 +66,13 @@ class Run_CV(Run_Electrochemical_Method):
         `SecondVertex` : float
             Potential of the second vertex in V
 
-        `Stepsize` : float               
+        `Stepsize` : float
             In V
 
-        `Scanrate` : float               
+        `Scanrate` : float
             In V/s
 
-        `Cycle` : int                  
+        `Cycle` : int
             Amount of cycles the CV should run
 
         `CurrentRange`: float
@@ -79,12 +83,12 @@ class Run_CV(Run_Electrochemical_Method):
             of the dynamic range (1.3 V) or not.
 
         `MainsFilter`: bool
-            Enable/ Disable 50 Hz/ 60 Hz mains filter. 
+            Enable/ Disable 50 Hz/ 60 Hz mains filter.
             If enabled `Sinc2_Oversampling` must be defiend (Default: 667)
 
         `Sinc2_Oversampling` : int
             Oversampling rate of the Sinc 2 filter
-            Defiend OSR rates: [22, 44, 89, 178, 267, 533, 
+            Defiend OSR rates: [22, 44, 89, 178, 267, 533,
             640, 667, 800, 889, 1067, 1333]
 
         `Sinc3_Oversampling` : int
@@ -110,9 +114,9 @@ class Run_CV(Run_Electrochemical_Method):
         # Intialize variables
         bSerialBuffer = b""
 
-        iPosition : int = 0
-        iErrorcode : int = 0
-     
+        iPosition: int = 0
+        iErrorcode: int = 0
+
         # Convert parameters from SI-units to internal units
         StartVoltage = StartVoltage * 1000.0
         FirstVertex = FirstVertex * 1000.0
@@ -128,12 +132,14 @@ class Run_CV(Run_Electrochemical_Method):
         fLptiaRtia = _encode_LPTIA_Resistor_Size(fLptiaRtia, self._logger)
 
         # Translate Sinc2 oversampling rate into integer value
-        Sinc2_Oversampling = _encode_Sinc_Oversampling_Rate("Sinc2", 
-                                Sinc2_Oversampling, self._logger)
+        Sinc2_Oversampling = _encode_Sinc_Oversampling_Rate(
+            "Sinc2", Sinc2_Oversampling, self._logger
+        )
 
         # Translate Sinc3 oversampling rate into integer value
-        Sinc3_Oversampling = _encode_Sinc_Oversampling_Rate("Sinc3",
-                                Sinc3_Oversampling, self._logger)
+        Sinc3_Oversampling = _encode_Sinc_Oversampling_Rate(
+            "Sinc3", Sinc3_Oversampling, self._logger
+        )
 
         # Check step size
         fStepSize = self._check_StepSize(Stepsize)
@@ -146,13 +152,13 @@ class Run_CV(Run_Electrochemical_Method):
 
         # Check starting potential and return real starting potential used by
         # FreiStat
-        fStartVoltage = self._check_StartingPotential(
-            StartVoltage, iFixedWEPotential)
+        fStartVoltage = self._check_StartingPotential(StartVoltage, iFixedWEPotential)
 
-        # Check if bool flag for FixedWEPotential must be changed due to 
+        # Check if bool flag for FixedWEPotential must be changed due to
         # required sweap range
         iFixedWEPotential = self._check_FixedWEPotential(
-            iFixedWEPotential, FirstVertex, SecondVertex)
+            iFixedWEPotential, FirstVertex, SecondVertex
+        )
 
         # Safe experiment parameters in correct list format for cyclic voltammetry
         self._listExperimentParameters = [
@@ -166,11 +172,11 @@ class Run_CV(Run_Electrochemical_Method):
             [FIXED_WE_POTENTIAL, iFixedWEPotential],
             [MAINS_FILTER, iMainsFilter],
             [SINC2_OVERSAMPLING, Sinc2_Oversampling],
-            [SINC3_OVERSAMPLING ,Sinc3_Oversampling]
+            [SINC3_OVERSAMPLING, Sinc3_Oversampling],
         ]
 
         # Check if optimizer is enabled
-        if (EnableOptimizer == True):
+        if EnableOptimizer == True:
             # Optimize experiment parameters
             # Create instance of the optimizer class
             _Optimizer = Optimizer(self._logger, self._iCommunicationMode)
@@ -179,17 +185,19 @@ class Run_CV(Run_Electrochemical_Method):
             iErrorcode = _Optimizer.start(CV, self._listExperimentParameters)
 
             # Check for error
-            if (iErrorcode != EC_NO_ERROR):
-                self._logger.warning(" Optimizer: Failed - Errorcode: "  + 
-                                str(iErrorcode) +
-                                " - FreiStat tries to run experiment with user " + 
-                                "defined parameters")
+            if iErrorcode != EC_NO_ERROR:
+                self._logger.warning(
+                    " Optimizer: Failed - Errorcode: "
+                    + str(iErrorcode)
+                    + " - FreiStat tries to run experiment with user "
+                    + "defined parameters"
+                )
             else:
                 # Overwrite parameters with optimized ones
                 self._listExperimentParameters = _Optimizer.return_Parameters()
 
         # Define electrochemical method
-        strMethod : str = CV
+        strMethod: str = CV
 
         # Unbound the logger
         self._logger = None
@@ -205,27 +213,40 @@ class Run_CV(Run_Electrochemical_Method):
         self._event = mp.Event()
 
         # Define location in the RAM as shared memory between processes
-        sharedMemoryLocation = shared_memory.SharedMemory(create= True, size= 200)
+        sharedMemoryLocation = shared_memory.SharedMemory(create=True, size=200)
 
         # Define byte array which accesses the prviously defined memory spacee
-        np_arrbSharedMemory = np.ndarray((1,200), dtype= '|S1', 
-            buffer= sharedMemoryLocation.buf)
+        np_arrbSharedMemory = np.ndarray(
+            (1, 200), dtype="|S1", buffer=sharedMemoryLocation.buf
+        )
 
-        # Define a process which deals with the reading of the data from the 
+        # Define a process which deals with the reading of the data from the
         # Serial connection and the storage of the data
-        self._process = mp.Process(target= self.P_DataCollection,
-            args=(strMethod, dataQueue, self._event, self._listExperimentParameters, 
-                  LowPerformanceMode, sharedMemoryLocation.name))
+        self._process = mp.Process(
+            target=self.P_DataCollection,
+            args=(
+                strMethod,
+                dataQueue,
+                self._event,
+                self._listExperimentParameters,
+                LowPerformanceMode,
+                sharedMemoryLocation.name,
+            ),
+        )
 
-        # Start the process                                                 
-        self._process.start() 
+        # Start the process
+        self._process.start()
 
         # Check if Library is used as interface backend or not
-        if(self._FreiStatMode == FREISTAT_STANDALONE):
-            if (LowPerformanceMode == False):
+        if self._FreiStatMode == FREISTAT_STANDALONE:
+            if LowPerformanceMode == False:
                 # Create an object for plotting the data
-                self._plotter = Plotter(strMethod, self._listExperimentParameters, 
-                                        FREISTAT_STANDALONE, self._process)
+                self._plotter = Plotter(
+                    strMethod,
+                    self._listExperimentParameters,
+                    FREISTAT_STANDALONE,
+                    self._process,
+                )
 
                 # Initialize plot
                 self._plotter.initPlot()
@@ -238,16 +259,16 @@ class Run_CV(Run_Electrochemical_Method):
 
                 # Join process (Blocks until process is done)
                 self._process.join()
-            else :
+            else:
                 # Join process (Blocks until process is done)
                 self._process.join()
 
             # Loop until the end of the shared memory array
-            while (True):
+            while True:
                 # Check if the array ended
-                if (np_arrbSharedMemory[0, iPosition] == b''):
+                if np_arrbSharedMemory[0, iPosition] == b"":
                     break
-                else :
+                else:
                     # Append data on serial buffer
                     bSerialBuffer += np_arrbSharedMemory[0, iPosition]
 
@@ -259,17 +280,21 @@ class Run_CV(Run_Electrochemical_Method):
 
             # Release allocated memory
             sharedMemoryLocation.unlink()
-            
+
             # End process
             self._process.close()
 
             # Decode the string containing the file path and return it
             return bSerialBuffer.decode("UTF-8")
 
-        elif (self._FreiStatMode == FREISTAT_BACKEND):
+        elif self._FreiStatMode == FREISTAT_BACKEND:
             # Create an object for plotting the data
-            self._plotter = Plotter(strMethod, self._listExperimentParameters,
-                                    FREISTAT_BACKEND, self._process)
+            self._plotter = Plotter(
+                strMethod,
+                self._listExperimentParameters,
+                FREISTAT_BACKEND,
+                self._process,
+            )
 
             # Initialize plot
             self._plotter.initPlot()

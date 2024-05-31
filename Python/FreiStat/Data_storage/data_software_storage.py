@@ -20,20 +20,25 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 # Import internal dependencies
 from .constants import *
 
+
 # Forward declaration
 def Communication():
     pass
 
+
 def JSON_Parser():
     pass
+
 
 def JSON_Telegram_Generator():
     pass
 
+
 def DataHandling():
     pass
 
-class DataSoftwareStorage():
+
+class DataSoftwareStorage:
     """
     Description
     -----------
@@ -54,9 +59,9 @@ class DataSoftwareStorage():
         self._jsonParser = None
         self._jsonTelegramGenerator = None
 
-        self._bLowPerformanceMode : bool = False
+        self._bLowPerformanceMode: bool = False
 
-        self._systemStatus : int = FREISTAT_BOOTUP
+        self._systemStatus: int = FREISTAT_BOOTUP
 
     # Setter methods
     def set_SystemStatus(self, iSystemStatus: int) -> None:
@@ -82,7 +87,7 @@ class DataSoftwareStorage():
         """
         self._systemStatus = iSystemStatus
 
-    def set_LowPerformanceMode(self, bLowPerformanceMode : bool) -> None:
+    def set_LowPerformanceMode(self, bLowPerformanceMode: bool) -> None:
         """
         Description
         -----------
@@ -92,9 +97,9 @@ class DataSoftwareStorage():
         ----------
         `bLowPerformanceMode ` bool
             Flag indicating if the low performance mode is enabled or not.
-        
+
         """
-        self._bLowPerformanceMode = bLowPerformanceMode 
+        self._bLowPerformanceMode = bLowPerformanceMode
 
     def setJSON_Parser(self, jsonParser: JSON_Parser) -> None:
         """
@@ -138,8 +143,9 @@ class DataSoftwareStorage():
         """
         self._dataHandling = dataHandling
 
-    def setJSON_TelegramGenerator(self, 
-        jsonTelegramGenerator: JSON_Telegram_Generator) -> None:
+    def setJSON_TelegramGenerator(
+        self, jsonTelegramGenerator: JSON_Telegram_Generator
+    ) -> None:
         """
         Description
         -----------
@@ -178,7 +184,7 @@ class DataSoftwareStorage():
         ------
         `bLowPerformanceMode ` bool
             Flag indicating if the low performance mode is enabled or not.
-        
+
         """
         return self._bLowPerformanceMode
 
@@ -222,7 +228,7 @@ class DataSoftwareStorage():
             Reference to the data handling object
 
         """
-        return self._dataHandling 
+        return self._dataHandling
 
     def getJSON_TelegramGenerator(self) -> JSON_Telegram_Generator:
         """
@@ -234,6 +240,6 @@ class DataSoftwareStorage():
         ------
         `jsonTelegramGenerator`: JSON_Telegram_Generator
             Reference to the JSON telegram generator object
-            
+
         """
         return self._jsonTelegramGenerator

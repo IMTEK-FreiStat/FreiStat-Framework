@@ -32,29 +32,32 @@ from .Setup_behavior.setup_cv import SetupCV
 from .Execute_behavior.execute_cv import ExecuteCV
 
 from .Setup_behavior.setup_npv import SetupNPV
-#from .Execute_behavior.execute_npv import ExecuteNPV
+
+# from .Execute_behavior.execute_npv import ExecuteNPV
 
 from .Setup_behavior.setup_dpv import SetupDPV
 from .Execute_behavior.execute_dpv import ExecuteDPV
 
 from .Setup_behavior.setup_swv import SetupSWV
-#from .Execute_behavior.execute_swv import ExecuteSWV
+
+# from .Execute_behavior.execute_swv import ExecuteSWV
 
 from .Setup_behavior.setup_sequence import SetupSequence
 from .Execute_behavior.execute_sequence import ExecuteSequence
+
 
 class ElectrochemicalMethod:
     """
     Description
     -----------
     Class which is called when running a electrochemical method. The behavior
-    of this class is changed dynamically according to the choosen method. 
+    of this class is changed dynamically according to the choosen method.
 
     """
 
-    def __init__(self, 
-                 ElectrochemicalMethod: str, 
-                 dataSoftwareStorage: DataSoftwareStorage) -> None:
+    def __init__(
+        self, ElectrochemicalMethod: str, dataSoftwareStorage: DataSoftwareStorage
+    ) -> None:
         """
         Description
         -----------
@@ -75,43 +78,43 @@ class ElectrochemicalMethod:
 
         # Define setup and execute behavior for running a sequence of
         # electrochemical methods
-        if (ElectrochemicalMethod == SEQUENCE):
+        if ElectrochemicalMethod == SEQUENCE:
             self._setupBehavior = SetupSequence(self._dataSoftwareStorage)
-            self._executeBehavior = ExecuteSequence(self._dataSoftwareStorage)            
+            self._executeBehavior = ExecuteSequence(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running chronoamperometry
-        if(ElectrochemicalMethod == CA):
+        if ElectrochemicalMethod == CA:
             self._setupBehavior = SetupCA(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteCA(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running ocp measurement
-        if(ElectrochemicalMethod == OCP):
+        if ElectrochemicalMethod == OCP:
             self._setupBehavior = SetupOCP(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteOCP(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running linear sweep voltammetry
-        if(ElectrochemicalMethod == LSV):
+        if ElectrochemicalMethod == LSV:
             self._setupBehavior = SetupLSV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteCV(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running cyclic voltammetry
-        if(ElectrochemicalMethod == CV):
+        if ElectrochemicalMethod == CV:
             self._setupBehavior = SetupCV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteCV(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running normal pulse voltammetry
-        if(ElectrochemicalMethod == NPV):
+        if ElectrochemicalMethod == NPV:
             self._setupBehavior = SetupNPV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteDPV(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running differential pulse
         # voltammetry
-        if(ElectrochemicalMethod == DPV):
+        if ElectrochemicalMethod == DPV:
             self._setupBehavior = SetupDPV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteDPV(self._dataSoftwareStorage)
 
         # Define setup and execute behavior for running square wave voltammetry
-        if(ElectrochemicalMethod == SWV):
+        if ElectrochemicalMethod == SWV:
             self._setupBehavior = SetupSWV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteDPV(self._dataSoftwareStorage)
 
@@ -135,12 +138,14 @@ class ElectrochemicalMethod:
         """
         return self._setupBehavior.setup(ExperimentParamters)
 
-    def execute(self, 
-                dataQueue : Queue,
-                event : mp.Event(),
-                iTelegrams : int = 3,
-                bEnableReading : bool = True,
-                bPorgressiveMesurement : bool = False) -> None:
+    def execute(
+        self,
+        dataQueue: Queue,
+        event: mp.Event(),
+        iTelegrams: int = 3,
+        bEnableReading: bool = True,
+        bPorgressiveMesurement: bool = False,
+    ) -> None:
         """
         Description
         -----------
@@ -154,7 +159,7 @@ class ElectrochemicalMethod:
         `event` : Event
             Multiprocessing event to indicate termination event
 
-        `iTelegrams` : int 
+        `iTelegrams` : int
             Number of telegrams which should be send by the ec-method
 
         `bEnableReading` : bool
@@ -165,6 +170,10 @@ class ElectrochemicalMethod:
             if each cycle should start at time = 0
 
         """
-        self._executeBehavior.execute(dataQueue = dataQueue, event= event,
-            iTelegrams= iTelegrams, bEnableReading= bEnableReading,
-            bPorgressiveMesurement= bPorgressiveMesurement)
+        self._executeBehavior.execute(
+            dataQueue=dataQueue,
+            event=event,
+            iTelegrams=iTelegrams,
+            bEnableReading=bEnableReading,
+            bPorgressiveMesurement=bPorgressiveMesurement,
+        )

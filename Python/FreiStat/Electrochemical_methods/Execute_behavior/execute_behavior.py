@@ -23,13 +23,14 @@ from multiprocessing.queues import Queue
 from ...Data_storage.constants import *
 from ...Data_storage.data_software_storage import DataSoftwareStorage
 
-class ExecuteBehavior():
+
+class ExecuteBehavior:
     """
     Description
     -----------
     Interface parent class implementing the execute behavior of the
     electrochemical methods.
-    
+
     """
 
     def __init__(self, dataSoftwareStorage: DataSoftwareStorage) -> None:
@@ -45,11 +46,12 @@ class ExecuteBehavior():
 
         """
         # Set reference to object storing all software related parameters
-        self._dataSoftwareStorage = dataSoftwareStorage    
+        self._dataSoftwareStorage = dataSoftwareStorage
 
         # Get reference to JSON telegram generator object
-        self._jsonTelegramGenerator = self._dataSoftwareStorage. \
-            getJSON_TelegramGenerator()
+        self._jsonTelegramGenerator = (
+            self._dataSoftwareStorage.getJSON_TelegramGenerator()
+        )
 
         # Get reference to JSON parser object
         self._jsonParser = self._dataSoftwareStorage.getJSON_Parser()
@@ -60,11 +62,13 @@ class ExecuteBehavior():
         # Get flag of the low performance mode
         self._lowPerformaneMode = self._dataSoftwareStorage.get_LowPerformanceMode()
 
-    def execute(self, 
-                dataQueue : Queue,
-                iTelegrams : int = 3,
-                bEnableReading : bool = True,
-                bPorgressiveMesurement : bool = False) -> int:
+    def execute(
+        self,
+        dataQueue: Queue,
+        iTelegrams: int = 3,
+        bEnableReading: bool = True,
+        bPorgressiveMesurement: bool = False,
+    ) -> int:
         """
         Description
         -----------
@@ -75,7 +79,7 @@ class ExecuteBehavior():
         `dataQueue` : Queue
             Data queue which is used as a pipe between processes
 
-        `iTelegrams` : int 
+        `iTelegrams` : int
             Number of telegrams which should be send by the ec-method
 
         `bEnableReading` : bool

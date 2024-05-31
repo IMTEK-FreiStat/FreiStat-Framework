@@ -38,206 +38,233 @@ from Python.FreiStat.Methods.run_sequence import Run_Sequence
 
 from Python.FreiStat.Utility.recovery import Recovery_Data
 
+
 def ExampleImplementation():
     """
     Example method implementing the different electrochemical methods which are
     supported by the FreiStat software.
-    
+
     """
     # Change this parameter to switch between the different electrochemical
     # methods (see top for more information)
-    iExperiment : int = 1
+    iExperiment: int = 1
 
-    if (iExperiment == 0):
+    if iExperiment == 0:
         # Run sequence on FreiStat
-        C_Run_Sequence = Run_Sequence(EnableOptimizer= False)
+        C_Run_Sequence = Run_Sequence(EnableOptimizer=False)
 
         # 1. Entry in sequence: Add CV
-        C_Run_Sequence.add_CV(StartVoltage= 0.5,
-                              FirstVertex= -0.62,
-                              SecondVertex= 1.05,
-                              Stepsize= 0.005,
-                              Scanrate= 0.6,
-                              Cycle= 3,
-                              CurrentRange= 45e-6,
-                              FixedWEPotential= True,
-                              MainsFilter = False,
-                              Sinc2_Oversampling = 667,
-                              Sinc3_Oversampling = 2)
+        C_Run_Sequence.add_CV(
+            StartVoltage=0.5,
+            FirstVertex=-0.62,
+            SecondVertex=1.05,
+            Stepsize=0.005,
+            Scanrate=0.6,
+            Cycle=3,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=667,
+            Sinc3_Oversampling=2,
+        )
 
         # 2. Entry in sequence: Add CA
-        C_Run_Sequence.add_CA(Potential_Steps= [-0.1, 0.05, 1],
-                              Pulse_Lengths=[0.3, 0.5, 0.4],
-                              Sampling_Rate= 0.02,
-                              Cycle= 5,
-                              CurrentRange= 15e-6, 
-                              MainsFilter = False,
-                              Sinc2_Oversampling = 667,
-                              Sinc3_Oversampling = 2,
-                              Progressive_Measurement = False)
-        
+        C_Run_Sequence.add_CA(
+            Potential_Steps=[-0.1, 0.05, 1],
+            Pulse_Lengths=[0.3, 0.5, 0.4],
+            Sampling_Rate=0.02,
+            Cycle=5,
+            CurrentRange=15e-6,
+            MainsFilter=False,
+            Sinc2_Oversampling=667,
+            Sinc3_Oversampling=2,
+            Progressive_Measurement=False,
+        )
+
         # 3. Entry in sequence: Add LSV
-        C_Run_Sequence.add_LSV(StartVoltage= 0.08,
-                               StopVoltage= 0.2,
-                               Stepsize= 0.001,
-                               Scanrate= 0.2,
-                               Cycle= 3,
-                               CurrentRange= 15e-6,
-                               FixedWEPotential= True,
-                               MainsFilter = False,
-                               Sinc2_Oversampling = 150,
-                               Sinc3_Oversampling = 2)
-        
+        C_Run_Sequence.add_LSV(
+            StartVoltage=0.08,
+            StopVoltage=0.2,
+            Stepsize=0.001,
+            Scanrate=0.2,
+            Cycle=3,
+            CurrentRange=15e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=150,
+            Sinc3_Oversampling=2,
+        )
+
         # 4. Entry in sequence: Add NPV
-        C_Run_Sequence.add_NPV(BaseVoltage= 0.3,
-                               StartVoltage= 0.5,
-                               StopVoltage= 1.025,
-                               DeltaV_Staircase= 0.02,
-                               Pulse_Lengths= [0.03, 0.07],
-                               Sampling_Duration= 0.01,
-                               Cycle= 2,
-                               CurrentRange= 45e-6,
-                               FixedWEPotential= True,
-                               MainsFilter = False,
-                               Sinc2_Oversampling = 25,
-                               Sinc3_Oversampling = 2)
+        C_Run_Sequence.add_NPV(
+            BaseVoltage=0.3,
+            StartVoltage=0.5,
+            StopVoltage=1.025,
+            DeltaV_Staircase=0.02,
+            Pulse_Lengths=[0.03, 0.07],
+            Sampling_Duration=0.01,
+            Cycle=2,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=25,
+            Sinc3_Oversampling=2,
+        )
 
         # 5. Entry in sequence: Add DPV
-        C_Run_Sequence.add_DPV(StartVoltage= 0.0,
-                               StopVoltage= 1.4,
-                               DeltaV_Staircase= 0.01,
-                               DeltaV_Peak= 0.02,
-                               Pulse_Lengths= [0.01, 0.01],
-                               Sampling_Duration= 0.005,
-                               Cycle= 4,
-                               CurrentRange= 45e-6,
-                               FixedWEPotential= True,
-                               MainsFilter = False,
-                               Sinc2_Oversampling = 25,
-                               Sinc3_Oversampling = 2)
+        C_Run_Sequence.add_DPV(
+            StartVoltage=0.0,
+            StopVoltage=1.4,
+            DeltaV_Staircase=0.01,
+            DeltaV_Peak=0.02,
+            Pulse_Lengths=[0.01, 0.01],
+            Sampling_Duration=0.005,
+            Cycle=4,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=25,
+            Sinc3_Oversampling=2,
+        )
 
         # 6. Entry in sequence: Add SWV
-        C_Run_Sequence.add_SWV(StartVoltage= 0.0,
-                               StopVoltage= 1.4,
-                               DeltaV_Staircase= 0.05,
-                               DeltaV_Peak= 0.2,
-                               DutyCycle= 0.1,
-                               Sampling_Duration= 0.005,
-                               Cycle= 3,
-                               CurrentRange= 45e-6,
-                               FixedWEPotential= True,
-                               MainsFilter = False,
-                               Sinc2_Oversampling = 25,
-                               Sinc3_Oversampling = 2)
-        
-        strExportpath = C_Run_Sequence.start(SequenceCycles= 3,
-                                             LowPerformanceMode= False)
+        C_Run_Sequence.add_SWV(
+            StartVoltage=0.0,
+            StopVoltage=1.4,
+            DeltaV_Staircase=0.05,
+            DeltaV_Peak=0.2,
+            DutyCycle=0.1,
+            Sampling_Duration=0.005,
+            Cycle=3,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=25,
+            Sinc3_Oversampling=2,
+        )
 
-    elif (iExperiment == 1):
-        # Run chronoamperometry on FreiStat
-        strExportpath = Run_CA().start(Potential_Steps= [0.5, -.5],
-                                       Pulse_Lengths=[5, 5],
-                                       Sampling_Rate= 0.01,
-                                       Cycle= 3,
-                                       CurrentRange= 45e-5, 
-                                       MainsFilter= False,
-                                       Sinc2_Oversampling = 22,
-                                       Sinc3_Oversampling = 2,
-                                       LowPerformanceMode= False,
-                                       EnableOptimizer= False,
-                                       Progressive_Measurement = False)
-    elif (iExperiment == 2):
-        # Run chronoamperometry on FreiStat
-        strExportpath = Run_OCP().start(Measurement_Length= 200.0,
-                                        Sampling_Rate= 10.0,
-                                        Cycle= 3,
-                                        MainsFilter = False,
-                                        Sinc2_Oversampling = 667,
-                                        Sinc3_Oversampling = 4,
-                                        LowPerformanceMode= False)
+        strExportpath = C_Run_Sequence.start(SequenceCycles=3, LowPerformanceMode=False)
 
-    elif (iExperiment == 3):
+    elif iExperiment == 1:
+        # Run chronoamperometry on FreiStat
+        strExportpath = Run_CA().start(
+            Potential_Steps=[0.5, -0.5],
+            Pulse_Lengths=[5, 5],
+            Sampling_Rate=0.01,
+            Cycle=3,
+            CurrentRange=45e-5,
+            MainsFilter=False,
+            Sinc2_Oversampling=22,
+            Sinc3_Oversampling=2,
+            LowPerformanceMode=False,
+            EnableOptimizer=False,
+            Progressive_Measurement=False,
+        )
+    elif iExperiment == 2:
+        # Run chronoamperometry on FreiStat
+        strExportpath = Run_OCP().start(
+            Measurement_Length=200.0,
+            Sampling_Rate=10.0,
+            Cycle=3,
+            MainsFilter=False,
+            Sinc2_Oversampling=667,
+            Sinc3_Oversampling=4,
+            LowPerformanceMode=False,
+        )
+
+    elif iExperiment == 3:
         # Run linear sweep voltammetry on FreiStat
-        strExportpath = Run_LSV().start(StartVoltage= 0.08,
-                                        StopVoltage= 0.4,
-                                        Stepsize= 0.001,
-                                        Scanrate= 0.2,
-                                        Cycle= 2,
-                                        CurrentRange= 45e-6,
-                                        FixedWEPotential= True,
-                                        MainsFilter = False,
-                                        Sinc2_Oversampling = 150,
-                                        Sinc3_Oversampling = 2,
-                                        LowPerformanceMode= False)
+        strExportpath = Run_LSV().start(
+            StartVoltage=0.08,
+            StopVoltage=0.4,
+            Stepsize=0.001,
+            Scanrate=0.2,
+            Cycle=2,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=150,
+            Sinc3_Oversampling=2,
+            LowPerformanceMode=False,
+        )
 
-    elif (iExperiment == 4):
+    elif iExperiment == 4:
         # Run cyclic voltammetry on FreiStat
-        strExportpath = Run_CV().start(StartVoltage= 0.5,
-                                       FirstVertex= -0.22,
-                                       SecondVertex= 0.55,
-                                       Stepsize= 0.002,
-                                       Scanrate= 0.8,
-                                       Cycle= 1,
-                                       CurrentRange= 45e-6,
-                                       FixedWEPotential= True,
-                                       MainsFilter = True,
-                                       Sinc2_Oversampling = 222,
-                                       Sinc3_Oversampling = 2,
-                                       EnableOptimizer= True,
-                                       LowPerformanceMode= False)
+        strExportpath = Run_CV().start(
+            StartVoltage=0.5,
+            FirstVertex=-0.22,
+            SecondVertex=0.55,
+            Stepsize=0.002,
+            Scanrate=0.8,
+            Cycle=1,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=True,
+            Sinc2_Oversampling=222,
+            Sinc3_Oversampling=2,
+            EnableOptimizer=True,
+            LowPerformanceMode=False,
+        )
 
-    elif (iExperiment == 5):
+    elif iExperiment == 5:
         # Run normal pulse voltammetry on FreiStat
-        strExportpath = Run_NPV().start(BaseVoltage= 0.3,
-                                        StartVoltage= 0.5,
-                                        StopVoltage= 1.025,
-                                        DeltaV_Staircase= 0.02,
-                                        Pulse_Lengths= [0.03, 0.07],
-                                        Sampling_Duration= 0.01,
-                                        Cycle= 1,
-                                        CurrentRange= 45e-6,
-                                        FixedWEPotential= True,
-                                        MainsFilter = False,
-                                        Sinc2_Oversampling = 25,
-                                        Sinc3_Oversampling = 4,
-                                        LowPerformanceMode= False)
+        strExportpath = Run_NPV().start(
+            BaseVoltage=0.3,
+            StartVoltage=0.5,
+            StopVoltage=1.025,
+            DeltaV_Staircase=0.02,
+            Pulse_Lengths=[0.03, 0.07],
+            Sampling_Duration=0.01,
+            Cycle=1,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=25,
+            Sinc3_Oversampling=4,
+            LowPerformanceMode=False,
+        )
 
-    elif (iExperiment == 6):
+    elif iExperiment == 6:
         # Run differential pulse voltammetry on FreiStat
-        strExportpath = Run_DPV().start(StartVoltage= 0.0,
-                                        StopVoltage= 1.4,
-                                        DeltaV_Staircase= 0.05,
-                                        DeltaV_Peak= 0.2,
-                                        Pulse_Lengths= [0.4, 0.6],
-                                        Sampling_Duration= 0.04,
-                                        Cycle= 1,
-                                        CurrentRange= 45e-6,
-                                        FixedWEPotential= True,
-                                        MainsFilter = False,
-                                        Sinc2_Oversampling = 22,
-                                        Sinc3_Oversampling = 4,
-                                        EnableOptimizer= True,
-                                        LowPerformanceMode= False)
+        strExportpath = Run_DPV().start(
+            StartVoltage=0.0,
+            StopVoltage=1.4,
+            DeltaV_Staircase=0.05,
+            DeltaV_Peak=0.2,
+            Pulse_Lengths=[0.4, 0.6],
+            Sampling_Duration=0.04,
+            Cycle=1,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=22,
+            Sinc3_Oversampling=4,
+            EnableOptimizer=True,
+            LowPerformanceMode=False,
+        )
 
-    elif (iExperiment == 7):
+    elif iExperiment == 7:
         # Run square wave voltammetry on FreiStat
-        strExportpath = Run_SWV().start(StartVoltage= 0.0,
-                                        StopVoltage= 1.4,
-                                        DeltaV_Staircase= 0.05,
-                                        DeltaV_Peak= 0.2,
-                                        DutyCycle= 0.1,
-                                        Sampling_Duration= 0.01,
-                                        Cycle= 1,
-                                        CurrentRange= 45e-6,
-                                        FixedWEPotential= True,
-                                        MainsFilter = False,
-                                        Sinc2_Oversampling = 100,
-                                        Sinc3_Oversampling = 4,
-                                        LowPerformanceMode= False)
+        strExportpath = Run_SWV().start(
+            StartVoltage=0.0,
+            StopVoltage=1.4,
+            DeltaV_Staircase=0.05,
+            DeltaV_Peak=0.2,
+            DutyCycle=0.1,
+            Sampling_Duration=0.01,
+            Cycle=1,
+            CurrentRange=45e-6,
+            FixedWEPotential=True,
+            MainsFilter=False,
+            Sinc2_Oversampling=100,
+            Sinc3_Oversampling=4,
+            LowPerformanceMode=False,
+        )
 
     # Show file-path of the collected data in the terminal
     print(strExportpath)
 
+
 # Run example implementation if this script is the main file
-if __name__ == '__main__':
+if __name__ == "__main__":
     ExampleImplementation()
