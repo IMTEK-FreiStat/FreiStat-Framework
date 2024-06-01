@@ -16,10 +16,11 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 from typing import Union
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.constants import *
+from ..data_storage.data_software_storage import DataSoftwareStorage
 
-class JSON_Telegram_Generator():
+
+class JSON_Telegram_Generator:
     """
     Description
     -----------
@@ -42,13 +43,12 @@ class JSON_Telegram_Generator():
 
         # Save data software storage object and set own reference
         self._dataSoftwareStorage = dataSoftwareStorage
-        self._dataSoftwareStorage.setJSON_TelegramGenerator(self)  
+        self._dataSoftwareStorage.setJSON_TelegramGenerator(self)
 
         # Get reference to data handling object
         self._dataHandling = self._dataSoftwareStorage.getDataHandling()
 
-    def generateCommandTelegram(self, iCodeID : int, iCodeSubID: int) \
-                                -> Union[str, int]:
+    def generateCommandTelegram(self, iCodeID: int, iCodeSubID: int) -> Union[str, int]:
         """
         Description
         -----------
@@ -74,7 +74,7 @@ class JSON_Telegram_Generator():
         -----------
         The following table shows all defined Command code IDs
 
-        Command ID : Command SubID : Description 
+        Command ID : Command SubID : Description
         1 : 1 : Experiment type                             \n
         2 : 1 : Experiment parameters                       \n
         3 : X : Experiment control                          \n
@@ -82,7 +82,7 @@ class JSON_Telegram_Generator():
           : 2 : Stop                                        \n
         4 : X : Sequence control                            \n
           : 1 : Enable sequence                             \n
-          : 2 : Disable sequence 
+          : 2 : Disable sequence
 
         Error Codes
         -----------
@@ -94,11 +94,11 @@ class JSON_Telegram_Generator():
 
         """
         # Initalize variables
-        strJSON : str = "\"" + COMMAND_TELEGRAM + "\""
-        iErrorCode : int = EC_NO_ERROR
+        strJSON: str = '"' + COMMAND_TELEGRAM + '"'
+        iErrorCode: int = EC_NO_ERROR
 
         # Check ID
-        if (iCodeID in (COMMAND_EXT, COMMAND_EXP, COMMAND_EXC, COMMAND_EXS)):
+        if iCodeID in (COMMAND_EXT, COMMAND_EXP, COMMAND_EXC, COMMAND_EXS):
             pass
         else:
             iErrorCode = EC_JSON_PARSER + EC_JP_CODEID_UNDEF
@@ -109,61 +109,75 @@ class JSON_Telegram_Generator():
         strJSON = "{" + strJSON + ":" + str(iCodeID) + ","
 
         # Generate command telegram for transmitting experiment type
-        if (iCodeID == COMMAND_EXT and iCodeSubID == 1):
+        if iCodeID == COMMAND_EXT and iCodeSubID == 1:
             # Get electrochemical method
-            strTemp : str = self._dataHandling.get_ExperimentType()
+            strTemp: str = self._dataHandling.get_ExperimentType()
 
             # ' {"C":1,"ExT": "EC Method" } '
-            strJSON =  strJSON + "\"" + COMMAND_EXT_STR + "\":\"" + strTemp + "\"}"
+            strJSON = strJSON + '"' + COMMAND_EXT_STR + '":"' + strTemp + '"}'
 
         # Generate command telegram for transmitting experiment parameters
-        elif(iCodeID == COMMAND_EXP and iCodeSubID == 1):
+        elif iCodeID == COMMAND_EXP and iCodeSubID == 1:
             # Get electrochemical experiment parameters
-            listTemp : list = self._dataHandling.get_ExperimentParameters()
-            
+            listTemp: list = self._dataHandling.get_ExperimentParameters()
+
             # Initalize variables
-            strTemp : str = ""
+            strTemp: str = ""
 
             # Convert experiment parameters from list format into JSON
-            for iEntry in range (len(listTemp)):
+            for iEntry in range(len(listTemp)):
                 # '"X"'
-                strTemp = strTemp +"\"" + str(listTemp[iEntry][0]) + "\":"
-                strTemp = strTemp + str(listTemp[iEntry][1]) 
-                if (iEntry == len(listTemp) - 1):
+                strTemp = strTemp + '"' + str(listTemp[iEntry][0]) + '":'
+                strTemp = strTemp + str(listTemp[iEntry][1])
+                if iEntry == len(listTemp) - 1:
                     break
                 strTemp = strTemp + ","
 
             # ' {"C":2,"ExP": {           } '
-            strJSON =  strJSON + "\"" + COMMAND_EXP_STR + "\":{" + strTemp + "}}"
+            strJSON = strJSON + '"' + COMMAND_EXP_STR + '":{' + strTemp + "}}"
 
         # Generate command telegram for experiment control
-        elif (iCodeID == COMMAND_EXC):
-            if (iCodeSubID == FREISTAT_START_I):
+        elif iCodeID == COMMAND_EXC:
+            if iCodeSubID == FREISTAT_START_I:
                 # ' {"C":3,"ExC": "START" } '
-                strJSON =  strJSON + "\"" + COMMAND_EXC_STR + "\":\"" + \
-                           FREISTAT_START_STR + "\"}"
+                strJSON = (
+                    strJSON + '"' + COMMAND_EXC_STR + '":"' + FREISTAT_START_STR + '"}'
+                )
 
-            if (iCodeSubID == FREISTAT_STOP_I):
+            if iCodeSubID == FREISTAT_STOP_I:
                 # ' {"C":3,"ExC": "STOP" } '
-                strJSON =  strJSON + "\"" + COMMAND_EXC_STR + "\":\"" + \
-                           FREISTAT_STOP_STR + "\"}"   
+                strJSON = (
+                    strJSON + '"' + COMMAND_EXC_STR + '":"' + FREISTAT_STOP_STR + '"}'
+                )
 
         # Generate command telegram for sequence control
-        elif (iCodeID == COMMAND_EXS):
-            if (iCodeSubID == SEQUENCE_ENABLE_I):
+        elif iCodeID == COMMAND_EXS:
+            if iCodeSubID == SEQUENCE_ENABLE_I:
                 # ' {"C":4,"ExS": "SE"} '
-                strJSON =  strJSON + "\"" + COMMAND_EXS_STR + "\": \"" + \
-                           SEQUENCE_ENABLE_STR + "\"}"
-            if (iCodeSubID == SEQUENCE_DISABLE_I):
+                strJSON = (
+                    strJSON
+                    + '"'
+                    + COMMAND_EXS_STR
+                    + '": "'
+                    + SEQUENCE_ENABLE_STR
+                    + '"}'
+                )
+            if iCodeSubID == SEQUENCE_DISABLE_I:
                 # ' {"C":4,"ExS": "SD"} '
-                strJSON =  strJSON + "\"" + COMMAND_EXS_STR + "\": \"" + \
-                           SEQUENCE_DISABLE_STR + "\"}"
-        
+                strJSON = (
+                    strJSON
+                    + '"'
+                    + COMMAND_EXS_STR
+                    + '": "'
+                    + SEQUENCE_DISABLE_STR
+                    + '"}'
+                )
+
         # Print send telegram
         print(strJSON)
 
         # Check if string is 128 byte long
-        if (len(strJSON) == 128):
+        if len(strJSON) == 128:
             # Add whitespace to prevent transmission bug
             strJSON += " "
 
@@ -172,12 +186,13 @@ class JSON_Telegram_Generator():
         # Return union
         return iErrorCode, strJSON
 
-    def generateAcknowledgeTelegram(self, iCodeID : int, iCodeSubID: int) \
-                                -> Union[str, int]:
+    def generateAcknowledgeTelegram(
+        self, iCodeID: int, iCodeSubID: int
+    ) -> Union[str, int]:
         """
         Description
         -----------
-        Method for sending acknowledge telegrams from the Python library to the 
+        Method for sending acknowledge telegrams from the Python library to the
         microcontroller.
 
         Parameters
@@ -187,7 +202,7 @@ class JSON_Telegram_Generator():
 
         `iCodeSubID` : int
             Integer with the ID of the subcommand which should be transmitted
-            
+
         Return
         ------
         `iErrorCode` : int

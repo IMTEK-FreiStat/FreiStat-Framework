@@ -13,19 +13,20 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
 import logging
-import multiprocessing  as mp
+import multiprocessing as mp
 from multiprocessing import shared_memory
 import numpy as np
 import platform
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Serial_communication.serial_communication import Communication
-from ..Data_storage.data_handling import DataHandling
-from ..Data_storage.data_software_storage import DataSoftwareStorage
-from ..Electrochemical_methods.electrochemical_method import ElectrochemicalMethod
-from ..JSON_parser.json_parser import JSON_Parser
-from ..Plotter.plotter import Plotter
+from ..data_storage.constants import *
+from ..serial_communication.serial_communication import Communication
+from ..data_storage.data_handling import DataHandling
+from ..data_storage.data_software_storage import DataSoftwareStorage
+from ..electrochemical_methods.electrochemical_method import ElectrochemicalMethod
+from ..json_parser.json_parser import JSON_Parser
+from ..plotter.plotter import Plotter
+
 
 class Run_Electrochemical_Method:
     """
@@ -35,14 +36,18 @@ class Run_Electrochemical_Method:
 
     """
 
-    def __init__(self, 
-                 logger = logging.Logger("FreiStat_Library"),
-                 commnicationMode = FREISTAT_SERIAL,
-                 wlanSetting = [FREISTAT_UDP_SERVER_IP, 
-                                FREISTAT_UDP_SERVER_PORT,
-                                FREISTAT_UDP_CLIENT_IP,
-                                FREISTAT_UDP_CLIENT_PORT],
-                 mode: str = FREISTAT_STANDALONE) -> None:
+    def __init__(
+        self,
+        logger=logging.Logger("FreiStat_Library"),
+        commnicationMode=FREISTAT_SERIAL,
+        wlanSetting=[
+            FREISTAT_UDP_SERVER_IP,
+            FREISTAT_UDP_SERVER_PORT,
+            FREISTAT_UDP_CLIENT_IP,
+            FREISTAT_UDP_CLIENT_PORT,
+        ],
+        mode: str = FREISTAT_STANDALONE,
+    ) -> None:
         """
         Description
         -----------
@@ -66,32 +71,34 @@ class Run_Electrochemical_Method:
 
         """
         # Save class variables
-        self._logger= logger
+        self._logger = logger
         self._iCommunicationMode = commnicationMode
         self._listWLANSetting = wlanSetting
 
         # Check if mode is defined
-        if (mode == FREISTAT_STANDALONE or mode == FREISTAT_BACKEND):
+        if mode == FREISTAT_STANDALONE or mode == FREISTAT_BACKEND:
             self._FreiStatMode = mode
         else:
             raise RuntimeError("Operation mode doesn't exist.")
 
-    def P_DataCollection(self, 
-                         strMethod : str,
-                         dataQueue : mp.Queue, 
-                         event : mp.Event(),
-                         listTempExperimentParameters : list, 
-                         bLowPerformanceMode : bool,
-                         sharedMemoryLocation_name : str) -> None:
+    def P_DataCollection(
+        self,
+        strMethod: str,
+        dataQueue: mp.Queue,
+        event: mp.Event(),
+        listTempExperimentParameters: list,
+        bLowPerformanceMode: bool,
+        sharedMemoryLocation_name: str,
+    ) -> None:
         """
         Description
         -----------
         Method running in a seperate process, which is used to setup and execute
         the electrochemical method.
         Thereby, the data from the serial connection is read and stored in the
-        corresponding data handling, as well as in the DataQueue, which is 
+        corresponding data handling, as well as in the DataQueue, which is
         accessed by the plotter class.
-        
+
         Parameters
         ----------
         `strMethod` : str
@@ -114,7 +121,7 @@ class Run_Electrochemical_Method:
 
         """
         self._logger = logging.Logger("FreiStat_Library")
-        
+
         # Save event reference
         self._event = event
 
@@ -126,27 +133,31 @@ class Run_Electrochemical_Method:
 
         # Create an object which handles all data
         self._dataHandling = DataHandling(self._dataSoftwareStorage)
-        
+
         # Create an object for handling communication
-        self._serialConnection = Communication(self._dataSoftwareStorage,
-                                               self._iCommunicationMode,
-                                               self._listWLANSetting)
+        self._serialConnection = Communication(
+            self._dataSoftwareStorage, self._iCommunicationMode, self._listWLANSetting
+        )
 
         # Create an object for parsing JSON strings
         self._jsonParser = JSON_Parser(self._dataSoftwareStorage)
 
         # Creating an object for general electrochemical methods
         self._ecMethod = ElectrochemicalMethod(strMethod, self._dataSoftwareStorage)
-        
+
         # Execute setup for electrochemical methods
         iErrorCode = self._ecMethod.setup(listTempExperimentParameters)
 
         # Check if setup was successfull
-        if(iErrorCode != 0):
-            self._logger.warning(strMethod + "setup failed: Error code: " + 
-                str(iErrorCode) + " Check error list for further informations.")
+        if iErrorCode != 0:
+            self._logger.warning(
+                strMethod
+                + "setup failed: Error code: "
+                + str(iErrorCode)
+                + " Check error list for further informations."
+            )
             return iErrorCode
-        
+
         # Start thread to run execute behavior
         self._ecMethod.execute(dataQueue, self._event)
 
@@ -155,29 +166,32 @@ class Run_Electrochemical_Method:
 
         # Post processing of experiment data
         # Export data to previously setup csv export after experiment is done
-        strExportPath = self._dataHandling. \
-            export_Data_csv(self._dataHandling.get_StoredData())
+        strExportPath = self._dataHandling.export_data_csv(
+            self._dataHandling.get_stored_data()
+        )
 
-        # Export experiment type and parameters 
-        self._dataHandling.export_ExperimentParameters_csv(
-            self._dataHandling.get_ExperimentType(),
-            self._dataHandling.get_ExperimentParameters())
+        # Export experiment type and parameters
+        self._dataHandling.export_experiment_parameters_csv(
+            self._dataHandling.get_experiment_type(),
+            self._dataHandling.get_experiment_parameters(),
+        )
 
         # Save data object persistent
-        self._dataHandling.export_DataStorage()
+        self._dataHandling.export_data_storage()
 
         # Get address of the shared memory in the RAM through the unique name
         existing_shm = shared_memory.SharedMemory(
-            name=sharedMemoryLocation_name, create= False)
-        
+            name=sharedMemoryLocation_name, create=False
+        )
+
         # Define array which is located in the shared memory and has the right
         # data format
-        np_array = np.ndarray((1,200), dtype= '|S1', buffer= existing_shm.buf)
-        
+        np_array = np.ndarray((1, 200), dtype="|S1", buffer=existing_shm.buf)
+
         # Loop over the length of the file-path and write it into the array in
         # the shared memory
         for i in range(len(strExportPath)):
-            np_array[0,i] = strExportPath[i].encode("UTF-8")
+            np_array[0, i] = strExportPath[i].encode("UTF-8")
 
         # Close exisitng serial connection
         self._serialConnection._closeConnection()
@@ -196,23 +210,24 @@ class Run_Electrochemical_Method:
         ------
         `strProcess` : string
             Process used on the operating system encoded as string
-        
+
         """
         # Variable initaliztaion
         strProcess = ""
 
         # Check operating system
-        if (platform.system() == LINUX):
+        if platform.system() == LINUX:
             strProcess = "fork"
-        elif (platform.system() == MACOS):
+        elif platform.system() == MACOS:
             strProcess = "spawn"
-        elif (platform.system() == WINDOWS):
+        elif platform.system() == WINDOWS:
             strProcess = "spawn"
 
         return strProcess
 
-    def _check_StartingPotential(self, fStartingPotential : float,
-                                 iFixedWEPotential : int) -> float:
+    def _check_StartingPotential(
+        self, fStartingPotential: float, iFixedWEPotential: int
+    ) -> float:
         """
         Description
         -----------
@@ -234,50 +249,56 @@ class Run_Electrochemical_Method:
             Real starting potential calculated through the resolution of the
             6-Bit and 12-Bit DAC
 
-        """ 
+        """
 
         # Check if working electrode potential is fixed and calculate potential
-        if (iFixedWEPotential == 1):
-            fWePotential = (AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT) / \
-                            2 + AD5940_MIN_DAC_OUTPUT
+        if iFixedWEPotential == 1:
+            fWePotential = (
+                AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT
+            ) / 2 + AD5940_MIN_DAC_OUTPUT
         else:
             fWePotential = AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT
 
         # Calculate 6-Bit DAC code
-        f6BitDacCode : int = int((fWePotential - AD5940_MIN_DAC_OUTPUT) / \
-                                 AD5940_6BIT_DAC_1LSB)
+        f6BitDacCode: int = int(
+            (fWePotential - AD5940_MIN_DAC_OUTPUT) / AD5940_6BIT_DAC_1LSB
+        )
 
         # Calculate 6-Bit DAC potential
         f6BitDacPotential = f6BitDacCode * AD5940_6BIT_DAC_1LSB
 
         # Calculate 12-Bit DAC code
-        f12BitDacCode : int = int(f6BitDacCode * 64 - fStartingPotential / \
-                                  AD5940_12BIT_DAC_1LSB + 0.5)
+        f12BitDacCode: int = int(
+            f6BitDacCode * 64 - fStartingPotential / AD5940_12BIT_DAC_1LSB + 0.5
+        )
 
-        if (f12BitDacCode < f6BitDacCode * 64):
+        if f12BitDacCode < f6BitDacCode * 64:
             f12BitDacCode -= 1
 
         # Calculate 12-Bit DAC potential
         f12BitDacPotential = f12BitDacCode * AD5940_12BIT_DAC_1LSB
 
         # Calculate 12-Bit DAC potential
-        fTrueStartingPotential : float = f6BitDacPotential - f12BitDacPotential
+        fTrueStartingPotential: float = f6BitDacPotential - f12BitDacPotential
 
-        if (fTrueStartingPotential != fStartingPotential):
+        if fTrueStartingPotential != fStartingPotential:
             # Truncate float
-            fTrueStartingPotential = float(int(fTrueStartingPotential * 
-                                           10000) / 10000) 
+            fTrueStartingPotential = float(int(fTrueStartingPotential * 10000) / 10000)
 
-            self._logger.warning("Chosen potential of " + 
-                            str(fStartingPotential) + " mV is not possible, " + 
-                            "closest value of " + str(fTrueStartingPotential) + 
-                            " mV will be used instead.")  
+            self._logger.warning(
+                "Chosen potential of "
+                + str(fStartingPotential)
+                + " mV is not possible, "
+                + "closest value of "
+                + str(fTrueStartingPotential)
+                + " mV will be used instead."
+            )
 
             return fTrueStartingPotential
         else:
-            return fStartingPotential        
-        
-    def _check_StepSize(self, fStepsize : float) -> float:
+            return fStartingPotential
+
+    def _check_StepSize(self, fStepsize: float) -> float:
         """
         Description
         -----------
@@ -294,28 +315,36 @@ class Run_Electrochemical_Method:
             Real stepsize calculated through the resolution of the 12-Bit DAC
 
         """
-        fTrueStepsize : float = int(fStepsize / AD5940_12BIT_DAC_1LSB + 0.5) * \
-                                    AD5940_12BIT_DAC_1LSB
+        fTrueStepsize: float = (
+            int(fStepsize / AD5940_12BIT_DAC_1LSB + 0.5) * AD5940_12BIT_DAC_1LSB
+        )
 
-        if (fTrueStepsize != fStepsize):
+        if fTrueStepsize != fStepsize:
             # Truncate float
             fTrueStepsize = float(int(fTrueStepsize * 10000) / 10000)
-            
-            self._logger.warning("Chosen stepsize of " + str(fStepsize) + 
-                            " mV is not possible, closest value of " + 
-                            str(fTrueStepsize) + " mV will be used instead.")
- 
+
+            self._logger.warning(
+                "Chosen stepsize of "
+                + str(fStepsize)
+                + " mV is not possible, closest value of "
+                + str(fTrueStepsize)
+                + " mV will be used instead."
+            )
+
             return fTrueStepsize
         else:
             return fStepsize
-        
-    def _check_FixedWEPotential(self, iFixedWEPotential: int,
-                                fLowerTurningVoltage : float,
-                                fUpperTurningVoltage : float) -> int:
+
+    def _check_FixedWEPotential(
+        self,
+        iFixedWEPotential: int,
+        fLowerTurningVoltage: float,
+        fUpperTurningVoltage: float,
+    ) -> int:
         """
         Description
         -----------
-        Method for checking if size of sweaping range is in conflict with 
+        Method for checking if size of sweaping range is in conflict with
         flag for fixing the working electrode potential.
 
         Parameters
@@ -331,29 +360,31 @@ class Run_Electrochemical_Method:
         ------
         `iNewFixedWEPotential` : int
             Boolean flag encoded as integer (0 : True | 1 : False)
-        
+
         """
         # Calculate sweap range
         fRange = abs(fUpperTurningVoltage - fLowerTurningVoltage)
 
         # Check if flag needs to be adjusted
-        if (fRange > VOLTAGE_RANGE):
+        if fRange > VOLTAGE_RANGE:
             iNewFixedWEPotential = 0
         else:
             iNewFixedWEPotential = 1
 
         # Check if flag has changed
-        if (iNewFixedWEPotential != iFixedWEPotential):
-            if (iFixedWEPotential == 0):
+        if iNewFixedWEPotential != iFixedWEPotential:
+            if iFixedWEPotential == 0:
                 pass
-            elif (iFixedWEPotential == 1):
-                self._logger.warning("Sweap range exceeds operating range for fixed" +
-                                " working electrode potential. Fixed potential" +
-                                " disabled.")
+            elif iFixedWEPotential == 1:
+                self._logger.warning(
+                    "Sweap range exceeds operating range for fixed"
+                    + " working electrode potential. Fixed potential"
+                    + " disabled."
+                )
                 pass
         return iNewFixedWEPotential
 
-    def _pressEvent(self, event) -> None :
+    def _pressEvent(self, event) -> None:
         """
         Description
         -----------
@@ -365,15 +396,15 @@ class Run_Electrochemical_Method:
         event : event
             Event which should be executed
 
-        """ 
-        if event.key == 'q':
+        """
+        if event.key == "q":
             self._terminateExperiment()
 
     def _terminateExperiment(self) -> None:
         """
         Description
         -----------
-        Method used to terminate the current experiment 
+        Method used to terminate the current experiment
 
         """
         # Set event flag to true to end child process
@@ -405,7 +436,7 @@ class Run_Electrochemical_Method:
             Reference to the data queue object used by FreiStat
 
         """
-        return self._dataQueue  
+        return self._dataQueue
 
     def get_process(self):
         """
@@ -419,4 +450,4 @@ class Run_Electrochemical_Method:
             Reference to the process used by FreiStat
 
         """
-        return self._process  
+        return self._process

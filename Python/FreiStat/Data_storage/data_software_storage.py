@@ -7,6 +7,8 @@ FreiStat Python, in order to operate.
 
 """
 
+from __future__ import annotations
+
 __author__ = "Mark Jasper"
 __contact__ = "University of Freiburg, IMTEK, Jochen Kieninger"
 __credits__ = "Mark Jasper"
@@ -15,25 +17,19 @@ __version__ = "1.0.0"
 __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
-# Import dependencies
 
-# Import internal dependencies
-from .constants import *
+from typing import TYPE_CHECKING, Optional
 
-# Forward declaration
-def Communication():
-    pass
+from .constants import FREISTAT_BOOTUP
 
-def JSON_Parser():
-    pass
+if TYPE_CHECKING:
+    from FreiStat.data_storage.data_handling import DataHandling
+    from FreiStat.json_parser.json_parser import JsonParser
+    from FreiStat.json_parser.json_telegram_generator import JSON_Telegram_Generator
+    from FreiStat.serial_communication.serial_communication import Communication
 
-def JSON_Telegram_Generator():
-    pass
 
-def DataHandling():
-    pass
-
-class DataSoftwareStorage():
+class DataSoftwareStorage:
     """
     Description
     -----------
@@ -49,17 +45,17 @@ class DataSoftwareStorage():
         Constructor of class DataSoftwareStorage
 
         """
-        # Initalize class variables
-        self._dataHandling = None
-        self._jsonParser = None
-        self._jsonTelegramGenerator = None
+        self._data_handling: Optional[DataHandling] = None
+        self._json_parser: Optional[JsonParser] = None
+        self._json_telegram_generator: Optional[JSON_Telegram_Generator] = None
+        self._communication: Optional[Communication] = None
 
-        self._bLowPerformanceMode : bool = False
+        self._low_performance_mode = False
 
-        self._systemStatus : int = FREISTAT_BOOTUP
+        self._system_status: int = FREISTAT_BOOTUP
 
     # Setter methods
-    def set_SystemStatus(self, iSystemStatus: int) -> None:
+    def set_system_status(self, system_status: int) -> None:
         """
         Description
         -----------
@@ -80,9 +76,9 @@ class DataSoftwareStorage():
             Status of the system encoded in an integer value.
 
         """
-        self._systemStatus = iSystemStatus
+        self._system_status = system_status
 
-    def set_LowPerformanceMode(self, bLowPerformanceMode : bool) -> None:
+    def set_low_performance_mode(self, low_performance_mode: bool) -> None:
         """
         Description
         -----------
@@ -92,11 +88,11 @@ class DataSoftwareStorage():
         ----------
         `bLowPerformanceMode ` bool
             Flag indicating if the low performance mode is enabled or not.
-        
-        """
-        self._bLowPerformanceMode = bLowPerformanceMode 
 
-    def setJSON_Parser(self, jsonParser: JSON_Parser) -> None:
+        """
+        self._low_performance_mode = low_performance_mode
+
+    def set_json_parser(self, json_parser: JsonParser) -> None:
         """
         Description
         -----------
@@ -108,9 +104,9 @@ class DataSoftwareStorage():
             Reference to the JSON parser object
 
         """
-        self._jsonParser = jsonParser
+        self._json_parser = json_parser
 
-    def setCommunication(self, communication: Communication) -> None:
+    def set_communication(self, communication: Communication) -> None:
         """
         Description
         -----------
@@ -124,7 +120,7 @@ class DataSoftwareStorage():
         """
         self._communication = communication
 
-    def setDataHandling(self, dataHandling: DataHandling) -> None:
+    def set_data_handling(self, data_handling: DataHandling) -> None:
         """
         Description
         -----------
@@ -136,10 +132,11 @@ class DataSoftwareStorage():
             Reference to the data handling object
 
         """
-        self._dataHandling = dataHandling
+        self._data_handling = data_handling
 
-    def setJSON_TelegramGenerator(self, 
-        jsonTelegramGenerator: JSON_Telegram_Generator) -> None:
+    def set_json_telegram_generator(
+        self, json_telegram_generator: JSON_Telegram_Generator
+    ) -> None:
         """
         Description
         -----------
@@ -151,10 +148,10 @@ class DataSoftwareStorage():
             Reference to the JSON telegram generator object
 
         """
-        self._jsonTelegramGenerator = jsonTelegramGenerator
+        self._json_telegram_generator = json_telegram_generator
 
     # Getter methods
-    def get_SystemStatus(self) -> int:
+    def get_system_status(self) -> int:
         """
         Description
         -----------
@@ -166,9 +163,9 @@ class DataSoftwareStorage():
             Status of the system encoded in an integer value
 
         """
-        return self._systemStatus
+        return self._system_status
 
-    def get_LowPerformanceMode(self) -> bool:
+    def get_low_performance_mode(self) -> bool:
         """
         Description
         -----------
@@ -178,11 +175,11 @@ class DataSoftwareStorage():
         ------
         `bLowPerformanceMode ` bool
             Flag indicating if the low performance mode is enabled or not.
-        
-        """
-        return self._bLowPerformanceMode
 
-    def getJSON_Parser(self) -> JSON_Parser:
+        """
+        return self._low_performance_mode
+
+    def get_json_parser(self) -> Optional[JsonParser]:
         """
         Description
         -----------
@@ -194,9 +191,9 @@ class DataSoftwareStorage():
             Reference to the JSON parser object
 
         """
-        return self._jsonParser
+        return self._json_parser
 
-    def getCommunication(self) -> Communication:
+    def get_communication(self) -> Optional[Communication]:
         """
         Description
         -----------
@@ -210,7 +207,7 @@ class DataSoftwareStorage():
         """
         return self._communication
 
-    def getDataHandling(self) -> DataHandling:
+    def get_data_handling(self) -> Optional[DataHandling]:
         """
         Description
         -----------
@@ -222,9 +219,9 @@ class DataSoftwareStorage():
             Reference to the data handling object
 
         """
-        return self._dataHandling 
+        return self._data_handling
 
-    def getJSON_TelegramGenerator(self) -> JSON_Telegram_Generator:
+    def get_json_telegram_generator(self) -> Optional[JSON_Telegram_Generator]:
         """
         Description
         -----------
@@ -234,6 +231,6 @@ class DataSoftwareStorage():
         ------
         `jsonTelegramGenerator`: JSON_Telegram_Generator
             Reference to the JSON telegram generator object
-            
+
         """
-        return self._jsonTelegramGenerator
+        return self._json_telegram_generator

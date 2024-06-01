@@ -17,7 +17,8 @@ import unittest
 
 # Import internal dependencies
 from .optimizer import Optimizer
-from ..Data_storage.constants import *
+from ..data_storage.constants import *
+
 
 class Optimizer_UnitTest(unittest.TestCase):
     """
@@ -26,6 +27,7 @@ class Optimizer_UnitTest(unittest.TestCase):
     Class which handles all unittests in regard to the class Optimizer.
 
     """
+
     def test_check_Optimizer(self) -> None:
         """
         Description
@@ -34,8 +36,8 @@ class Optimizer_UnitTest(unittest.TestCase):
 
         """
         # Test string
-        strMethod : str = CV
-        listExperimentParameters : list = []
+        strMethod: str = CV
+        listExperimentParameters: list = []
 
         # Create a test instance of the optimzier
         _Optimizer = Optimizer()
@@ -52,6 +54,7 @@ class Optimizer_UnitTest(unittest.TestCase):
                          + "occured, string not completly tested")
         """
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()

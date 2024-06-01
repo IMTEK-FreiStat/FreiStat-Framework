@@ -17,7 +17,7 @@ import logging
 from typing import Union
 
 # Import internal dependencies
-from ..Data_storage.data_software_storage import DataSoftwareStorage
+from ..data_storage.data_software_storage import DataSoftwareStorage
 
 class JSON_Parser:
     """

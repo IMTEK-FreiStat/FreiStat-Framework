@@ -19,8 +19,8 @@ import matplotlib.pyplot as plt
 from tkinter.ttk import Style
 
 # Import internal dependencies
-from ..Data_storage.constants import *
-from ..Utility.decoder import _decode_LPTIA_Resistor_Size
+from ..data_storage.constants import *
+from ..utility.decoder import _decode_LPTIA_Resistor_Size
 
 class Plotter:
     """

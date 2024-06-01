@@ -24,9 +24,6 @@ __version__ = "1.0.0"
 __maintainer__ = "Mark Jasper"
 __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
-# Include dependencies
-
-# Include internal dependencies
 
 class DataStorage:
     """
@@ -43,57 +40,56 @@ class DataStorage:
         Constructor of class DataStorage
 
         """
-        # Initalize class variable
-        self._strElectrochemicalMethod : str = ""
-        self._listStoredData : list = []
-        self._listExperimentParameters : list = []
+        self._electrochemical_method = ""
+        self._stored_data = []
+        self._experiment_parameters = []
 
-    def save_ExperimentParameters(self, listExperimentParameters: list) -> None:
+    def save_experiment_parameters(self, experiment_parameters: list) -> None:
         """
         Descirption
         -----------
         Save experiment parameters in the data object.
-        
+
         Parameters
         ----------
         `listExperimentParameters` : list
-            List which contains every experiment parameter required for the 
+            List which contains every experiment parameter required for the
             chosen electrochemical method
 
         """
-        self._listExperimentParameters = listExperimentParameters
+        self._experiment_parameters = experiment_parameters
 
-    def save_ExperimentType(self, strExperimentType: str) -> None:
+    def save_experiment_type(self, experiment_type: str) -> None:
         """
         Descirption
         -----------
         Save experiment type in the data object.
-        
+
         Parameters
         ----------
         `strExperimentType` : string
             String containing electrochemical method of the experiment
 
         """
-        self._strElectrochemicalMethod = strExperimentType
+        self._electrochemical_method = experiment_type
 
-    def append_Data(self, listTemp: list) -> None:
+    def append_data(self, temp: list) -> None:
         """
         Descirption
         -----------
         Extend data in the data storage by appending a new list of arbitrary
         data.
-        
+
         Parameters
         ----------
         `listTemp` : list
             List with new data which should be appended to the existing data
-        
+
         """
-        self._listStoredData.append(listTemp)
+        self._stored_data.append(temp)
 
     # Setter methods
-    def set_StoredData(self, listStoredData : list) -> None:
+    def set_stored_data(self, stored_data: list) -> None:
         """
         Descirption
         -----------
@@ -106,10 +102,10 @@ class DataStorage:
             List which consists of experiment data entries
 
         """
-        self._listStoredData = listStoredData    
+        self._stored_data = stored_data
 
     # Getter methods
-    def get_StoredData(self) -> list:
+    def get_stored_data(self) -> list:
         """
         Descirption
         -----------
@@ -121,32 +117,32 @@ class DataStorage:
             Retrun list which consists of all data aquired during an experiment
 
         """
-        return self._listStoredData
+        return self._stored_data
 
-    def get_ExperimentParameters(self) -> list:
+    def get_experiment_parameters(self) -> list:
         """
         Descirption
         -----------
         Get stored experiment parameters.
-        
+
         Return
         ------
         `listExperimentParameters` : list
             Return list cotaining all experiment parameters
 
         """
-        return self._listExperimentParameters 
+        return self._experiment_parameters
 
-    def get_ExperimentType(self) -> str:
+    def get_experiment_type(self) -> str:
         """
         Descirption
         -----------
         Get stored experiment type.
-        
+
         Return
         ------
         `strElectrochemicalMethod` : string
             Return string containing experiment type
-            
+
         """
-        return self._strElectrochemicalMethod
+        return self._electrochemical_method
