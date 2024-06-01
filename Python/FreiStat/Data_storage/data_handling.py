@@ -71,10 +71,7 @@ import pickle
 import time
 from typing import List, Optional
 
-from .constants import SEQUENCE
-from .data_software_storage import DataSoftwareStorage
-from .data_storage import DataStorage
-from .dictionaries import (
+from .constants import (
     CA,
     CV,
     DPV,
@@ -95,9 +92,12 @@ from .dictionaries import (
     FREISTAT_SEQUENCE_POSITION,
     LSV,
     NPV,
+    SEQUENCE,
     SWV,
-    dic_configParameters,
 )
+from .data_software_storage import DataSoftwareStorage
+from .data_storage import DataStorage
+from .dictionaries import dic_configParameters
 
 
 class DataHandling:
