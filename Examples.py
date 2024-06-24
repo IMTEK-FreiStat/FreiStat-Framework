@@ -143,7 +143,7 @@ def ExampleImplementation():
                                        MainsFilter= False,
                                        Sinc2_Oversampling = 22,
                                        Sinc3_Oversampling = 2,
-                                       LowPerformanceMode= False,
+                                       LowPerformanceMode= True,
                                        EnableOptimizer= False,
                                        Progressive_Measurement = False)
     elif (iExperiment == 2):
