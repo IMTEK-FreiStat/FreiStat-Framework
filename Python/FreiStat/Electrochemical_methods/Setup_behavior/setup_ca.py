@@ -17,6 +17,9 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 # Import internal dependencies
 from ...Data_storage.constants import *
 from .setup_behavior import SetupBehavior
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SetupCA(SetupBehavior):
     """
@@ -109,6 +112,11 @@ class SetupCA(SetupBehavior):
         11207       :   Sinc3 oversampling rate out of bounds
         
         """
+        
+        #logging.basicConfig(filename= "setup_ca.log", encoding= "utf-8",
+        #                     level=logging.DEBUG, 
+        #                    format='%(asctime)s %(levelname)s %(message)s')
+        logger.info("SetupCA")
         # Initialize variables
         iErrorCode : int = EC_NO_ERROR
 
@@ -123,6 +131,7 @@ class SetupCA(SetupBehavior):
 
         # Search for the highest defined potential step
         listPotentialSteps : list = listExperimentParameters[0][1]
+        logger.info(listPotentialSteps)
 
         for iSteps in range(len(listPotentialSteps)):
             if (listPotentialSteps[iSteps] > fMaxPotential):
@@ -133,6 +142,8 @@ class SetupCA(SetupBehavior):
 
         # Calculate required voltage range
         fRange = fMaxPotential - fMinPotential
+        logger.info(listExperimentParameters)
+        logger.info(fMaxPotential, fMinPotential)
 
         # Check if voltage range is exeeds possible range
         if (fRange >= VOLTAGE_RANGE):
@@ -150,6 +161,8 @@ class SetupCA(SetupBehavior):
             len(listExperimentParameters[1][1])):
             iErrorCode = EC_SETUP + EC_SE_LIST_MISMATCH
             return iErrorCode
+        
+        
 
         # Initialize reference list
         listReferenceList = [
@@ -163,6 +176,8 @@ class SetupCA(SetupBehavior):
             [SINC3_OVERSAMPLING, ADCSINC3OSR_DISABLED, ADCSINC3OSR_2]
         ]
 
+        logger.info("Experiment liste: %s", listExperimentParameters)    
+        logger.info("Reference liste: %s",listReferenceList)
         # Check individual entries
         for iEntry in range (len(listExperimentParameters)):
             # Check if parameter is named correct and at the right position

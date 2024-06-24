@@ -23,6 +23,9 @@ from ..Data_storage.data_software_storage import DataSoftwareStorage
 from .Setup_behavior.setup_ca import SetupCA
 from .Execute_behavior.execute_ca import ExecuteCA
 
+from .Setup_behavior.setup_a import SetupA
+from .Execute_behavior.execute_a import ExecuteA
+
 from .Setup_behavior.setup_ocp import SetupOCP
 from .Execute_behavior.execute_ocp import ExecuteOCP
 
@@ -77,7 +80,12 @@ class ElectrochemicalMethod:
         # electrochemical methods
         if (ElectrochemicalMethod == SEQUENCE):
             self._setupBehavior = SetupSequence(self._dataSoftwareStorage)
-            self._executeBehavior = ExecuteSequence(self._dataSoftwareStorage)            
+            self._executeBehavior = ExecuteSequence(self._dataSoftwareStorage)
+
+        # Define setup and execute behavior for running chronoamperometry
+        if(ElectrochemicalMethod == A):
+            self._setupBehavior = SetupA(self._dataSoftwareStorage)
+            self._executeBehavior = ExecuteA(self._dataSoftwareStorage)            
 
         # Define setup and execute behavior for running chronoamperometry
         if(ElectrochemicalMethod == CA):

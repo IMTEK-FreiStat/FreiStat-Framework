@@ -23,6 +23,7 @@ import socket
 from ..Data_storage.constants import *
 from ..Data_storage.data_software_storage import DataSoftwareStorage
 
+
 class Communication:
     """
     Descirption
@@ -63,7 +64,6 @@ class Communication:
         """
         # Save variables
         self._logger = logger
-
         # Initialize class variables
         self._iOperationMode : int = iOperationMode
         self._iClientPort : int = wlanSetting[3]

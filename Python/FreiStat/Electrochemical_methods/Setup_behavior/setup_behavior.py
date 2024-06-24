@@ -62,7 +62,6 @@ class SetupBehavior():
             # Object is already created, get reference
             self._jsonTelegramGenerator = self._dataSoftwareStorage.\
                 getJSON_TelegramGenerator() 
-
         # Create an data object for this electrochemical method
         self._dataHandling.create_DataObject()
 

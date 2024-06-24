@@ -112,6 +112,7 @@ class Run_CA(Run_Electrochemical_Method):
 
         """
         # Intialize variables
+        print("start_CA")
         bSerialBuffer = b""
 
         iPosition : int = 0

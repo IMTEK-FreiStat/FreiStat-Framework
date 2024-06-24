@@ -64,6 +64,7 @@ UNDEFIEND               = "UDF"         # Undefiend ec-method
 SEQUENCE                = "SEQ"         # Sequence
 OCP                     = "OCP"         # Open circuit potential
 CA                      = "CA"          # Chronoamperometry
+A                      = "A"          # Amperometry
 LSV                     = "LSV"         # Linear sweap voltammetry
 CV                      = "CV"          # Cyclic voltammetry
 NPV                     = "NPV"         # Normal pulse voltammetry
@@ -77,6 +78,7 @@ EIS                     = "EIS"         # Electrochemical impedance spectroscopy
 |   Constant              Value                     Meaning
 -----------------------------------------------------------------------------"""
 CA_NUM_PARAMETER        = 8             # CA setup parameters
+A_NUM_PARAMETER         = 6             # A setup parameters
 OCP_NUM_PARAMETER       = 6             # OCP setup parameters
 LSV_NUM_PARAMETER       = 10            # LSV setup parameters
 CV_NUM_PARAMETER        = 11            # CV setup parameters
@@ -96,6 +98,7 @@ STOP_POTENTIAL          = "pSTP"        # Parameter stop potential
 LOWER_POTENTIAL         = "pLP"         # Parameter lower potential
 UPPER_POTENTIAL         = "pUP"         # Parameter upper potential
 POTENTIAL_STEPS         = "pPS"         # Parameter potential steps
+POTENTIAL_A   	        = "pP"         # Parameter potential
 PULSE_LENGTH            = "pPL"         # Parameter pulse length
 SAMPLING_RATE           = "pSAR"        # Parameter sampling rate
 SAMPLING_DURATION       = "pSAD"        # Parameter sampling duration
@@ -308,10 +311,15 @@ FREISTAT_CV_LABEL       = [DE_TAG_CYCLE, DE_TAG_DATAPOINT, DE_TAG_VOLTAGE,
                            DE_TAG_CURRENT, DE_TAG_TIME]
 FREISTAT_CA_LABEL       = [DE_TAG_CYCLE, DE_TAG_DATAPOINT, DE_TAG_VOLTAGE, 
                            DE_TAG_CURRENT, DE_TAG_TIME]
+FREISTAT_A_LABEL       = [DE_TAG_DATAPOINT, DE_TAG_VOLTAGE, 
+                           DE_TAG_CURRENT, DE_TAG_TIME]
 FREISTAT_CV_LABEL_SEQ   = [DE_TAG_SEQ_CYCLE, DE_TAG_CYCLE, DE_TAG_DATAPOINT, 
                            DE_TAG_VOLTAGE, DE_TAG_CURRENT, DE_TAG_CYCLE_TIME, 
                            DE_TAG_SEQ_TIME, DE_TAG_TOTAL_TIME]
 FREISTAT_CA_LABEL_SEQ   = [DE_TAG_SEQ_CYCLE, DE_TAG_CYCLE, DE_TAG_DATAPOINT, 
+                           DE_TAG_VOLTAGE, DE_TAG_CURRENT, DE_TAG_CYCLE_TIME, 
+                           DE_TAG_SEQ_TIME, DE_TAG_TOTAL_TIME]
+FREISTAT_A_LABEL_SEQ   = [ DE_TAG_CYCLE, DE_TAG_DATAPOINT, 
                            DE_TAG_VOLTAGE, DE_TAG_CURRENT, DE_TAG_CYCLE_TIME, 
                            DE_TAG_SEQ_TIME, DE_TAG_TOTAL_TIME]
 

@@ -20,6 +20,10 @@ from multiprocessing.queues import Queue
 from ...Data_storage.constants import *
 from .execute_behavior import ExecuteBehavior
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ExecuteCA(ExecuteBehavior):
     """
     Description
@@ -74,6 +78,10 @@ class ExecuteCA(ExecuteBehavior):
         12001       :   Mismatch between send command ID and received acknowledge ID
         
         """
+        logging.basicConfig(filename= "execute_a.log", encoding= "utf-8",
+                             level=logging.DEBUG, 
+                          format='%(asctime)s %(levelname)s %(message)s')
+        logger.info("execute_a")
         # Initialize class variables
         self._bPorgressiveMesurement : bool = bPorgressiveMesurement
 
@@ -151,6 +159,8 @@ class ExecuteCA(ExecuteBehavior):
             Data queue which is used as a pipe between processes
 
         """
+    
+
         # Initialize variables
         iDataPoint : int = 0
 

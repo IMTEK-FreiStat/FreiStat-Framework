@@ -23,6 +23,8 @@ dic_configParameters = {
                            "Starting potential in mV"],
     STOP_POTENTIAL      : ["Stop potential",
                            "Stop potential in mV"],
+    POTENTIAL_A         :  ["Potential",
+                            "Potential in mV"],
     LOWER_POTENTIAL     : ["Lower turning potential",
                            "Lower potential in mV"],
     UPPER_POTENTIAL     : ["Upper turning potential",
