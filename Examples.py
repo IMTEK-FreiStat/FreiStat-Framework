@@ -27,6 +27,7 @@ __email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 # Import internal dependencies
 from Python.FreiStat.Data_storage.constants import *
 from Python.FreiStat.Methods.run_chronoamperometry import Run_CA
+from Python.FreiStat.Methods.run_amperometry import Run_A
 from Python.FreiStat.Methods.run_open_circuit_potential import Run_OCP
 from Python.FreiStat.Methods.run_linear_sweep_voltammetry import Run_LSV
 from Python.FreiStat.Methods.run_cyclic_voltammetry import Run_CV
@@ -138,7 +139,7 @@ def ExampleImplementation():
         strExportpath = Run_CA().start(Potential_Steps= [0.5, -.5],
                                        Pulse_Lengths=[5, 5],
                                        Sampling_Rate= 0.01,
-                                       Cycle= 3,
+                                       Cycle= 1,
                                        CurrentRange= 45e-5, 
                                        MainsFilter= False,
                                        Sinc2_Oversampling = 22,
@@ -146,6 +147,9 @@ def ExampleImplementation():
                                        LowPerformanceMode= True,
                                        EnableOptimizer= False,
                                        Progressive_Measurement = False)
+        
+       
+        
     elif (iExperiment == 2):
         # Run chronoamperometry on FreiStat
         strExportpath = Run_OCP().start(Measurement_Length= 200.0,
@@ -234,6 +238,20 @@ def ExampleImplementation():
                                         Sinc2_Oversampling = 100,
                                         Sinc3_Oversampling = 4,
                                         LowPerformanceMode= False)
+
+    
+    elif (iExperiment == 8):
+         #Run amperometry
+        strExportpath = Run_A().start(Potential=0.5, 
+                                      Sampling_Rate= 0.01,
+                                      CurrentRange= 45e-5, 
+                                       MainsFilter= False,
+                                       Sinc2_Oversampling = 22,
+                                       Sinc3_Oversampling = 2,
+                                       LowPerformanceMode= True,
+                                       EnableOptimizer= False,
+                                       Progressive_Measurement = False)
+        
 
     # Show file-path of the collected data in the terminal
     print(strExportpath)
