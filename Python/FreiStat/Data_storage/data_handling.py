@@ -337,6 +337,11 @@ class DataHandling:
                         # Write header in csv file
                         writer.writerow(FREISTAT_A_LABEL_SEQ)  
 
+                    # Loop over every entry
+                    for iEntry in range(len(listStoredData)):
+                        # Write new row
+                        writer.writerow(listStoredData[iEntry])
+
                 else:
                     # Method not known
                     iErrorcode = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
