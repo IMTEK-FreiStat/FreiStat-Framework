@@ -327,6 +327,16 @@ class DataHandling:
                     for iEntry in range(len(listStoredData)):
                         # Write new row
                         writer.writerow(listStoredData[iEntry])
+                
+                elif (strExperimentType == A):
+                    # Check if sequence or single method should be exported
+                    if (len(self.get_StoredData()[0]) <= 5):
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_A_LABEL)
+                    else:
+                        # Write header in csv file
+                        writer.writerow(FREISTAT_A_LABEL_SEQ)  
+
                 else:
                     # Method not known
                     iErrorcode = EC_DATASTORAGE + EC_DS_METHOD_UNKOWN
