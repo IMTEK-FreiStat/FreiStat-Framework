@@ -3,8 +3,8 @@
  * defines the behavior of measuring the open circuit potential
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 

@@ -3,8 +3,8 @@
  * defines the behavior of setting up an chronoamperometry.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  *
  *****************************************************************************/
 
@@ -135,23 +135,14 @@ int C_Setup_CA::funInitCA(){
     AD5940_INTCClrFlag(AFEINTSRC_ALLINT);
 
     /*************************************************************************/
-    // Define operation range potentials of the working electrode
-    // Check if potential of the working electrode is fixed or not
-    if (c_DataStorageLocal_->get_FixedWEPotential() == true){
-        // Set potential of the working electrode to the middle of the static range
-        c_DataStorageLocal_->set_WePotentialHigh((AD5940_MAX_DAC_OUTPUT - 
-                                                AD5940_MIN_DAC_OUTPUT) / 2 + 
-                                                AD5940_MIN_DAC_OUTPUT);
-        c_DataStorageLocal_->set_WePotentialLow((AD5940_MAX_DAC_OUTPUT - 
-                                                AD5940_MIN_DAC_OUTPUT) / 2 + 
-                                                AD5940_MIN_DAC_OUTPUT);
-    }
-    else {
-        c_DataStorageLocal_->set_WePotentialHigh((AD5940_MAX_DAC_OUTPUT - 
-                                                AD5940_MIN_DAC_OUTPUT) / 2 + 
-                                                AD5940_MIN_DAC_OUTPUT);
-        c_DataStorageLocal_->set_WePotentialLow(AD5940_MIN_DAC_OUTPUT);
-    }
+    // Calculations
+    // Set potential of the working electrode to the middle of the static range
+    c_DataStorageLocal_->set_WePotentialHigh((AD5940_MAX_DAC_OUTPUT - 
+                                              AD5940_MIN_DAC_OUTPUT) / 2 + 
+                                              AD5940_MIN_DAC_OUTPUT);
+    c_DataStorageLocal_->set_WePotentialLow((AD5940_MAX_DAC_OUTPUT - 
+                                             AD5940_MIN_DAC_OUTPUT) / 2 + 
+                                             AD5940_MIN_DAC_OUTPUT);
 
     /*************************************************************************/
     // Generate CA sequences (Init, Execute)
@@ -583,9 +574,8 @@ int C_Setup_CA::funSequencerExecuteSequence(){
     AD5940_SEQGenCtrl(bTRUE);
 
     // Insert blank command
-    //AD5940_SEQGenInsert(SEQ_NOP());
-    AD5940_AFECtrlS(AFECTRL_ADCCNV, bFALSE);
-    
+    AD5940_SEQGenInsert(SEQ_NOP());
+
     // Create custom interrupt 1
     AD5940_SEQGenInsert(SEQ_INT1());
 
@@ -667,12 +657,8 @@ int C_Setup_CA::funSequencerExecuteSequence(){
 
     // Write command to SRAM
     AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
-    /*
-    // Set remaining pulse length
-    c_DataStorageLocal_->set_StepsRemaining(
-        c_DataStorageLocal_->get_StepsRemaining() - c_DataStorageLocal_->get_Scanrate());
-    */
+    
     return EC_NO_ERROR;
 }
 
-#endif /* setup_CV_CPP */
+#endif /* setup_CA_CPP */

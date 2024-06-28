@@ -3,8 +3,8 @@
  * parameters which are identical for all experiments are stored.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -21,8 +21,8 @@
  * not saved and directly send to the python program via serial port.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 class C_DataStorageGeneral{

@@ -3,8 +3,8 @@
  * the FreiStat and holds references to all other objects.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -15,6 +15,7 @@
 // Include dependencies
 #include "datatypes.cpp"
 #include "../ad5941_FreiStat/ad5941_FreiStat_setup.h"
+#include "logger.h"
 
 // Forward declaration
 class C_AD5940_Setup;
@@ -23,6 +24,7 @@ class C_DataStorageGeneral;
 class C_DataStorageLocal;
 class C_ElectrochemicalMethod;
 class C_JSONParser;
+class Logger;
 
 /******************************************************************************
  * @brief: Abstract class for data storage.
@@ -30,8 +32,8 @@ class C_JSONParser;
  * directly to measurement data.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 class C_DataSoftwareStorage{
@@ -52,6 +54,7 @@ class C_DataSoftwareStorage{
         C_DataStorageLocal * c_DataStorageLocal_;
         C_ElectrochemicalMethod * c_ElectrochemicalMethod_;
         C_JSONParser * c_JSONParser_;
+        Logger  * logger;
 
     public:
         // Constructor

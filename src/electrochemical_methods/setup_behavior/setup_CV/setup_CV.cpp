@@ -3,8 +3,8 @@
  * defines the behavior of setting up an cyclic voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -71,21 +71,10 @@ int C_Setup_CV::funInitCV(){
     // Define operation range potentials of the working electrode
     // Check if potential of the working electrode is fixed or not
     if (c_DataStorageLocal_->get_FixedWEPotential() == true){
-        float fWePotentialHigh = 0.0;
-
-        // Check if Upper voltage (first vertex) is higher than the lower
-        // voltage (second vertex)
-        if (c_DataStorageLocal_->get_UpperVoltage() > 
-            c_DataStorageLocal_->get_LowerVoltage()){
-            // Set WE potential close to the upper voltage, since the potential of 
-            // the cell is calculated as Vzero - Vbias (Vzero --> fWePotentialHigh)
-            fWePotentialHigh = c_DataStorageLocal_->get_UpperVoltage() + 
-                50.0 + AD5940_MIN_DAC_OUTPUT;
-        }
-        else {
-            fWePotentialHigh = c_DataStorageLocal_->get_LowerVoltage() + 
-                50.0 + AD5940_MIN_DAC_OUTPUT;
-        }
+        // Set WE potential close to the upper voltage, since the potential of 
+        // the cell is calculated as Vzero - Vbias (Vzero --> fWePotentialHigh)
+        float fWePotentialHigh = c_DataStorageLocal_->get_UpperVoltage() + 
+            50.0 + AD5940_MIN_DAC_OUTPUT;
 
         // Check if potential of the working electrode exceeds 2.4 V / 0.2 V
         if (fWePotentialHigh >= AD5940_MAX_DAC_OUTPUT){
@@ -104,18 +93,9 @@ int C_Setup_CV::funInitCV(){
         fRange /= 2;
     }
     else {
-        // Check if Upper voltage (first vertex) is higher than the lower
-        // voltage (second vertex)
-        if (c_DataStorageLocal_->get_UpperVoltage() > 
-            c_DataStorageLocal_->get_LowerVoltage()){
-            // Working potential can range from 0.4 V to 2.2 V
-            c_DataStorageLocal_->set_WePotentialHigh(c_DataStorageLocal_->
-                get_UpperVoltage() + 50.0 + AD5940_MIN_DAC_OUTPUT);
-        }
-        else {
-            c_DataStorageLocal_->set_WePotentialHigh(c_DataStorageLocal_->
-                get_LowerVoltage() + 50.0 + AD5940_MIN_DAC_OUTPUT);
-        }
+        // Working potential can range from 0.4 V to 2.2 V
+        c_DataStorageLocal_->set_WePotentialHigh(c_DataStorageLocal_->
+            get_UpperVoltage() + 50.0 + AD5940_MIN_DAC_OUTPUT);
         c_DataStorageLocal_->set_WePotentialLow(AD5940_MIN_DAC_OUTPUT);
     }
 
@@ -655,7 +635,9 @@ int C_Setup_CV::funSequencerDACControl(){
          AD5940_12BIT_DAC_1LSB))) * 2);
 
     // Determine if DAC must increment or decrement
-    if (c_DataStorageLocal_->get_LowerVoltage() < 
+    // Determine the amount of steps from the starting voltage to both
+    // peak voltages
+    if (c_DataStorageLocal_->get_StartVoltage() < 
             c_DataStorageLocal_->get_UpperVoltage()){
         c_DataStorageLocal_->set_DacIncrement(true);
     }

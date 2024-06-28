@@ -3,8 +3,8 @@
  * defines the behavior of executing an linear sweep voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.6.0
+ * @date: 14.09.2021
  * 
  *****************************************************************************/
 

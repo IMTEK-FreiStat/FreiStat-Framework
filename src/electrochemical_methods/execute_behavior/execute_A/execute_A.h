@@ -9,8 +9,8 @@
  *****************************************************************************/
 
 // Include guard
-#ifndef execute_CA_H
-#define execute_CA_H
+#ifndef execute_A_H
+#define execute_A_H
 
 // Include dependencies
 #include "../execute_behavior.h"
@@ -24,7 +24,7 @@
  * @date: 13.09.2021
  * 
  *****************************************************************************/
-class C_Execute_CA : public C_ExecuteBehavior{
+class C_Execute_A : public C_ExecuteBehavior{
     private:
         // Variables
         bool bEosInterruptOccured_;
@@ -42,7 +42,7 @@ class C_Execute_CA : public C_ExecuteBehavior{
 
     public:
         // Constructor
-        C_Execute_CA();
+        C_Execute_A();
 
         // Starting method
         void Begin(C_DataSoftwareStorage *);

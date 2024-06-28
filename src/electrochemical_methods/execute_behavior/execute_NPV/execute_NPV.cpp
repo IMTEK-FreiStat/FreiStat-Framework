@@ -3,8 +3,8 @@
  * defines the behavior of executing an normal pulse voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -403,32 +403,13 @@ int C_Execute_NPV::funUpdateSequence(){
                     iDacSeqBlock1Address : iDacSeqBlock0Address;
 
     if (iDacCurrentBlock == CURRENT_BLOCK_1){
-        // Check if cycle is done
-        if (c_DataStorageLocal_->get_StepsRemaining() <= 0 &&
-            c_DataStorageLocal_->get_StepNumber() < c_DataStorageLocal_->get_Cycle()){
-            // Calculate amount of steps in cycle and round up
-            int iStepsRemaining = (c_DataStorageLocal_->get_UpperVoltage() -
-                                c_DataStorageLocal_->get_StartVoltage()) / 
-                                c_DataStorageLocal_->get_PotentialSteps(0) + 0.5;
-            
-            // Save amount of steps
-            c_DataStorageLocal_->set_StepsRemaining(iStepsRemaining);
+        // Update remaining amount of steps
+        c_DataStorageLocal_->set_StepsRemaining(c_DataStorageLocal_->
+            get_StepsRemaining() - 1);
 
-            // Update step number
-            c_DataStorageLocal_->set_StepNumber(c_DataStorageLocal_->get_StepNumber() + 1);
-
-            // Update start voltage
-            c_DataStorageLocal_->set_LowerVoltage(c_DataStorageLocal_->get_StartVoltage());            
-        }
-        else {
-            // Update remaining amount of steps
-            c_DataStorageLocal_->set_StepsRemaining(c_DataStorageLocal_->
-                get_StepsRemaining() - 1);
-
-            // Save voltage of staircase
-            c_DataStorageLocal_->set_LowerVoltage(c_DataStorageLocal_->
-                get_LowerVoltage() + c_DataStorageLocal_->get_PotentialSteps(0));
-        }
+        // Save voltage of staircase
+        c_DataStorageLocal_->set_LowerVoltage(c_DataStorageLocal_->
+            get_LowerVoltage() + c_DataStorageLocal_->get_PotentialSteps(0));
     }
 
     // Calculate DAC code
@@ -470,7 +451,7 @@ int C_Execute_NPV::funUpdateSequence(){
         this->funGetDataPosition(c_DataStorageLocal_->get_CurrentStepNumber()));
 
     // Generate stop sequence if experiment is done
-    if (c_DataStorageLocal_->get_StepNumber() >= c_DataStorageLocal_->get_Cycle()){
+    if (c_DataStorageLocal_->get_StepsRemaining() < 0){
         // Read the current values of the AFE Control register
         uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
 

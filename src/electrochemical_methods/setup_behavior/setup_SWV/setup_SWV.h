@@ -3,8 +3,8 @@
  * defines the behavior of setting up an square wave voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -20,8 +20,8 @@
  * setup behavior
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 class C_Setup_SWV : public C_SetupBehavior{

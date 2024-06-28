@@ -3,8 +3,8 @@
  * defines the behavior of executing an differential pulse voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  *   
  *****************************************************************************/
 
@@ -20,8 +20,8 @@
  * execute behavior
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.4.0
+ * @date: 08.09.2021
  * 
  *****************************************************************************/
 class C_Execute_DPV : public C_ExecuteBehavior{

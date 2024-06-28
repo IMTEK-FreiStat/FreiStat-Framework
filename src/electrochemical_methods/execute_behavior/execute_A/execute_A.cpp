@@ -1,6 +1,6 @@
 /******************************************************************************
- * @brief: Source file containing the subclass (C_Execute) C_Execute_SWV which 
- * defines the behavior of executing an square wave voltammetry
+ * @brief: Source file containing the subclass (C_Execute) C_Execute_CA which 
+ * defines the behavior of executing an chronoamperometry
  * 
  * @author: Mark Jasper
  * @version: V 1.5.0
@@ -9,24 +9,24 @@
  *****************************************************************************/
 
 // Include guard
-#ifndef execute_SWV_CPP
-#define execute_SWV_CPP
+#ifndef execute_CA_CPP
+#define execute_CA_CPP
 
 // Include dependencies
-#include "execute_SWV.h"
+#include "execute_A.h"
 
 /******************************************************************************
- * @brief Constructor of the class C_Execute_SWV
+ * @brief Constructor of the class C_Execute_CA
  * 
  *****************************************************************************/ 
-C_Execute_SWV::C_Execute_SWV(){}
+C_Execute_A::C_Execute_A(){}
 
 /******************************************************************************
- * @brief Starting method for the class C_Execute_SWV
+ * @brief Starting method for the class C_Execute_CA
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Execute_SWV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+void C_Execute_A::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Initialize variables
     bEosInterruptOccured_ = false;
 
@@ -46,9 +46,6 @@ void C_Execute_SWV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Convert char array with experiment type to integer
     int iExperimentType = funGetExperimentTypeInt(chrExperimentType_);
 
-    // Preconfig AFE reference buffer
-    this->funConfigAfeReferenceBuffer();
-
     // Get reference to serial communication object
     C_Communication * c_Communication = c_DataSoftwareStorage_->
         get_Communication();
@@ -60,7 +57,10 @@ void C_Execute_SWV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataSoftwareStorage_->set_SystemStatus(FREISTAT_EXP_RUNNING);
 
     // Control the application
-    this->funControlApplication(FREISTAT_START_TIMER);      
+    this->funControlApplication(FREISTAT_START_TIMER);    
+
+    // Let system settle in 
+    delay(20);   
 
     // Loop while experiment is running
     while (c_DataSoftwareStorage_->get_SystemStatus() == FREISTAT_EXP_RUNNING){
@@ -72,29 +72,29 @@ void C_Execute_SWV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
             // Call interrupt service routine
             this->funInterruptServiceRoutine();
-            
-            // Get send data counter
-            int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
-
-            // If data needs to be send, write to serial port
-            if (iSendDataCounter + 1 < iStepCounter_){     
-                S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
-                get_ExperimentData(this->funGetDataPosition(iSendDataCounter));
-
-                // Write data to serial port       
-                c_Communication->funSendExperimentData(
-                    S_ExperimentData, iExperimentType);
-
-                // Increase send data counter
-                c_DataStorageGeneral_->set_SendDataCounter(iSendDataCounter + 1);
-            }
         }
+            
+        // Get send data counter
+        int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
+
+        // If data needs to be send, write to serial port
+        if (iSendDataCounter + 2 < iStepCounter_){     
+            S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
+            get_ExperimentData(this->funGetDataPosition(iSendDataCounter));
+
+            if (S_ExperimentData.iCycle <= c_DataStorageLocal_->get_Cycle()){
+                // Write data to serial port        
+                c_Communication->funSendExperimentData(
+                    S_ExperimentData, iExperimentType);  
+            }
+
+            // Increase send data counter
+            c_DataStorageGeneral_->set_SendDataCounter(iSendDataCounter + 1);
+        }
+        
         // Check if experiment is completed
         // Check if end of sequence interrupt occured
         if (bEosInterruptOccured_ == true){
-            // Get send data counter
-            int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
-
             // Check if step counter is equal to maximal amount of values and
             // send data counter is equal to step counter
             S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
@@ -131,7 +131,7 @@ void C_Execute_SWV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
  * 
  * @return: Returns error code                                        
  *****************************************************************************/
-int C_Execute_SWV::funInterruptServiceRoutine(){
+int C_Execute_A::funInterruptServiceRoutine(){
     // Initalizing variables
     int iErrorCode = 0;
 
@@ -171,20 +171,6 @@ int C_Execute_SWV::funInterruptServiceRoutine(){
 
             // Create next sequence
             this->funUpdateSequence();           
-            
-            // Turn off ADC reference voltage to ensure unified starting
-            // Conditions for every cycle 
-            // Disable high power 1.8 V reference buffer
-            S_AFEReferenceBufferConfig_.Hp1V8BuffEn = bFALSE;
-
-            // Configure AFE reference buffer
-            AD5940_REFCfgS(&S_AFEReferenceBufferConfig_);
-
-            // Turn on ADC referenec voltage
-            S_AFEReferenceBufferConfig_.Hp1V8BuffEn = bTRUE;
-
-            // Configure AFE reference buffer
-            AD5940_REFCfgS(&S_AFEReferenceBufferConfig_);
         }
 
         // FIFO threshold interrupt
@@ -201,6 +187,9 @@ int C_Execute_SWV::funInterruptServiceRoutine(){
             // Call the function to process data
             this->funProcessExperimentData(
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
+
+            // Create next sequence
+            this->funUpdateSequence();
         }
         // General purpose timer 1 interrupt
         if (uiInterruptFlag & AFEINTSRC_GPT1INT_TRYBRK){
@@ -244,8 +233,8 @@ int C_Execute_SWV::funInterruptServiceRoutine(){
  * 
  * @return: Returns error code
  *****************************************************************************/
-int C_Execute_SWV::funProcessExperimentData(uint32_t * pData, 
-                                            uint32_t uiCountData){
+int C_Execute_A::funProcessExperimentData(uint32_t * pData, 
+                                           uint32_t uiCountData){
     // Intialize variables
     float fVoltage = 0;
         
@@ -268,7 +257,7 @@ int C_Execute_SWV::funProcessExperimentData(uint32_t * pData,
 
     // Get experiment data at specific position
     S_ExperimentData = c_DataStorageGeneral_->get_ExperimentData(
-                        this->funGetDataPosition(iCurrentStep - 1));
+                            this->funGetDataPosition(iCurrentStep - 1));
 
     // Loop to postprocess transmitted data
     for (int iData = 0; iData < uiCountData; iData++){
@@ -287,13 +276,17 @@ int C_Execute_SWV::funProcessExperimentData(uint32_t * pData,
 
         S_DataContainer S_ExperimentData2 = 
             c_DataStorageGeneral_->get_ExperimentData(
-            this->funGetDataPosition(iStepCounter_ - 1));
+            this->funGetDataPosition(iStepCounter_ - 2));
 
         // Calculate current in uA
         S_ExperimentData2.fCurrent = 1000.0f * fVoltage / fRtiaMagnitude;
 
         c_DataStorageGeneral_->set_ExperimentData(S_ExperimentData2, 
-                                this->funGetDataPosition(iStepCounter_ - 1));        
+            this->funGetDataPosition(iStepCounter_ - 2));        
+
+        // Store voltage
+        S_ExperimentData.fVoltage = c_DataStorageLocal_->
+            get_PotentialSteps(iCurrentStep);
 
         // Store cycle number
         S_ExperimentData.iCycle = 1 + c_DataStorageLocal_->get_StepNumber();       
@@ -306,10 +299,14 @@ int C_Execute_SWV::funProcessExperimentData(uint32_t * pData,
 
         // Save data
         c_DataStorageGeneral_->set_ExperimentData(
-            S_ExperimentData, this->funGetDataPosition(iCurrentStep - 1)); 
+            S_ExperimentData, this->funGetDataPosition(iStepCounter_)); 
 
         // Increase step counter
         iStepCounter_++;
+
+        // Reset variables
+        iSumSamples = 0;
+        iCountSamples = 0;
     }
     return EC_NO_ERROR;
 }
@@ -323,7 +320,7 @@ int C_Execute_SWV::funProcessExperimentData(uint32_t * pData,
  * 
  * @return: Error code encoded as integer
  *****************************************************************************/
-int C_Execute_SWV::funControlApplication(uint32_t uiCommand){
+int C_Execute_A::funControlApplication(uint32_t uiCommand){
     // Initialize variables
     WUPTCfg_Type S_WakeUpTimer_Config;
 
@@ -332,8 +329,7 @@ int C_Execute_SWV::funControlApplication(uint32_t uiCommand){
         return EC_EXECUTE + EC_EX_WAKEUP_AFE_ERR;
 
     // Operate depending on the command
-    switch (uiCommand)
-    {
+    switch (uiCommand){
         case FREISTAT_START_TIMER:{
             // Enable wake-up timer
             S_WakeUpTimer_Config.WuptEn = bTRUE;
@@ -350,11 +346,11 @@ int C_Execute_SWV::funControlApplication(uint32_t uiCommand){
             S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1] = 1;
             S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1] = 
                     (uint32_t)(c_DataStorageGeneral_->get_LFOSCFrequency() * 
-                    (c_DataStorageLocal_->get_PulseDurations(0)) / 1000.0);
-            S_WakeUpTimer_Config.SeqxSleepTime[SEQID_2] = 1;
+                    c_DataStorageLocal_->get_Scanrate() / 1000.0);
+            S_WakeUpTimer_Config.SeqxSleepTime[SEQID_2] = 
+                    S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1];
             S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_2] = 
-                    (uint32_t)(c_DataStorageGeneral_->get_LFOSCFrequency() * 
-                    (c_DataStorageLocal_->get_PulseDurations(1)) / 1000.0);
+                    S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1];
 
             // Config wake-up timer
             AD5940_WUPTCfg(&S_WakeUpTimer_Config);        
@@ -376,7 +372,7 @@ int C_Execute_SWV::funControlApplication(uint32_t uiCommand){
  * 
  * @returns: Error code encoded as integer
  *****************************************************************************/
-int C_Execute_SWV::funUpdateSequence(){
+int C_Execute_A::funUpdateSequence(){
     // Initialize variables
     bool bSeqBlockUsed = c_DataStorageLocal_->get_SeqBlockUsed();
 
@@ -392,9 +388,7 @@ int C_Execute_SWV::funUpdateSequence(){
     uint32_t uiVzeroCode = 0;
     uint32_t uiSequenceLength = 0;
 
-    uint32_t iCommandBuffer[AD5940_BUFFER_DPV];
-
-    S_DataContainer S_ExperimentData; 
+    uint32_t iCommandBuffer[AD5940_BUFFER_CA];
 
     // Assign address of block 0 or block 1 to current block address
     uiCurrAddr = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 
@@ -404,30 +398,49 @@ int C_Execute_SWV::funUpdateSequence(){
     iSRAMAddress = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 
                     iDacSeqBlock1Address : iDacSeqBlock0Address;
 
-    if (iDacCurrentBlock == CURRENT_BLOCK_0){
-        // Update remaining amount of steps
-        c_DataStorageLocal_->set_StepsRemaining(c_DataStorageLocal_->
-            get_StepsRemaining() - 1);
 
-        // Save voltage of staircase
-        c_DataStorageLocal_->set_LowerVoltage(c_DataStorageLocal_->
-            get_LowerVoltage() + c_DataStorageLocal_->get_PotentialSteps(0));
+    // Calculate values for one sampling step of chronoamperometry
+    // Get current step number
+    int iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
+
+    // Check if current step has to be changed
+    if (c_DataStorageLocal_->get_StepsRemaining() <= 0){
+        // Check if new cycle begins
+        if (iCurrentStep + 1 >= c_DataStorageLocal_->get_BufferEntries()){
+            // Increment step number
+            c_DataStorageLocal_->set_StepNumber(
+                c_DataStorageLocal_->get_StepNumber() + 1);
+
+            // Update current step
+            c_DataStorageLocal_->set_CurrentStepNumber(0);
+
+            // Set remaining pulse length
+            c_DataStorageLocal_->set_StepsRemaining(
+                c_DataStorageLocal_->get_PulseDurations(0));                
+        }
+        else {
+            // Update current step
+            c_DataStorageLocal_->set_CurrentStepNumber(iCurrentStep + 1);
+
+            // Set remaining pulse length
+            c_DataStorageLocal_->set_StepsRemaining(
+                c_DataStorageLocal_->get_PulseDurations(iCurrentStep + 1));
+        }
+
+        // Get updated current step number
+        iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
+
     }
+
+    // Get sampling rate
+    float fSamplingRate = c_DataStorageLocal_->get_Scanrate();
 
     // Calculate DAC code
     uiVzeroCode = (c_DataStorageLocal_->get_WePotentialHigh() - 
-        AD5940_MIN_DAC_OUTPUT) / AD5940_6BIT_DAC_1LSB;
-
-    if (iDacCurrentBlock == CURRENT_BLOCK_1){
-        uiVbiasCode = (uiVzeroCode * 64 - ((c_DataStorageLocal_->
-            get_LowerVoltage() - c_DataStorageLocal_->get_PotentialSteps(1)) / 
-            AD5940_12BIT_DAC_1LSB));
-    }
-    else if (iDacCurrentBlock == CURRENT_BLOCK_0){
-        uiVbiasCode = (uiVzeroCode * 64 - ((c_DataStorageLocal_->
-            get_LowerVoltage() + c_DataStorageLocal_->get_PotentialSteps(1)) / 
-            AD5940_12BIT_DAC_1LSB));
-    }
+                   AD5940_MIN_DAC_OUTPUT) / AD5940_6BIT_DAC_1LSB;
+    uiVbiasCode = (uiVzeroCode * 64 - 
+                   (c_DataStorageLocal_->get_PotentialSteps(iCurrentStep) / 
+                   AD5940_12BIT_DAC_1LSB));
 
     // Ensure smooth transition when switching potential sign
     if (uiVbiasCode < (uiVzeroCode * 64)){
@@ -442,20 +455,12 @@ int C_Execute_SWV::funUpdateSequence(){
         uiVzeroCode = 64;
     }
 
-    // Store the voltage value 
-    S_ExperimentData.fVoltage = uiVzeroCode * AD5940_6BIT_DAC_1LSB - 
-                                uiVbiasCode * AD5940_12BIT_DAC_1LSB;
-
-    // Update current step
-    c_DataStorageLocal_->set_CurrentStepNumber(c_DataStorageLocal_->
-        get_CurrentStepNumber() + 1);
-
-    // Store experiment data at newest free position
-    c_DataStorageGeneral_->set_ExperimentData(S_ExperimentData, 
-        this->funGetDataPosition(c_DataStorageLocal_->get_CurrentStepNumber()));
+    // Update remaining pulse length
+    c_DataStorageLocal_->set_StepsRemaining(
+        c_DataStorageLocal_->get_StepsRemaining() - fSamplingRate);
 
     // Generate stop sequence if experiment is done
-    if (c_DataStorageLocal_->get_StepsRemaining() < 0){
+    if (c_DataStorageLocal_->get_StepNumber() > c_DataStorageLocal_->get_Cycle()){
         // Enable sequencer
         AD5940_SEQGenCtrl(bTRUE);
 
@@ -477,27 +482,24 @@ int C_Execute_SWV::funUpdateSequence(){
     else {
         // Read the current values of the AFE Control register
         uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
+        // Clear ADC conversion bit
+        AfeControlRegister &= ~AFECTRL_ADCCNV;
+        iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
+        iCommandBuffer[1] = SEQ_INT1();
 
         // Enbale ADC conversion bit
         AfeControlRegister |= AFECTRL_ADCCNV;
-        iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-        iCommandBuffer[1] = SEQ_WAIT(16 * 1000 * c_DataStorageLocal_->get_Scanrate());
-
-        // Clear ADC conversion bit
-        AfeControlRegister &= ~AFECTRL_ADCCNV;
         iCommandBuffer[2] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-        iCommandBuffer[3] = SEQ_INT1();
 
-        iCommandBuffer[4] = SEQ_WR(REG_AFE_LPDACDAT0, uiVzeroCode << 12 | 
-                            uiVbiasCode);
-        iCommandBuffer[5] = SEQ_WAIT(10);
-        iCommandBuffer[6] = SEQ_WR(bSeqBlockUsed ? REG_AFE_SEQ1INFO : 
-                            REG_AFE_SEQ2INFO, ( iSRAMAddress << 
-                            BITP_AFE_SEQ1INFO_ADDR) | (AD5940_BUFFER_DPV << 
+        iCommandBuffer[3] = SEQ_WR(REG_AFE_LPDACDAT0, uiVzeroCode << 12 | uiVbiasCode);
+        iCommandBuffer[4] = SEQ_WAIT(10);
+        iCommandBuffer[5] = SEQ_WR(bSeqBlockUsed ? REG_AFE_SEQ1INFO : 
+                            REG_AFE_SEQ2INFO, (iSRAMAddress << 
+                            BITP_AFE_SEQ1INFO_ADDR) | (AD5940_BUFFER_CA << 
                             BITP_AFE_SEQ1INFO_LEN));
 
         // Write command to SRAM
-        AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_DPV);
+        AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
     }
     
     // Switch between block 0 and block 1
@@ -513,44 +515,4 @@ int C_Execute_SWV::funUpdateSequence(){
     return EC_NO_ERROR;
 }
 
-/******************************************************************************
- * @brief Helper method for the configuration of the AFE reference buffer
- * 
- *****************************************************************************/
-int C_Execute_SWV::funConfigAfeReferenceBuffer(){
-    // Disable high power band-gap
-    S_AFEReferenceBufferConfig_.HpBandgapEn = bTRUE;
-
-    // Enable high power 1.1 V reference buffer
-    S_AFEReferenceBufferConfig_.Hp1V1BuffEn = bTRUE;
-
-    // Disable discharge of 1.1 V capacitor
-    S_AFEReferenceBufferConfig_.Disc1V1Cap = bFALSE;
-
-    // Disable discharge of 1.8 V cpacitor
-    S_AFEReferenceBufferConfig_.Disc1V8Cap = bFALSE;
-            
-    // Disable thermal buffer
-    S_AFEReferenceBufferConfig_.Hp1V8ThemBuff = bFALSE;
-
-    // Disable current limit for 1.8 V buffer
-    S_AFEReferenceBufferConfig_.Hp1V8Ilimit = bFALSE;
-
-    // Disable 1.1 V reference buffer
-    S_AFEReferenceBufferConfig_.Lp1V1BuffEn = bTRUE;
-
-    // Disable 1.8 V reference buffer
-    S_AFEReferenceBufferConfig_.Lp1V8BuffEn = bTRUE;
-            
-    // Enable low power band gap
-    S_AFEReferenceBufferConfig_.LpBandgapEn = bTRUE;
-
-    // Enable 2.5 V reference buffer
-    S_AFEReferenceBufferConfig_.LpRefBufEn = bTRUE;
-
-    // Disable boost buffer current
-    S_AFEReferenceBufferConfig_.LpRefBoostEn = bFALSE;
-
-    return EC_NO_ERROR;
-}
-#endif /* execute_SWV_CPP */
+#endif /* execute_A_CPP */

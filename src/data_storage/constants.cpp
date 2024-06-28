@@ -10,8 +10,8 @@
  * work.
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.7.3
+ * @date: 25.10.2021
  * 
  *****************************************************************************/
 
@@ -25,7 +25,8 @@
  *      Constant                Value                     Meaning
  *****************************************************************************/
 #define ENABLE_OCP              false       // flag indicating if method is enabled
-#define ENABLE_CA               true        
+#define ENABLE_CA               true    
+#define ENABLE_A                true      
 #define ENABLE_LSV              true
 #define ENABLE_CV               true
 #define ENABLE_NPV              true
@@ -37,7 +38,7 @@
  *
  *      Constant                Value                     Meaning
  *****************************************************************************/
-//#define FREISTAT_STANDALONE     true        // Flag indicating if the FreiStat is used in standalone mode
+//#define FREISTAT_STANDALONE     true        // Flag indicating if the FreiStat is used in standalone mode or not
 #define FREISTAT_STANDALONE     false
 //#define WiFiEnabled             true        // Flag indicating if WiFi communication is enabled
 #define WiFiEnabled             false
@@ -135,6 +136,7 @@
 #define SEQUENCE                "Seq"       // Sequence mode (required for transmitting related parameters)
 #define OCP                     "OCP"       // Open circuit potential
 #define CA                      "CA"        // Chronoamperometry
+#define A                       "A"        // Amperometry
 #define LSV                     "LSV"       // Linear sweap voltammetry
 #define CV                      "CV"        // Cyclic voltammetry
 #define NPV                     "NPV"       // Normal pulse voltammetry
@@ -157,6 +159,7 @@
 #define DPV_I                   7           // Differential pulse voltammetry
 #define SWV_I                   8           // Square wave voltammetry
 #define EIS_I                   9           // Electrochemical impedance spectroscopy
+#define A_I                    10           // Aperometry
 
 /******************************************************************************
  * Electrochemical parameters: Default values
@@ -176,12 +179,6 @@
 #define LPTIA_RTIA_SIZE_I           11      // Parameter low power TIA resistor size encoded as int
 #define FIXED_WE_POTENTIAL_B        1       // Parameter Fixed Working electrode Potential
 #define MAINS_FILTER_B              1       // Parameter mains filter
-
-#define BUFFER_ENTRIES              3       // Amount of entries in the following arrays
-// Parameter for CA Standalone potential steps
-const float POTENTIAL_STEPS_F[] =   {800.0, -400.0, -300.0}; 
-// Parameter for CA Standalone pulse lengths in ms
-const float PULSE_LENGTHS_F[] =     {4000, 3000, 3000};         
 
 /******************************************************************************
  * Electrochemical parameters: Abbreviations for telegram exchange

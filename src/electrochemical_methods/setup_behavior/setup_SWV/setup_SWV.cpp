@@ -3,8 +3,8 @@
  * defines the behavior of setting up an square wave voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  *
  *****************************************************************************/
 
@@ -509,7 +509,7 @@ int C_Setup_SWV::funSequencerExecuteSequence(){
     // Calculate total amount of steps and round up
     iStepsRemaining = (c_DataStorageLocal_->get_UpperVoltage() -
                        c_DataStorageLocal_->get_StartVoltage()) / 
-                       c_DataStorageLocal_->get_PotentialSteps(0) + 1.5;
+                       c_DataStorageLocal_->get_PotentialSteps(0) + 0.5;
 
     // Save amount of steps
     c_DataStorageLocal_->set_StepsRemaining(iStepsRemaining);

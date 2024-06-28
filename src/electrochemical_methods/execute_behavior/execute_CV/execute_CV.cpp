@@ -3,8 +3,8 @@
  * defines the behavior of executing an cyclic voltammetry
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.6.0
+ * @date: 14.09.2021
  * 
  *****************************************************************************/
 
@@ -112,8 +112,8 @@ void C_Execute_CV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
  *****************************************************************************/
 int C_Execute_CV::funInterruptServiceRoutine(){
     // Initalize variables
-    uint32_t uiInterruptFlag = 0;
-    uint32_t uiFiFoCount = 0;
+    uint32_t uiInterruptFlag;
+    uint32_t uiFiFoCount;
 
     // Read interrupt flag from interrupt controller 0
     uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
@@ -121,7 +121,8 @@ int C_Execute_CV::funInterruptServiceRoutine(){
     // Loop until no interrupts are there which need to be handled
     // Reason for looping is that interrupts could occure while an interrupt is
     // still handled
-    while (uiInterruptFlag != 0){
+    while (uiInterruptFlag != 0)
+    {
         // Custom interrupt 1 occured (New voltage step)
         if (uiInterruptFlag & AFEINTSRC_CUSTOMINT1){
             // Clear flag for custom interrupt 1
@@ -484,7 +485,7 @@ int C_Execute_CV::funUpdateDACRegister(uint32_t * ipDacData){
     switch (iExperimentState){
     // Initalize sweaping direction
     case EC_METHOD_STATE_0:
-        if (c_DataStorageLocal_->get_LowerVoltage() < 
+        if (c_DataStorageLocal_->get_StartVoltage() < 
             c_DataStorageLocal_->get_UpperVoltage()){
             // Set DAC to increment (ramp up)
             c_DataStorageLocal_->set_DacIncrement(true);
@@ -496,79 +497,62 @@ int C_Execute_CV::funUpdateDACRegister(uint32_t * ipDacData){
         // Update ramp state: State 0 -> 1
         c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_1);
         break;
-
-    // Sweaping from starting potential to first vertex
+    
+    // Sweaping from starting potential to upper turning potential
     case EC_METHOD_STATE_1:
-        // Check sweep direction
-        if (c_DataStorageLocal_->get_DacIncrement() == true){
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= iStepsToUpperVoltage_){
-                // Update ramp state: State 1 -> 2
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_2);
+        if (c_DataStorageLocal_->get_CurrentStepNumber() % 
+            c_DataStorageLocal_->get_StepNumber() >= iStepsToUpperVoltage_){
+            // Update ramp state: State 1 -> 2
+            c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_2);
 
-                // Change sweep direction
+            // Update increment/ decrement (Change sweaping direction)
+            if (c_DataStorageLocal_->get_DacIncrement() == true){
                 c_DataStorageLocal_->set_DacIncrement(false); 
             }
-        }
-        else {
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= iStepsToLowerVoltage_){
-                // Update ramp state: State 1 -> 2
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_2);
-
-                // Change sweep direction
-                c_DataStorageLocal_->set_DacIncrement(true); 
+            else {
+                c_DataStorageLocal_->set_DacIncrement(true);
             }
         }
         break;
 
-    // Sweaping from first vertex to starting potential
+    // Sweaping from upper potential to starting potential
     case EC_METHOD_STATE_2: 
-        // Check sweep direction
-        if (c_DataStorageLocal_->get_DacIncrement() == false){
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= iStepsToUpperVoltage_ * 2){
-                // Update ramp state: State 2 -> 3
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_3);
-            }
-        }
-        else {
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= iStepsToLowerVoltage_ * 2){
-                // Update ramp state: State 2 -> 3
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_3);
-            }
-        }
-        break;
+        if (c_DataStorageLocal_->get_CurrentStepNumber() % 
+            c_DataStorageLocal_->get_StepNumber() >= (iStepsToUpperVoltage_ * 2)){
+            // Update ramp state: State 2 -> 3
+            c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_3);
 
-    // Sweaping from starting potential to second vertex
-    case EC_METHOD_STATE_3:
-        // Check sweep direction
-        if (c_DataStorageLocal_->get_DacIncrement() == false){
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= 
-                (iStepsToUpperVoltage_ * 2 + iStepsToLowerVoltage_)){
-                // Update ramp state: State 3 -> 4
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_4);
-
-                // Change sweep direction
-                c_DataStorageLocal_->set_DacIncrement(true); 
+            if (c_DataStorageLocal_->get_StartVoltage() < 
+                c_DataStorageLocal_->get_LowerVoltage()){
+                // Set DAC to increment (ramp up)
+                c_DataStorageLocal_->set_DacIncrement(true);
             }
-        }
-        else {
-            if (c_DataStorageLocal_->get_CurrentStepNumber() % 
-                c_DataStorageLocal_->get_StepNumber() >= 
-                (iStepsToLowerVoltage_ * 2 + iStepsToUpperVoltage_)){
-                // Update ramp state: State 3 -> 4
-                c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_4);
-
-                // Change sweep direction
+            else {
+                // Set DAC to decrement (ramp down)
                 c_DataStorageLocal_->set_DacIncrement(false); 
             }
         }
         break;
 
-    // Sweaping from second vertex to starting potential
+    // Sweaping from starting potential to lower potential
+    case EC_METHOD_STATE_3:
+        if (c_DataStorageLocal_->get_CurrentStepNumber() % 
+            c_DataStorageLocal_->get_StepNumber() >= 
+            (iStepsToUpperVoltage_ * 2 + iStepsToLowerVoltage_)){
+            // Update ramp state: State 3 -> 4
+            c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_4);
+
+            // Update increment/ decrement (Change sweaping direction)
+            if (c_DataStorageLocal_->get_DacIncrement() == true){
+                c_DataStorageLocal_->set_DacIncrement(false); 
+            }
+            else {
+                c_DataStorageLocal_->set_DacIncrement(true);
+            }
+        }
+        break;
+
+    // Sweaping from lower turning potential to starting potential
     case EC_METHOD_STATE_4:
         if (c_DataStorageLocal_->get_CurrentStepNumber() % 
             c_DataStorageLocal_->get_StepNumber() == 
@@ -664,20 +648,10 @@ int C_Execute_CV::funPreCalulations(){
     iStepsPerBlock_ = c_DataStorageLocal_->get_StepsPerBlock();
 
     // Calculate steps from starting potential to upper turning potential
-    // Check sweeping direction
-    if (c_DataStorageLocal_->get_DacIncrement() == true){
-        iStepsToUpperVoltage_ = (c_DataStorageLocal_->get_UpperVoltage() - 
-                                c_DataStorageLocal_->get_StartVoltage()) / 
-                                (c_DataStorageLocal_->get_DacIncrementPerStep() *
-                                AD5940_12BIT_DAC_1LSB); 
-    }
-    else {
-        // Sweeping down first (upper and lower vertex switched)
-        iStepsToUpperVoltage_ = (c_DataStorageLocal_->get_LowerVoltage() - 
-                                c_DataStorageLocal_->get_StartVoltage()) / 
-                                (c_DataStorageLocal_->get_DacIncrementPerStep() *
-                                AD5940_12BIT_DAC_1LSB);         
-    }
+    iStepsToUpperVoltage_ = (c_DataStorageLocal_->get_UpperVoltage() - 
+                             c_DataStorageLocal_->get_StartVoltage()) / 
+                            (c_DataStorageLocal_->get_DacIncrementPerStep() *
+                             AD5940_12BIT_DAC_1LSB); 
 
     // Calculate steps from starting potential to lower turning potential
     iStepsToLowerVoltage_ = c_DataStorageLocal_->get_StepNumber() / 2 - 

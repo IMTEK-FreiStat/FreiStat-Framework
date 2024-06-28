@@ -3,8 +3,8 @@
  * objects required for the chosen electrochemical method dynamically
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -13,6 +13,11 @@
 #define electrochemical_method_H
 
 // Include dependencies
+
+
+// Amperometry
+#include "execute_behavior/execute_A/execute_A.h"
+#include "setup_behavior/setup_A/setup_A.h"
 
 // Chronoamperometry
 #include "execute_behavior/execute_CA/execute_CA.h"

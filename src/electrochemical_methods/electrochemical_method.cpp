@@ -3,8 +3,8 @@
  * objects required for the chosen electrochemical method dynamically
  * 
  * @author: Mark Jasper
- * @version: V 1.0.0
- * @date: 19.01.2022
+ * @version: V 1.5.0
+ * @date: 13.09.2021
  * 
  *****************************************************************************/
 
@@ -42,6 +42,12 @@ int C_ElectrochemicalMethod::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage
     if (strcmp(chrExperimentType_, UNDEFINED_EC_METHOD) == 0){
         // EC-Method unknown
         return EC_SETUP + EC_SE_EC_METHOD_UKNOWN;
+    }
+       // Amperometry
+    else if (strcmp(chrExperimentType_, A) == 0 && ENABLE_A){
+        // Create behavior objects, save references and execute starting method
+        c_SetupBehavior_ = new C_Setup_A();
+        c_ExecuteBehavior_ = new C_Execute_A();
     }
     // Chronoamperometry
     else if (strcmp(chrExperimentType_, CA) == 0 && ENABLE_CA){
