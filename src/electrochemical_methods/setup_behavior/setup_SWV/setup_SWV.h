@@ -36,7 +36,7 @@ class C_Setup_SWV : public C_SetupBehavior{
         C_Setup_SWV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* setup_SWV_H */

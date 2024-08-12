@@ -99,6 +99,7 @@ void loop(){
     // Loop forever
     while (true){
         // Intialize variables
+        int iErrorCode = 0;
         int iParseResult = 0;
         int iSequencePosition = 0;
         int iTrueSequenceLength = 0;
@@ -350,7 +351,7 @@ void loop(){
                     FREISTAT_EXP_STARTED){
                     // Send acknowledge telegram
                     c_Communication.funSendAcknowledgeTelegram();
-
+                    
                     if (WiFiEnabled || FREISTAT_STANDALONE){
                         if (WiFiEnabled){
                             // Disable WiFi communication
@@ -361,7 +362,10 @@ void loop(){
                     }
 
                     // Setup ec-method object according to the transmitted data
-                    c_ElectrochemicalMethod.Begin(&c_DataSoftwareStorage);
+                    iErrorCode = c_ElectrochemicalMethod.Begin(&c_DataSoftwareStorage);
+                    if (iErrorCode != 0){
+                        c_Communication.funSendErrorTelegram(iErrorCode);
+                    }
 
                     if (WiFiEnabled || FREISTAT_STANDALONE){
                         if (WiFiEnabled){

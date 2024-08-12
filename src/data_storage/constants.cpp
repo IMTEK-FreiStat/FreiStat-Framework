@@ -216,6 +216,7 @@ const float PULSE_LENGTHS_F[] =     {4000, 3000, 3000};
  *****************************************************************************/
 #define COMMAND_TELEGRAM        "C"         // Command telegram
 #define ACKNOWLEDGE_TELEGRAM    "A"         // Acknowledge telegram
+#define ERROR_TELEGRAM          "E"         // Error telegram
 
 #define SEQUENCE_ENABLE         "SE"        // Enable sequence
 #define SEQUENCE_DISABLE        "SD"        // Disable sequence

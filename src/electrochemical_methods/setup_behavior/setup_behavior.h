@@ -41,7 +41,7 @@ class C_SetupBehavior{
         C_SetupBehavior();
 
         // Starting method
-        virtual void Begin(C_DataSoftwareStorage *);
+        virtual int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* setup_behavior_H */

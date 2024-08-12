@@ -26,7 +26,7 @@ C_Execute_CA::C_Execute_CA(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+int C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Initialize variables
     bEosInterruptOccured_ = false;
 
@@ -120,6 +120,8 @@ void C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageGeneral_->set_SendDataCounter(0);
     c_DataStorageLocal_->set_CurrentStepNumber(0);
     c_DataStorageLocal_->set_StepNumber(0);
+
+    return 0;
 }
 
 /******************************************************************************

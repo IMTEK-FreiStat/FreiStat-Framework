@@ -26,7 +26,9 @@ C_SetupBehavior::C_SetupBehavior(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_SetupBehavior::Begin(C_DataSoftwareStorage *){}
+int C_SetupBehavior::Begin(C_DataSoftwareStorage *){
+    return EC_NO_ERROR;
+}
 
 /******************************************************************************
  * @brief Method for calibrating internal LPTIA resistor

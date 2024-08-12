@@ -45,7 +45,7 @@ class C_Execute_CA : public C_ExecuteBehavior{
         C_Execute_CA();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_CA_H */

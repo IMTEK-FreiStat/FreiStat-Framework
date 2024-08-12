@@ -26,7 +26,7 @@ C_Setup_OCP::C_Setup_OCP(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Setup_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+int C_Setup_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Save reference of data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
     
@@ -40,7 +40,7 @@ void C_Setup_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageGeneral_->set_LPTIALoadSize(LPTIARLOAD_3K6);
 
     // Check if experiment parameters are valid
-    this->funInitOCP();
+    return this->funInitOCP();
 }
 
 /******************************************************************************

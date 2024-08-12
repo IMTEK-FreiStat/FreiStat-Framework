@@ -45,7 +45,7 @@ class C_Execute_DPV : public C_ExecuteBehavior{
         C_Execute_DPV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_DPV_H */

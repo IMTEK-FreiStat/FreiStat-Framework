@@ -26,7 +26,9 @@ C_ExecuteBehavior::C_ExecuteBehavior(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_ExecuteBehavior::Begin(C_DataSoftwareStorage *){}
+int C_ExecuteBehavior::Begin(C_DataSoftwareStorage *){
+    return EC_NO_ERROR;
+}
 
 /******************************************************************************
  * @brief Helper method calculating the position of the data in the

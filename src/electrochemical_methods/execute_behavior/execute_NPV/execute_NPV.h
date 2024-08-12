@@ -45,7 +45,7 @@ class C_Execute_NPV : public C_ExecuteBehavior{
         C_Execute_NPV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_NPV_H */

@@ -77,6 +77,7 @@ class C_Communication{
         int funConstructPrefixes(char *); 
         int funEstablishCommunication();
         int funSendAcknowledgeTelegram();
+        int funSendErrorTelegram(int);
         int funSendCommandTelegram(char *);
         int funSendExperimentData(S_DataContainer, int);
         int funSetupSDcard();

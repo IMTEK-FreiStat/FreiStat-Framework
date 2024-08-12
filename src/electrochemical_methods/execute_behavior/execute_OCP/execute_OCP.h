@@ -43,7 +43,7 @@ class C_Execute_OCP : public C_ExecuteBehavior{
         C_Execute_OCP();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_OCP_H */

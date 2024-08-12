@@ -26,7 +26,7 @@ C_Setup_CA::C_Setup_CA(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Setup_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+int C_Setup_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Save reference of data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
 
@@ -35,7 +35,7 @@ void C_Setup_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageLocal_ = c_DataSoftwareStorage_->get_DataStorageLocal();
 
     // Initialize chronoamperometry
-    this->funInitCA();
+    return this->funInitCA();
 }
 
 /******************************************************************************
@@ -61,7 +61,7 @@ int C_Setup_CA::funInitCA(){
     if (AD5940_WakeUp(10) > 10){
         // Error wakeup failed
         return EC_SETUP + EC_SE_WAKEUP_AFE_ERR;        
-    }
+    }   
 
     // Initializing the sequencer
     // Disable -> not used

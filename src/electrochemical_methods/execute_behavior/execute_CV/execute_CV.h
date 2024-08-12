@@ -50,7 +50,7 @@ class C_Execute_CV : public C_ExecuteBehavior{
         C_Execute_CV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_CV_H */

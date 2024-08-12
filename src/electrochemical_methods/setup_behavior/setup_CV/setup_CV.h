@@ -38,7 +38,7 @@ class C_Setup_CV : public C_SetupBehavior{
         C_Setup_CV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* setup_CV_H */

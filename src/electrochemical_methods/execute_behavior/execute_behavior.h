@@ -43,7 +43,7 @@ class C_ExecuteBehavior{
         C_ExecuteBehavior();
 
         // Starting method
-        virtual void Begin(C_DataSoftwareStorage *);
+        virtual int Begin(C_DataSoftwareStorage *);
 
 };
 

@@ -425,6 +425,26 @@ int C_Communication::funSendAcknowledgeTelegram(){
 }
 
 /******************************************************************************
+ * @brief Function to send error telegram to the serial port
+ * @return Error code
+ *****************************************************************************/ 
+int C_Communication::funSendErrorTelegram(int iErrorCode){
+    // Intialize variables
+    char chrBuffer[128];
+    char chrStr[16];
+
+    // Write {"E": COMMAND_TELEGRAM_NUMBER
+    c_JSONParser_->funWrapObjectChar(chrBuffer, ERROR_TELEGRAM, true);
+
+    strcat(chrBuffer, itoa(iErrorCode, chrStr, 10));
+    strcat(chrBuffer, "}");
+
+    this->funWriteSerial(chrBuffer);
+
+    return EC_NO_ERROR;
+}
+
+/******************************************************************************
  * @brief Function to send command telegram to the serial port
  * @param chrCommandType: Command type which should be send 
  * @return Error code

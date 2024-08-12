@@ -27,6 +27,8 @@ C_ElectrochemicalMethod::C_ElectrochemicalMethod(){}
  * @return: return status of executing electrochemical method
  *****************************************************************************/
 int C_ElectrochemicalMethod::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+    int iErrorCode = 0;
+
     // Save reference to data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
 
@@ -89,8 +91,16 @@ int C_ElectrochemicalMethod::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage
     else {
         return EC_SETUP + EC_SE_METHOD_DISABLED;
     }
-    c_SetupBehavior_->Begin(c_DataSoftwareStorage_);
-    c_ExecuteBehavior_->Begin(c_DataSoftwareStorage_);
+
+    iErrorCode = c_SetupBehavior_->Begin(c_DataSoftwareStorage_);
+    if (iErrorCode != 0) {
+        return iErrorCode;
+    }
+    
+    iErrorCode = c_ExecuteBehavior_->Begin(c_DataSoftwareStorage_);
+    if (iErrorCode != 0) {
+        return iErrorCode;
+    }
 
     delete c_SetupBehavior_;
     delete c_ExecuteBehavior_;

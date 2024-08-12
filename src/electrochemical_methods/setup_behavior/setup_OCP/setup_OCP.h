@@ -38,7 +38,7 @@ class C_Setup_OCP : public C_SetupBehavior{
         C_Setup_OCP();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* setup_OCP_H */

@@ -49,7 +49,7 @@ class C_Execute_LSV : public C_ExecuteBehavior{
         C_Execute_LSV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* execute_LSV_H */

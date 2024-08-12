@@ -26,7 +26,7 @@ C_Execute_OCP::C_Execute_OCP(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Execute_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+int C_Execute_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Save reference of data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
     
@@ -107,6 +107,8 @@ void C_Execute_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageGeneral_->set_SendDataCounter(0);
     c_DataStorageLocal_->set_CurrentStepNumber(0);
     c_DataStorageLocal_->set_StepNumber(0);
+
+    return EC_NO_ERROR;
 }
 
 /******************************************************************************

@@ -26,7 +26,7 @@ C_Setup_LSV::C_Setup_LSV(){}
  * @param c_DataSoftwareStorage: Reference to data software storage object
  * 
  *****************************************************************************/
-void C_Setup_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
+int C_Setup_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Save reference of data software storage object
     c_DataSoftwareStorage_ = c_DataSoftwareStorage;
 
@@ -35,7 +35,7 @@ void C_Setup_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageLocal_ = c_DataSoftwareStorage_->get_DataStorageLocal();
 
     // Check if experiment parameters are valid
-    this->funInitLSV();
+    return this->funInitLSV();
 }
 
 /******************************************************************************

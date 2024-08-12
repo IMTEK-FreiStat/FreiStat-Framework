@@ -36,7 +36,7 @@ class C_Setup_NPV : public C_SetupBehavior{
         C_Setup_NPV();
 
         // Starting method
-        void Begin(C_DataSoftwareStorage *);
+        int Begin(C_DataSoftwareStorage *);
 };
 
 #endif /* setup_NPV_H */
