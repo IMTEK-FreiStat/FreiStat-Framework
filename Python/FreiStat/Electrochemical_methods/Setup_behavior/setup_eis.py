@@ -1,6 +1,6 @@
 """
-Module implementing the behavior of the setup function for running differential
-pulse voltammetery.
+Module implementing the behavior of the setup function for running
+electrochemical impedance spectroscopy.
 
 """
 
@@ -23,7 +23,7 @@ class SetupEIS(SetupBehavior):
     Description
     -----------
     Behavior class implementing the functionality of the setup function when
-    running differential pulse voltammetry.
+    running electrochemical impedance spectroscopy.
     
     """
 
@@ -31,7 +31,7 @@ class SetupEIS(SetupBehavior):
         """
         Description
         -----------
-        Setup method for differential pulse voltammetry
+        Setup method for electrochemical impedance spectroscopy
         
         List of required parameters
         ----------
@@ -42,18 +42,13 @@ class SetupEIS(SetupBehavior):
             Frequency at which FreiStat should stop in Hz.
 
         acAmplitude : float
-            Amplitude of the Sinussignal in mVp.
+            Amplitude of the sinussignal in Vp.
 
         dcOffset : float
-            Offset of the Sinussignal in mV.
+            Offset of the sinussignal in V.
 
         sweep_Typ : bool
             true for a logarithmic sweep and false for a linear sweep.
-
-
-        FixedWEPotential : int
-            Defines if the we electrode potential should be fixed to the middle
-            of the dynamic range (1.3 V) or not.
 
         LPTIA_Resistor : int
             Size of the low power transimpendance amplifier resistor which is
@@ -108,11 +103,11 @@ class SetupEIS(SetupBehavior):
         11109       :   Mains filter named wrong or not found as 10 entry   
         11110       :   Sinc2 oversampling rate named wrong or not found as 11 entry
         11111       :   Sinc3 oversampling rate named wrong or not found as 12 entry
-        11200       :   StartVoltage out of bounds
-        11201       :   StopVoltage out of bounds    
+        11200       :   start_frequemcy out of bounds
+        11201       :   stop_frequemcy out of bounds    
         11202       :   DeltaV_Staircase out of bounds     
         11203       :   DeltaV_Peak out of bounds     
-        11204       :   PulseLength out of bounds
+        11204       :   Number of sample points out of bounds
         11205       :   Sampling_Duration out of bounds
         11206       :   Cycle out of bounds
         11207       :   LPTIA Rtia size out of bounds
@@ -125,46 +120,38 @@ class SetupEIS(SetupBehavior):
         # Initialize variables
         iErrorCode : int = EC_NO_ERROR
 
-        startFrequency : float = 0
-        stopFrequency : float = 0
+        #start_frequency : float = 0
+        #stop_frequency : float = 0
 
-        maxFrequency = 250e3
-        minFrequncy = 0.0149
+        max_frequency = 250e3
+        min_frequncy = 0.0149
         
-        acAmplitude : float = 0
+        #ac_amplitude : float = 0
 
-        minAcAmplitude = 0
-        maxAcAmplitude = 800
+        min_ac_amplitude = 0
+        max_ac_amplitude = 800
 
-        dcOffset : float = 0
+        #dc_offset : float = 0
 
-        minDcOffset = -2700
-        maxDcOffset = 2700
+        min_dc_offset = -2700
+        max_dc_offset = 2700
         
-        # Check if potential of the working electrode is fixed or not
-        if (FIXED_WE_POTENTIAL == 1):
-            fVoltageRange = VOLTAGE_RANGE_FWP
-        else:
-            fVoltageRange = VOLTAGE_RANGE * 2
-
-       
 
         # Initialize reference list
         listReferenceList = [
-            [START_FREQUENCY, minFrequncy, maxFrequency],
-            [STOP_FREQUENCY, minFrequncy, maxFrequency],
-            [AC_AMPLITUDE, minAcAmplitude, maxAcAmplitude],
-            [DC_OFFSET, minDcOffset, maxDcOffset],
+            [START_FREQUENCY, min_frequncy, max_frequency],
+            [STOP_FREQUENCY, min_frequncy, max_frequency],
+            [AC_AMPLITUDE, min_ac_amplitude, max_ac_amplitude],
+            [DC_OFFSET, min_dc_offset, max_dc_offset],
+            [NUM_POINTS,1],
             [SWEEP_TYPE, 0, 1 ],
-            [LPTIA_RTIA_SIZE, LPTIARTIA_OPEN, LPTIARTIA_512K],
-            [FIXED_WE_POTENTIAL, 0, 1],
             [MAINS_FILTER, 0, 1],
             [SINC2_OVERSAMPLING, ADCSINC2OSR_DISABLED, ADCSINC2OSR_1333],
             [SINC3_OVERSAMPLING, ADCSINC3OSR_DISABLED, ADCSINC3OSR_2]
         ]
-
+    
         # Check if list of Parameters is in correct format
-        if (len(listExperimentParameters) != DPV_NUM_PARAMETER):
+        if (len(listExperimentParameters) != EIS_NUM_PARAMETER):
             # Not enough Parameters
             iErrorCode = EC_SETUP + EC_SE_AMOUNT_PARAMETER
             return iErrorCode
@@ -178,15 +165,10 @@ class SetupEIS(SetupBehavior):
                 return iErrorCode
 
             if (iEntry == 4):
-                # Check if the parameters in the lists are in the boundaries
-                for iStep in range(len(listExperimentParameters[iEntry][1])):
-                    if (listExperimentParameters[iEntry][1][iStep] < 
-                        listReferenceList[iEntry][1] or 
-                        listExperimentParameters[iEntry][1][iStep] > 
-                        listReferenceList[iEntry][2]):
-                        iErrorCode = EC_SETUP + EC_SE_PARAM_OUT_OF_BOUND + iEntry
-                        return iErrorCode
-            else: 
+                if (listExperimentParameters[iEntry][1]< listReferenceList[iEntry][1]):
+                    iErrorCode = EC_SETUP + EC_SE_PARAM_OUT_OF_BOUND + iEntry
+                    return iErrorCode
+            else:
                 # Check if the parameters are in the boundaries
                 if (listExperimentParameters[iEntry][1] < 
                     listReferenceList[iEntry][1] or 
@@ -195,13 +177,9 @@ class SetupEIS(SetupBehavior):
                     iErrorCode = EC_SETUP + EC_SE_PARAM_OUT_OF_BOUND + iEntry
                     return iErrorCode
 
-        # Check if scan range is not exceeded
-        if (fRange >= fVoltageRange):
-            iErrorCode = EC_SETUP + EC_SE_SCAN_RANGE_ERROR
-            return iErrorCode
 
         # Safe experiment parameters
-        self._dataHandling.save_ExperimentType(DPV)
+        self._dataHandling.save_ExperimentType(EIS)
         self._dataHandling.save_ExperimentParmeters(listExperimentParameters)
 
         # Setup CSV export for the chosen experiment

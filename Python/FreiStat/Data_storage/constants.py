@@ -83,6 +83,7 @@ CV_NUM_PARAMETER        = 11            # CV setup parameters
 NPV_NUM_PARAMETER       = 12            # NPV setup parameters
 DPV_NUM_PARAMETER       = 12            # DPV setup parameters
 SWV_NUM_PARAMETER       = 12            # SWV setup parameters
+EIS_NUM_PARAMETER       = 9            # EIS setup parameters
 
 """-----------------------------------------------------------------------------
 | Configuration parameters: Abbreviations
@@ -95,8 +96,9 @@ START_POTENTIAL         = "pSP"         # Parameter start potential
 STOP_POTENTIAL          = "pSTP"        # Parameter stop potential
 START_FREQUENCY         = "pSF"         # Parameter start potential
 STOP_FREQUENCY          = "pSTF"        # Parameter stop potential
-AC_AMPLITUDE            = "pAC"         # Parameter Amplitude 
+AC_AMPLITUDE            = "pAC"         # Parameter Amplitude
 DC_OFFSET               = "pDC"         # Parameter Dc Offset
+NUM_POINTS              = "pNum"        # Parameter number of sample points
 SWEEP_TYPE              = "pSW"         # Parameter Sweep Type log or linear
 LOWER_POTENTIAL         = "pLP"         # Parameter lower potential
 UPPER_POTENTIAL         = "pUP"         # Parameter upper potential
@@ -123,6 +125,11 @@ SINC3_OVERSAMPLING      = "pOS3"        # Parameter oversampling rate sinc3 filt
 BASE_POTENTIAL_F        = 0.0       # Default value for base potential in V
 START_POTENTIAL_F       = 0.5       # Default value for start potential in V
 STOP_POTENTIAL_F        = 0.9       # Default value for stop potential in V
+START_FREQUENCY_F       = 1         # Default value for start frequnecy in Hz
+STOP_FREQUENCY_F        = 100       # Default value for stop frequnecy in Hz
+AC_AMPLITUDE_F          = 10        # Default value for ac amplitude in mV
+DC_OFFSET_F             = 0         # Default value for dc offset in mV
+NUM_POINTS_I            = 101       # Default value for sample points
 LOWER_POTENTIAL_F       = -0.62     # Default value for lower turning potential in V
 UPPER_POTENTIAL_F       = 1.05      # Default value for upper turning potential in V
 STEP_SIZE_F             = 0.002     # Default value for step size in V

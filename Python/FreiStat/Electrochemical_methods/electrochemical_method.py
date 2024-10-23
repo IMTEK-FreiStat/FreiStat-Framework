@@ -43,6 +43,9 @@ from .Setup_behavior.setup_swv import SetupSWV
 from .Setup_behavior.setup_sequence import SetupSequence
 from .Execute_behavior.execute_sequence import ExecuteSequence
 
+from .Setup_behavior.setup_eis import SetupEIS
+from .Execute_behavior.execute_eis import ExecuteEIS
+
 class ElectrochemicalMethod:
     """
     Description
@@ -114,6 +117,12 @@ class ElectrochemicalMethod:
         if(ElectrochemicalMethod == SWV):
             self._setupBehavior = SetupSWV(self._dataSoftwareStorage)
             self._executeBehavior = ExecuteDPV(self._dataSoftwareStorage)
+
+        # Define setup and execute behavior for running electrochemical
+        # impedance spectroscopy
+        if(ElectrochemicalMethod == EIS):
+            self._setupBehavior = SetupEIS(self._dataSoftwareStorage)
+            self._executeBehavior = ExecuteEIS(self._dataSoftwareStorage)
 
     def setup(self, ExperimentParamters: list) -> int:
         """

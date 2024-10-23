@@ -33,6 +33,7 @@ from Python.FreiStat.Methods.run_cyclic_voltammetry import Run_CV
 from Python.FreiStat.Methods.run_normal_pulse_voltammetry import Run_NPV
 from Python.FreiStat.Methods.run_differential_pulse_voltammetry import Run_DPV
 from Python.FreiStat.Methods.run_square_wave_voltammetry import Run_SWV
+from Python.FreiStat.Methods.run_electrochemical_impedance_spectroscopy import Run_EIS
 
 from Python.FreiStat.Methods.run_sequence import Run_Sequence
 
@@ -46,7 +47,7 @@ def ExampleImplementation():
     """
     # Change this parameter to switch between the different electrochemical
     # methods (see top for more information)
-    iExperiment : int = 1
+    iExperiment : int = 8
 
     if (iExperiment == 0):
         # Run sequence on FreiStat
@@ -234,6 +235,22 @@ def ExampleImplementation():
                                         Sinc2_Oversampling = 100,
                                         Sinc3_Oversampling = 4,
                                         LowPerformanceMode= False)
+
+    elif (iExperiment == 8):
+        # Run electrochemical impedance spectroscopy
+
+        strExportpath = Run_EIS().start(start_frequency= 1,
+                                        stop_frequency= 100,
+                                        ac_amplitude= 0.4,
+                                        dc_offset = 0.0,
+                                        num_points= 100,
+                                        sweep_typ= True,
+                                        MainsFilter = False,
+                                        Sinc2_Oversampling = 22,
+                                        Sinc3_Oversampling = 4,
+                                        EnableOptimizer= False,
+                                        LowPerformanceMode= False
+                                        )
 
     # Show file-path of the collected data in the terminal
     print(strExportpath)
