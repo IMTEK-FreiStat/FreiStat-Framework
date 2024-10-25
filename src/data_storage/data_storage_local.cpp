@@ -313,6 +313,64 @@ void C_DataStorageLocal::set_BufferEntries(int iBufferEntries){
 }
 
 /******************************************************************************
+ * @brief Setter method for saving start frqeuency
+ * @param fStartFrequncy: Starting frequency
+ *****************************************************************************/
+void C_DataStorageLocal::set_StartFrequency(float fStartFrequency){
+    fStartFrequency_ = fStartFrequency;
+}
+
+/******************************************************************************
+ * @brief Setter method for saving stop frqeuency
+ * @param fStopFrequncy: Stop frequency
+ *****************************************************************************/
+void C_DataStorageLocal::set_CurrentFrequency(float fCurrentFrequency){
+    fCurrentFrequency_ = fCurrentFrequency;
+}
+
+
+/******************************************************************************
+ * @brief Setter method for saving stop frqeuency
+ * @param fStopFrequncy: Stop frequency
+ *****************************************************************************/
+void C_DataStorageLocal::set_StopFrequency(float fStopFrequncy){
+    fStopFrequency_ = fStopFrequncy;
+}
+
+/******************************************************************************
+ * @brief Setter method for saving amplitude of the sinussignal
+ * @param fAcAmplitude: Amplitude of the sinussignal
+ *****************************************************************************/
+void C_DataStorageLocal::set_AcAmplitude(float fAcAmplitude){
+    fAcAmplitude_ = fAcAmplitude;
+}
+
+/******************************************************************************
+ * @brief Setter method for saving the dc offset of the sinunssignal
+ * @param fDcOffset: Dc offset of the sinussignal
+ *****************************************************************************/
+void C_DataStorageLocal::set_DcOffset(float fDcOffset){
+    fDcOffset_ = fDcOffset;
+}
+
+/******************************************************************************
+ * @brief Setter method for saving amount of points sampled in the frequnecysweep
+ * @param iNumPoints: Amount of points taken in the frequencysweep
+ *****************************************************************************/
+void C_DataStorageLocal::set_NumberPoints(int iNumPoints){
+    iNumPoints_ = iNumPoints;
+}
+
+/******************************************************************************
+ * @brief Setter method for saving thr type of frequencysweep true fpr log 
+ * false for linear
+ * @param bSweepTyp: Type of frequencysweep
+ *****************************************************************************/
+void C_DataStorageLocal::set_SweepTyp(BoolFlag bSweepTyp){
+    bSweepType_ = bSweepTyp;
+}
+
+/******************************************************************************
  * Getter methods
  *****************************************************************************/
 /******************************************************************************
@@ -743,6 +801,63 @@ bool C_DataStorageLocal::get_FixedWEPotential(){
  *****************************************************************************/
 int C_DataStorageLocal::get_BufferEntries(){
     return iBufferEntries_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving start frqeuency
+ * @param fStartFrequncy: Starting frequency
+ *****************************************************************************/
+float C_DataStorageLocal::get_StartFrequency(){
+    return fStartFrequency_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving stop frqeuency
+ * @param fStopFrequncy: Stop frequency
+ *****************************************************************************/
+float C_DataStorageLocal::get_CurrentFrequency(){
+    return fCurrentFrequency_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving stop frqeuency
+ * @param fStopFrequncy: Stop frequency
+ *****************************************************************************/
+float C_DataStorageLocal::get_StopFrequency(){
+    return fStopFrequency_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving amplitude of the sinussignal
+ * @param fAcAmplitude: Amplitude of the sinussignal
+ *****************************************************************************/
+float C_DataStorageLocal::get_AcAmplitude(){
+    return fAcAmplitude_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving the dc offset of the sinunssignal
+ * @param fDcOffset: Dc offset of the sinussignal
+ *****************************************************************************/
+float C_DataStorageLocal::get_DcOffset(){
+    return fDcOffset_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving amount of points sampled in the frequnecysweep
+ * @param iNumPoints: Amount of points taken in the frequencysweep
+ *****************************************************************************/
+int C_DataStorageLocal::get_NumberPoints(){
+    return iNumPoints_;
+}
+
+/******************************************************************************
+ * @brief Getter method for saving thr type of frequencysweep true fpr log 
+ * false for linear
+ * @param bSweepTyp: Type of frequencysweep
+ *****************************************************************************/
+BoolFlag C_DataStorageLocal::get_SweepTyp(){
+    return bSweepType_;
 }
 
 #endif /* data_storage_local_CPP */

@@ -83,7 +83,7 @@ CV_NUM_PARAMETER        = 11            # CV setup parameters
 NPV_NUM_PARAMETER       = 12            # NPV setup parameters
 DPV_NUM_PARAMETER       = 12            # DPV setup parameters
 SWV_NUM_PARAMETER       = 12            # SWV setup parameters
-EIS_NUM_PARAMETER       = 9            # EIS setup parameters
+EIS_NUM_PARAMETER       = 9             # EIS setup parameters
 
 """-----------------------------------------------------------------------------
 | Configuration parameters: Abbreviations
@@ -96,10 +96,10 @@ START_POTENTIAL         = "pSP"         # Parameter start potential
 STOP_POTENTIAL          = "pSTP"        # Parameter stop potential
 START_FREQUENCY         = "pSF"         # Parameter start potential
 STOP_FREQUENCY          = "pSTF"        # Parameter stop potential
-AC_AMPLITUDE            = "pAC"         # Parameter Amplitude
-DC_OFFSET               = "pDC"         # Parameter Dc Offset
+AC_AMPLITUDE            = "pAC"         # Parameter amplitude
+DC_OFFSET               = "pDC"         # Parameter dc offset
 NUM_POINTS              = "pNum"        # Parameter number of sample points
-SWEEP_TYPE              = "pSW"         # Parameter Sweep Type log or linear
+SWEEP_TYPE              = "pSW"         # Parameter sweep type log or linear
 LOWER_POTENTIAL         = "pLP"         # Parameter lower potential
 UPPER_POTENTIAL         = "pUP"         # Parameter upper potential
 POTENTIAL_STEPS         = "pPS"         # Parameter potential steps

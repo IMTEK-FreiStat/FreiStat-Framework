@@ -46,8 +46,9 @@ class C_DataStorageLocal{
          * 
          * Type |       Parametername           |       Electrochemical method
          **********************************************************************/
-        bool    bFixedWEPotential_;                     // LSV | CV |    | DPV | NPV | SWV
-        bool    bSeqBlockUsed_;                         // LSV | CV |    | DPV | NPV | SWV
+        bool    bFixedWEPotential_;                     // LSV | CV |    | DPV | NPV | SWV |
+        bool    bSeqBlockUsed_;                         // LSV | CV |    | DPV | NPV | SWV |
+        BoolFlag    bSweepType_;                        //     |    |    |     |     |     | EIS
 
         int     iBufferEntries_;                        //     |    | CA |     |     |
         int     iCurrentStepNumber_;                    // LSV | CV | CA | DPV | NPV | SWV
@@ -57,6 +58,7 @@ class C_DataStorageLocal{
         int     iDacSeqBlock1Address_;                  // LSV | CV |    | DPV | NPV | SWV
         int     iStepNumber_;                           // LSV | CV | CA |     |     |
         int     iStepsPerBlock_;                        //     | CV |    |     |     |
+        int     iNumPoints_;                            //     |    |    |     |     |     | EIS
 
         float   fLowerVoltage_;                         // LSV | CV |    | DPV | NPV | SWV
         float   fScanrate_;                             // LSV | CV | CA | DPV | NPV | SWV
@@ -66,6 +68,11 @@ class C_DataStorageLocal{
         float   fUpperVoltage_;                         // LSV | CV |    | DPV | NPV | SWV
         float   fWePotentialHigh_;                      // LSV | CV | CA | DPV | NPV | SWV
         float   fWePotentialLow_;                       // LSV | CV | CA | DPV | NPV | SWV
+        float   fStartFrequency_;                       //     |    |    |     |     |     | EIS
+        float   fCurrentFrequency_;                     //     |    |    |     |     |     | EIS
+        float   fStopFrequency_;                        //     |    |    |     |     |     | EIS
+        float   fAcAmplitude_;                          //     |    |    |     |     |     | EIS
+        float   fDcOffset_;                             //     |    |    |     |     |     | EIS
 
         float   arrfPotentialSteps_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
         float   arrfPulseDurations_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
@@ -142,7 +149,15 @@ class C_DataStorageLocal{
         void set_WePotentialLow(float);
 
         void set_PotentialSteps(float, int);
-        void set_PulseDurations(float, int);  
+        void set_PulseDurations(float, int); 
+
+        void set_StartFrequency(float);
+        void set_CurrentFrequency(float);
+        void set_StopFrequency(float);
+        void set_AcAmplitude(float);
+        void set_DcOffset(float);
+        void set_NumberPoints(int);
+        void set_SweepTyp(BoolFlag);
 
         /**********************************************************************
          * ADC - Analog digital converter
@@ -207,6 +222,15 @@ class C_DataStorageLocal{
         float get_UpperVoltage();
         float get_WePotentialHigh();
         float get_WePotentialLow();
+
+
+        float get_StartFrequency();
+        float get_CurrentFrequency();
+        float get_StopFrequency();
+        float get_AcAmplitude();
+        float get_DcOffset();
+        int get_NumberPoints();
+        BoolFlag get_SweepTyp();
 
         /**********************************************************************
          * ADC - Analog digital converter

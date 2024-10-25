@@ -60,7 +60,9 @@ class C_JSONParser{
         int funHandleDPVParameter(String, String);
         int funHandleLSVParameter(String, String);
         int funHandleOCPParameter(String, String);
+        int funHandleEISParameter(String, String);
         int funHandleSequenceParameter (String, String);
+        
 
     public:
         // Constructor

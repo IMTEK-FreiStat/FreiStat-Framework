@@ -42,6 +42,10 @@
 #include "execute_behavior/execute_SWV/execute_SWV.h"
 #include "setup_behavior/setup_SWV/setup_SWV.h"
 
+// Square wave voltammetry
+#include "execute_behavior/execute_EIS/execute_EIS.h"
+#include "setup_behavior/setup_EIS/setup_EIS.h"
+
 /******************************************************************************
  * @brief: Abstract class for electrochemical method class
  * 

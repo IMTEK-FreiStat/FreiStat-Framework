@@ -31,6 +31,7 @@
 #define ENABLE_NPV              true
 #define ENABLE_DPV              true
 #define ENABLE_SWV              true
+#define ENABLE_EIS              true
 
 /******************************************************************************
  * General definitions : Modes of operation
@@ -203,6 +204,12 @@ const float PULSE_LENGTHS_F[] =     {4000, 3000, 3000};
 #define DELTA_V_STAIRCASE       "pDVS"      // Parameter delta V staircase
 #define DELTA_V_PEAK            "pDVP"      // Parameter delta V peak
 #define CYCLE                   "pC"        // Parameter Cycle
+#define START_FREQUENCY         "pSF"       // Parameter start frequency
+#define STOP_FREQUENCY          "pSTF"      // Parameter stop frequency
+#define AC_Amplitude            "pAC"       // Parameter amplitude
+#define DC_OFFSTET              "pDC"       // Parameter dc offset
+#define NUM_POINTS              "pNum"      // Parameter number of sample points
+#define SWEEP_TYPE              "pSW"       // Parameter sweep type log or linear
 #define LPTIA_RTIA_SIZE         "pLRS"      // Parameter low power TIA resistor size encoded as int
 #define FIXED_WE_POTENTIAL      "pFWP"      // Parameter Fixed Working electrode Potential
 #define MAINS_FILTER            "pMF"       // Parameter 50 Hz/ 60 Hz mains filter enabled

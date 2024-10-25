@@ -87,6 +87,12 @@ int C_ElectrochemicalMethod::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage
         c_SetupBehavior_ = new C_Setup_SWV();
         c_ExecuteBehavior_ = new C_Execute_SWV();
     }
+    // Square wave voltammetry
+    else if (strcmp(chrExperimentType_, EIS) == 0 && ENABLE_EIS){
+        // Create behavior objects, save references and execute starting method
+        c_SetupBehavior_ = new C_Setup_EIS();
+        c_ExecuteBehavior_ = new C_Execute_EIS();
+    }
     // Selected method not enabled
     else {
         return EC_SETUP + EC_SE_METHOD_DISABLED;

@@ -593,6 +593,13 @@ int C_JSONParser::funParseExperimentParameters(String strJSON, int iJSONLength,
                 break;
             }
         }
+         else if (strTempExperimentType == EIS){
+            int iErrorCode = this->funHandleEISParameter(
+                strTempParameter, strTempNumber);
+            if (iErrorCode != 0){
+                break;
+            }
+        }
         else if (strTempExperimentType == SEQUENCE){
             int iErrorCode = this->funHandleSequenceParameter(
                 strTempParameter, strTempNumber);
@@ -1205,6 +1212,79 @@ int C_JSONParser::funHandleDPVParameter(String strParameter, String strNumber){
             c_DataStorageLocal_->set_FixedWEPotential(false);
         }
     }
+    else if (strParameter == MAINS_FILTER){
+        if (strNumber.toInt() == 1){
+            // Save that the notch filter for 50 Hz/ 60 Hz is not bypassed used
+            c_DataStorageLocal_->set_AdcNotchFilter(false);
+        }
+        else if (strNumber.toInt() == 0){
+            // Save that the notch filter for 50 Hz/ 60 Hz is bypassed used
+            c_DataStorageLocal_->set_AdcNotchFilter(true);
+        }        
+    }
+    else if (strParameter == SINC2_OVERSAMPLING){
+        int iTempOSRSinc2 = strNumber.toInt();
+
+        // Save encoded Sinc2 oversampling rate
+        c_DataStorageLocal_->set_AdcOsrSinc2(iTempOSRSinc2);
+    }
+    else if (strParameter == SINC3_OVERSAMPLING){
+        int iTempOSRSinc3 = strNumber.toInt();
+
+        // Save encoded Sinc3 oversampling rate
+        c_DataStorageLocal_->set_AdcOsrSinc3(iTempOSRSinc3);
+    }
+    else{
+        // Error occured parameter not known
+        return EC_JSON_PARSER + EC_JP_PARA_NOT_KNOWN;
+    }
+    return EC_NO_ERROR;
+}
+
+/******************************************************************************
+ * @brief Check if the transmitted parameter is known and part of the defined
+ * electrochemical method
+ * @param strParameter: String containing name of the parameter     
+ * @param strNumber: String containing value of the parameter
+ * @return Retruns error code encoded as integer
+ * 0 : Value successfully saved
+ * 1 : Parameter not known, check constants.py and constants.c for mismatch or 
+ *     check for correct experiment type
+ * 2 :  
+ *****************************************************************************/
+int C_JSONParser::funHandleEISParameter(String strParameter, String strNumber){
+    // Initialize variables
+    int iEntry = 0;
+    int iTempPosition = -1 ;
+
+    // Check if parameter is known as EIS parameter
+    if (strParameter == START_FREQUENCY){
+        c_DataStorageLocal_->set_StartFrequency(strNumber.toFloat());
+    }
+    else if (strParameter == STOP_FREQUENCY){
+        c_DataStorageLocal_->set_StopFrequency(strNumber.toFloat());
+    }
+    else if (strParameter == AC_Amplitude){
+        c_DataStorageLocal_->set_AcAmplitude(strNumber.toFloat());
+    }
+    else if (strParameter == DC_OFFSTET){
+        c_DataStorageLocal_->set_DcOffset(strNumber.toFloat());
+    }
+    else if (strParameter == NUM_POINTS){
+        c_DataStorageLocal_-> set_NumberPoints(strNumber.toInt());
+    }
+    else if (strParameter == SWEEP_TYPE){
+       
+      if (strNumber.toInt() == 1){
+            // Save for logarihmic sweep
+            c_DataStorageLocal_->set_SweepTyp(bTRUE);
+        }
+        else if (strNumber.toInt() == 0){
+            // Save for linear sweep
+            c_DataStorageLocal_->set_SweepTyp(bFALSE);
+        }        
+    }
+    
     else if (strParameter == MAINS_FILTER){
         if (strNumber.toInt() == 1){
             // Save that the notch filter for 50 Hz/ 60 Hz is not bypassed used
