@@ -55,7 +55,6 @@ int C_Setup_EIS::funInitEIS(){
 
     FIFOCfg_Type S_FiFoConfig;
     SEQCfg_Type S_SequencerConfig;
-
     SEQInfo_Type S_SequenceInfo;
     AFERefCfg_Type S_AFE_ReConfig;
     HSLoopCfg_Type S_HSLoop_Config;
@@ -90,29 +89,9 @@ int C_Setup_EIS::funInitEIS(){
     // Initialzie sequencer
     AD5940_SEQCfg(&S_SequencerConfig);
 
-   
-    // Check if internal or external LPTIA Rtia is selected
-    // External Rtia
-    if (c_DataStorageLocal_->get_LPTIARtiaSize() == LPTIARTIA_OPEN){
-        // Variable intialization
-        fImpPol_Type RtiaValue;
-
-        // Set magnitude to size of external resistor (only ohmic) -> Phase = 0
-        RtiaValue.Magnitude = c_DataStorageGeneral_->get_LPTIARtiaSizeExternal();
-        RtiaValue.Phase = 0;
-
-        // Save values
-        c_DataStorageGeneral_->set_RtiaValue(RtiaValue);
-    }
-    // Internal Rtia
-    else {
-        // Calibrating internal LPTIA Rtia resistor
-        this->funCalibrateLPTIAResistor();
-    }
-
     // Reconfigure FIFO, since the Rtia calibration can lead to data remnants
     // Disable FIFO
-    AD5940_FIFOCtrlS(FIFOSRC_SINC3, bFALSE);
+    AD5940_FIFOCtrlS(FIFOSRC_DFT, bFALSE);
 
     // Enable FIFO
     S_FiFoConfig.FIFOEn = bTRUE;
@@ -219,8 +198,8 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     int iErrorCode = EC_NO_ERROR;
 
     const uint32_t *uiSequenceCommand;
-    
     uint32_t uiSeqeuenceLength;
+    float fNext_Frequency;
 
     // Define structs
     SEQInfo_Type S_SequenceInfo;
@@ -229,8 +208,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     DSPCfg_Type S_DSPConfig;
     SoftSweepCfg_Type S_Sweep_Config;
 
-    float fNext_Frequency;
-
+    
     // Start sequence generator
     AD5940_SEQGenCtrl(bTRUE);
 
@@ -297,6 +275,8 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     S_Sweep_Config.SweepStop = c_DataStorageLocal_->get_StopFrequency();
     S_Sweep_Config.SweepPoints = c_DataStorageLocal_->get_NumberPoints();
     S_Sweep_Config.SweepLog = c_DataStorageLocal_->get_SweepTyp();
+
+    
     c_DataStorageLocal_->set_CurrentFrequency(S_Sweep_Config.SweepStart);
 
 
@@ -343,6 +323,8 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     }*/
 
     AD5940_SweepNext(& S_Sweep_Config, &fNext_Frequency);
+
+    c_DataStorageLocal_->set_NextFrequency(fNext_Frequency);
 
     S_HSLoopConfig.WgCfg.SinCfg.SinFreqWord = AD5940_WGFreqWordCal( c_DataStorageLocal_->get_CurrentFrequency(), AD5940_SYS_CLOCK_FREQ);
     S_HSLoopConfig.WgCfg.SinCfg.SinAmplitudeWord = (uint32_t)(c_DataStorageLocal_->get_AcAmplitude() / 800.0f*2047 + 0.5f);
@@ -393,46 +375,27 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     // Get gain of programmable gain amplifier
     S_DSPConfig.ADCBaseCfg.ADCPga = c_DataStorageLocal_->get_AdcPgaGain();
 
+    AD5940_StructInit(&S_DSPConfig.ADCDigCompCfg, sizeof(S_DSPConfig.ADCDigCompCfg));
+
     // Select sampling rate according to ADC clock
     // Clock = 16 Mhz -> 800 kHz sampling
     // Clock = 32 Mhz -> 1.6 MHz sampling
     S_DSPConfig.ADCFilterCfg.ADCRate = ADCRATE_800KHZ;
 
-    // Check Sinc3 filter oversampling rate
-    if (c_DataStorageLocal_->get_AdcOsrSinc3() == ADCSINC3OSR_DISABLED){
-        // Bypass Sinc3 filter
-        S_DSPConfig.ADCFilterCfg.BpSinc3 = bTRUE;
-    }
-    else {
-        // Disable bypass of Sinc3 filter
-        S_DSPConfig.ADCFilterCfg.BpSinc3 = bFALSE;
+    S_DSPConfig.ADCFilterCfg.ADCAvgNum = ADCAVGNUM_16;
 
-        // Get oversampling rate for Sinc3 filter
-        S_DSPConfig.ADCFilterCfg.ADCSinc3Osr = c_DataStorageLocal_->
-            get_AdcOsrSinc3();        
-    }
-
-    // Check Sinc2 filter oversampling rate
-    if (c_DataStorageLocal_->get_AdcOsrSinc2() == ADCSINC2OSR_DISABLED){
-        // Disable Sinc2 filter + Notch filter
-        S_DSPConfig.ADCFilterCfg.Sinc2NotchEnable = bFALSE;
-    }
-    else {
-        // Enable Sinc2 filter + Notch filter
-        S_DSPConfig.ADCFilterCfg.Sinc2NotchEnable = bTRUE;
-
-        // Enable/ disable bypass of Notch filter
-        S_DSPConfig.ADCFilterCfg.BpNotch = (BoolFlag)c_DataStorageLocal_->
-                                                     get_AdcNotchFilter();
-        // Get oversampling rate for Sinc2 filter
-        S_DSPConfig.ADCFilterCfg.ADCSinc2Osr = c_DataStorageLocal_->
-            get_AdcOsrSinc2(); 
-    }
+    S_DSPConfig.ADCFilterCfg.ADCSinc2Osr = ADCSINC2OSR_22;
+    S_DSPConfig.ADCFilterCfg.ADCSinc3Osr = ADCSINC3OSR_2;
+    S_DSPConfig.ADCFilterCfg.BpNotch = bTRUE;
+    S_DSPConfig.ADCFilterCfg.BpSinc3 = bFALSE;
+    S_DSPConfig.ADCFilterCfg.Sinc2NotchEnable = bTRUE;
 
     
     S_DSPConfig.DftCfg.DftNum = DFTNUM_16384;
     S_DSPConfig.DftCfg.DftSrc = DFTSRC_SINC3;
     S_DSPConfig.DftCfg.HanWinEn = bTRUE;
+
+    AD5940_StructInit(&S_DSPConfig.StatCfg, sizeof(S_DSPConfig.StatCfg));
 
     // Config digital signal processor (DSP)
     AD5940_DSPCfgS(&S_DSPConfig);
@@ -448,22 +411,20 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
                 AFECTRL_WG|AFECTRL_DACREFPWR|AFECTRL_HSDACPWR|\
                 AFECTRL_SINC2NOTCH|AFECTRL_DCBUFPWR, bTRUE);
 
-    // Disable syncnextdevice
-    AD5940_SEQGpioCtrlS(0);
 
     // Add cumston command -> Squence stop. This ensures the intialization 
     // sequence. Runs only one time
     AD5940_SEQGenInsert(SEQ_STOP()); 
 
-    // Stop sequence generator
-    AD5940_SEQGenCtrl(bFALSE);
-
     // Create sequence
     iErrorCode = AD5940_SEQGenFetchSeq(&uiSequenceCommand, &uiSeqeuenceLength);
 
+    // Stop sequence generator
+    AD5940_SEQGenCtrl(bFALSE);
+
     if (iErrorCode == AD5940ERR_OK){
         // Get sequence info 
-        S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_0);
+        S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
 
         // Set all members of the structure to 0
         AD5940_StructInit(&S_SequenceInfo, sizeof(S_SequenceInfo));
@@ -472,7 +433,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
         }
             
         // Set sequence ID to 1
-        S_SequenceInfo.SeqId = SEQID_0;
+        S_SequenceInfo.SeqId = SEQID_1;
 
         // Get sequener start adress in SRAM
         S_SequenceInfo.SeqRamAddr = c_DataStorageGeneral_->
@@ -485,7 +446,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
         S_SequenceInfo.SeqLen = uiSeqeuenceLength;
 
         // Save configuration
-        c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_0);
+        c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
 
         // Write to SRAM
         AD5940_SEQCmdWrite(S_SequenceInfo.SeqRamAddr, uiSequenceCommand, 
@@ -507,6 +468,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
 int C_Setup_EIS::funSequencerExecuteSequence(){
     // Initialize variables
     const uint32_t *uiSequenceCommand;
+    int iErrorCode = 0;
 
     uint32_t uiCurrAddr = 0;
     uint32_t uiRegData = 0;
@@ -567,20 +529,23 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     AD5940_EnterSleepS();/* Goto hibernate */
 
     /* Sequence end. */
-    AD5940_SEQGenFetchSeq(&uiSequenceCommand, &uiSequenceLength);
+    iErrorCode = AD5940_SEQGenFetchSeq(&uiSequenceCommand, &uiSequenceLength);
     AD5940_SEQGenCtrl(bFALSE); /* Stop sequencer generator */
 
+    if ( iErrorCode != 0){
+        return iErrorCode;
+    }
     // Get stored sequence info
-    S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
-    S_SequenceInfo.SeqId = SEQID_1;
-    S_SequenceInfo.SeqRamAddr = uiCurrAddr;
+    S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_0);
+    S_SequenceInfo.SeqId = SEQID_0;
+    S_SequenceInfo.SeqRamAddr = uiCurrAddr + uiSequenceLength;
     S_SequenceInfo.pSeqCmd = uiSequenceCommand;
     S_SequenceInfo.SeqLen = uiSequenceLength;
        // Save sequence info 
-    c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
+    c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_0);
 
     // Write command to SRAM
-    AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
+    AD5940_SEQCmdWrite(S_SequenceInfo.SeqRamAddr, uiSequenceCommand, uiSequenceLength);
     /* Write command to SRAM */
 
 

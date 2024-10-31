@@ -400,6 +400,123 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
 }
 
 /******************************************************************************
+ * @brief Function to send experiment data in json format to the serial port
+ * @param s_ExperimentData: struct with the experiment data
+ * @param iEcMethod: Integer containing the abbreviation for the electro-
+ * chemical method
+ * @return Error code encoded as integer
+ *****************************************************************************/ 
+int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDataEIS,
+                                           int iEcMethod){
+    // Initalize variables
+    char chrIntBuff[16];
+    char chrFloatBuff[33];
+    char chrBuff[128];
+
+    #if !FREISTAT_STANDALONE && !WiFiEnabled
+    // Send different data depending on the electrochemical method
+    switch (iEcMethod){
+    case EIS_I:
+        strncpy(chrBuff, chrPrefix1_, sizeof(chrPrefix1_));
+        strncat(chrBuff, itoa(S_ExperimentDataEIS.iCycle, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
+        strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
+        strncat(chrBuff, itoa(S_ExperimentDataEIS.iMeasurmentPair, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
+
+        dtostrf(S_ExperimentDataEIS.Magnitude, 7, 5, chrFloatBuff);
+        strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
+        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix1_));
+        dtostrf(S_ExperimentDataEIS.Phase, 7, 5, chrFloatBuff);
+        
+        strncat(chrBuff, "}}", sizeof("}}"));
+
+        break;
+    }
+    #endif
+    #if FREISTAT_STANDALONE
+    // Send different data depending on the electrochemical method
+    switch (iEcMethod){
+    case OCP_I:
+        strncat(chrBuff, itoa(S_ExperimentData.iCycle, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        dtostrf(S_ExperimentData.fVoltage, 7, 5, chrFloatBuff);
+        strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        strncat(chrBuff, itoa(S_ExperimentData.fTimeStamp, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+
+        break;
+    case SWV_I:
+    case DPV_I:
+    case NPV_I:
+    case CA_I:
+    case LSV_I:
+    case CV_I:
+        strncpy(chrBuff, itoa(S_ExperimentData.iCycle, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        dtostrf(S_ExperimentData.fVoltage, 7, 5, chrFloatBuff);
+
+        strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        dtostrf(S_ExperimentData.fCurrent, 7, 5, chrFloatBuff);
+
+        strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
+        strncat(chrBuff, ",", sizeof(","));
+
+        strncat(chrBuff, itoa(S_ExperimentData.fTimeStamp, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+
+        break;
+    default:
+        break;
+    }
+    #endif
+
+    if (WiFiEnabled || FREISTAT_STANDALONE){
+        // Check if FreiStat runs in WLAN mode or Standalone mode
+        #if FREISTAT_STANDALONE
+        // Append string terminator
+        strncat(chrBuff, "\n\0", sizeof("\n\0"));
+        
+        // Store data on SD-card
+        dataFile.write(chrBuff);
+        #endif
+        #if WiFiEnabled
+        dataFile.write((const uint8_t *)&S_ExperimentData, sizeof(S_ExperimentData));
+        
+        iFlushCounter += 1;
+        
+        if (iFlushCounter >= 20){
+            iFlushCounter = 0;
+            dataFile.flush();
+        }
+        #endif
+    }
+    else {
+        // Send char arry via serial port
+        Serial.write(chrBuff);
+    }
+    return EC_NO_ERROR;
+}
+
+/******************************************************************************
  * @brief Function to send acknowledge telegram to the serial port
  * @return Error code
  *****************************************************************************/ 

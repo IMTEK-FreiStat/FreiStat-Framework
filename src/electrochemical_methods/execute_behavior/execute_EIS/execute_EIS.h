@@ -38,7 +38,7 @@ class C_Execute_EIS : public C_ExecuteBehavior{
         int funControlApplication(uint32_t);
         int funInterruptServiceRoutine();
         int funProcessExperimentData(uint32_t * , uint32_t );
-        int funUpdateSequence();
+        int funUpdateSequence(uint32_t);
 
     public:
         // Constructor

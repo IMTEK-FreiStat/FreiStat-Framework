@@ -130,6 +130,17 @@ void C_DataStorageGeneral::set_ExperimentData(S_DataContainer S_ExperimentData,
 }
 
 /******************************************************************************
+ * @brief Setter method for saving experiment data from specific position
+ * in data storage
+ * @param S_ExperimentData: Experiment data which should be stored
+ * @param iPosition: Position from which data should be read
+ *****************************************************************************/
+void C_DataStorageGeneral::set_ExperimentDataEIS(S_DataContainerEIS S_ExperimentDataEIS, 
+                                              int iPosition){
+    S_ExperimentDataEIS_[iPosition] = S_ExperimentDataEIS;
+}
+
+/******************************************************************************
  * @brief Setter method for latest position of send data
  * @param iSendDataCounter: Latest position of send data
  *****************************************************************************/
@@ -274,6 +285,16 @@ SEQInfo_Type C_DataStorageGeneral::get_SequenceInfo(int iSequenceID){
  *****************************************************************************/
 S_DataContainer C_DataStorageGeneral::get_ExperimentData(int iPosition){
     return S_ExperimentData_[iPosition];
+}
+
+/******************************************************************************
+ * @brief Getter method for returning experiment data from specific position
+ * in data storage
+ * @param iPosition: Position from which data should be read
+ * @returns: returns experiment data from specific position
+ *****************************************************************************/
+S_DataContainerEIS C_DataStorageGeneral::get_ExperimentDataEIS(int iPosition){
+    return S_ExperimentDataEIS_[iPosition];
 }
 
 /******************************************************************************

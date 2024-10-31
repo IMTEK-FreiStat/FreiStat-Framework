@@ -121,6 +121,7 @@ class ExecuteEIS(ExecuteBehavior):
             iCurrenPosition, bErrorflag, listReadData = \
             self._jsonParser.parse_JSON_string(listReadData, strReadTelegram)
 
+            print(listReadData)
             # Compare code to previously send code
             if (int(listReadData[0][1]) != listCommandIDs[iIndex]):
                 return EC_EXECUTE + EC_EX_C_A_MISMATCH
@@ -132,6 +133,8 @@ class ExecuteEIS(ExecuteBehavior):
         if (bEnableReading == True):
             # Start thread to handle data exchange
             self._handleDataEIS(dataQueue)
+
+            print(listReadData)
 
         # No error occured
         return EC_NO_ERROR
@@ -171,6 +174,8 @@ class ExecuteEIS(ExecuteBehavior):
             # Read byte stream from serial connection and convert into string
             strReadData = self._serialConnection.read_Data("JSON").\
                 decode("utf-8")
+
+            print(strReadData)
 
             # Parse JSON string
             iCurrenPosition, bErrorflag, listReadData = \

@@ -61,6 +61,8 @@ class C_DataStorageGeneral{
         
         S_DataContainer S_ExperimentData_[TRANSMIT_BUFFER];
 
+        S_DataContainerEIS S_ExperimentDataEIS_[TRANSMIT_BUFFER];
+
         /**********************************************************************
          * Low power TIA (Transimpedence amplifier)
          * 
@@ -107,6 +109,7 @@ class C_DataStorageGeneral{
          * 
          **********************************************************************/        
         void set_ExperimentData(S_DataContainer, int);
+        void set_ExperimentDataEIS(S_DataContainerEIS, int);
 
         /**********************************************************************
          * Low power TIA (Transimpedence amplifier)
@@ -161,6 +164,9 @@ class C_DataStorageGeneral{
         uint32_t * get_SampleBuffer();
         
         S_DataContainer get_ExperimentData(int);
+
+        S_DataContainerEIS get_ExperimentDataEIS(int);
+
 
         /**********************************************************************
          * Low power TIA (Transimpedence amplifier)

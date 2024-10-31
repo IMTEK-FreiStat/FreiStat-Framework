@@ -89,6 +89,9 @@ int C_ExecuteBehavior::funGetExperimentTypeInt(char * chrExperimentType){
     else if (strcmp(chrExperimentType, SWV) == 0){
         iExperimentType = SWV_I;
     }
+    else if (strcmp(chrExperimentType, EIS) == 0){
+        iExperimentType = EIS_I;
+    }
     return iExperimentType;
 }
 

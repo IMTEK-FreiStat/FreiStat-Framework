@@ -160,7 +160,7 @@ MAX_CYCLE               = 2100000000    # Max. amount of cycles per experiment
 MIN_PULSE_LENGTH        = 0             # Min. pulse length in ms
 MAX_PULSE_LENGTH        = 2100000000.0  # Max. pulse length in ms
 MIN_SAMPLING_RATE       = 0.001         # Min. sampling rate in ms
-MAX_SAMPLING_RATE       = 2100000000.0  # Max. sampling rate in ms 
+MAX_SAMPLING_RATE       = 2100000000.0  # Max. sampling rate in ms
 MIN_SAMPLING_DURATION   = 0.001         # Min. sampling duration in ms
 EXPERIMENT_BUFFER       = 50            # Size of the buffer for misc. experiment parameters
 SAMPLE_BUFFER           = 250           # Site of the sample buffer which is used to store the read data
@@ -172,9 +172,9 @@ SAMPLE_BUFFER           = 250           # Site of the sample buffer which is use
 -----------------------------------------------------------------------------"""
 AD5940_MAX_DAC_OUTPUT   = 2400.0        # Max. voltage the 6-Bit and 12-Bit DAC can provide
 AD5940_MIN_DAC_OUTPUT   = 200.0         # Min. voltage the 6-Bit and 12-Bit DAC can provide
-AD5940_6BIT_DAC_1LSB    = ((AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT) / 64)      
+AD5940_6BIT_DAC_1LSB    = ((AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT) / 64)
                                         # Size of one LSB of the 6-Bit DAC
-AD5940_12BIT_DAC_1LSB   = ((AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT) / 4095)   
+AD5940_12BIT_DAC_1LSB   = ((AD5940_MAX_DAC_OUTPUT - AD5940_MIN_DAC_OUTPUT) / 4095)
                                         # Size of one LSB of the 12-Bit DAC
 AD5940_SAMPLING_RATE    = 800000        # Clock = 16 MHz -> 800 kHz sampling
                                         # Clock = 32 MHz -> 1.6 MHz sampling
@@ -188,9 +188,9 @@ FREISTAT_SEQUENCE_LENGTH= 35            # Maximum sequence length which is supoo
 FREISTAT_CA_ST_SERIAL   = 3.000e-3      # Minimal sampling time in s at which the CA still operates
 FREISTAT_CV_ST_SERIAL   = 2.875e-3      # Minimal sampling time in s at which the CV still operates
 FREISTAT_DPV_ST_SERIAL  = 3e-3          # Minimal sampling time in s at which the DPV still operates
-FREISTAT_CA_ST_WLAN     = 3.000e-3      
-FREISTAT_CV_ST_WLAN     = 2.875e-3      
-FREISTAT_DPV_ST_WLAN    = 3e-3          
+FREISTAT_CA_ST_WLAN     = 3.000e-3
+FREISTAT_CV_ST_WLAN     = 2.875e-3
+FREISTAT_DPV_ST_WLAN    = 3e-3
 
 """-----------------------------------------------------------------------------
 | Communication: Connection parameters

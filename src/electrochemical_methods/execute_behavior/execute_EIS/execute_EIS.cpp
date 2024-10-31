@@ -74,20 +74,14 @@ int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
         // Get send data counter
         int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
 
-        // If data needs to be send, write to serial port
-        if (iSendDataCounter + 2 < iStepCounter_){     
-            S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
-            get_ExperimentData(this->funGetDataPosition(iSendDataCounter));
+       
+            S_DataContainerEIS S_ExperimentDataEIS = c_DataStorageGeneral_->
+            get_ExperimentDataEIS(this->funGetDataPosition(iSendDataCounter));
 
-            if (S_ExperimentData.iCycle <= c_DataStorageLocal_->get_Cycle()){
-                // Write data to serial port        
-                c_Communication->funSendExperimentData(
-                    S_ExperimentData, iExperimentType);  
-            }
 
             // Increase send data counter
             c_DataStorageGeneral_->set_SendDataCounter(iSendDataCounter + 1);
-        }
+            
         
         // Check if experiment is completed
         // Check if end of sequence interrupt occured
@@ -158,7 +152,7 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
-            this->funUpdateSequence();           
+            this->funUpdateSequence(uiFiFoCount);           
         }
 
         // FIFO threshold interrupt
@@ -177,7 +171,7 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
-            this->funUpdateSequence();
+            this->funUpdateSequence(uiFiFoCount);
         }
         // General purpose timer 1 interrupt
         if (uiInterruptFlag & AFEINTSRC_GPT1INT_TRYBRK){
@@ -234,78 +228,67 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
 int C_Execute_EIS::funProcessExperimentData(uint32_t * pData, 
                                            uint32_t uiCountData){
     // Intialize variables
-    float fVoltage = 0;
+    float fNextFrequency = c_DataStorageLocal_->get_NextFrequency();
+    
+    uint32_t uiImpResCount = uiCountData/4;
         
     uint32_t iCountSamples = 0;
     uint64_t iSumSamples = 0;
 
-    S_DataContainer S_ExperimentData;
+    S_DataContainerEIS S_ExperimentDataEIS;
+    fImpPol_Type * const pOut = (fImpPol_Type*)pData;
+    iImpCar_Type * pSrcData = (iImpCar_Type*)pData;
 
-    // Get ADC gain
-    int iAdcPgaGain = c_DataStorageLocal_->get_AdcPgaGain();
 
-    // Get reference voltage
-    float fAdcReferenceVoltage = c_DataStorageGeneral_->get_ADCReferenceVoltage();
 
-    // Get size of Rtia resistor
-    float fRtiaMagnitude = c_DataStorageGeneral_->get_RtiaValue().Magnitude;
-
-    // Get current step number
-    int iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
-
-    // Get experiment data at specific position
-    S_ExperimentData = c_DataStorageGeneral_->get_ExperimentData(
-                            this->funGetDataPosition(iCurrentStep - 1));
-
-    // Loop to postprocess transmitted data
-    for (int iData = 0; iData < uiCountData; iData++){
-        // Sum up data 
-        iSumSamples += pData[iData] & 0xffff;
-
-        // Increase sample counter
-        iCountSamples ++;
+    /* Convert DFT result to int32_t type */
+  for(uint32_t i=0; i<uiCountData; i++)
+  {
+    pData[i] &= 0x3ffff; /* @todo option to check ECC */
+    if(pData[i]&(1L<<17)) /* Bit17 is sign bit */
+    {
+      pData[i] |= 0xfffc0000; /* Data is 18bit in two's complement, bit17 is the sign bit */
     }
+  }
+  for(uint32_t i=0; i<uiImpResCount; i++)
+  {
+    iImpCar_Type *pDftRcal, *pDftRz;
 
-    // Check if samples were collected
-    if (iCountSamples > 0){
-        // Turn it into a voltage (unit of ADCReferenceVoltage -> mV)
-        fVoltage = AD5940_ADCCode2Volt((uint32_t)((float)iSumSamples / 
-                    iCountSamples + 0.5), iAdcPgaGain, fAdcReferenceVoltage);
+    pDftRcal = pSrcData++;
+    pDftRz = pSrcData++;
+    float RzMag,RzPhase;
+    float RcalMag, RcalPhase;
+    
+    RcalMag = sqrt((float)pDftRcal->Real*pDftRcal->Real+(float)pDftRcal->Image*pDftRcal->Image);
+    RcalPhase = atan2(-pDftRcal->Image,pDftRcal->Real);
+    RzMag = sqrt((float)pDftRz->Real*pDftRz->Real+(float)pDftRz->Image*pDftRz->Image);
+    RzPhase = atan2(-pDftRz->Image,pDftRz->Real);
 
-        S_DataContainer S_ExperimentData2 = 
-            c_DataStorageGeneral_->get_ExperimentData(
-            this->funGetDataPosition(iStepCounter_ - 1));
+    RzMag = RcalMag/RzMag * c_DataStorageGeneral_->get_RtiaValue().Magnitude;
+    RzPhase = RcalPhase - RzPhase;
+    
+    pOut[i].Magnitude = RzMag;
+    pOut[i].Phase = RzPhase;
 
-        // Calculate current in uA
-        S_ExperimentData2.fCurrent = 1000.0f * fVoltage / fRtiaMagnitude;
+    S_ExperimentDataEIS.fFrequency = c_DataStorageLocal_->get_CurrentFrequency();
+    S_ExperimentDataEIS.Magnitude = RzMag;
+    S_ExperimentDataEIS.Phase = RzPhase;
 
-        c_DataStorageGeneral_->set_ExperimentData(S_ExperimentData2, 
-            this->funGetDataPosition(iStepCounter_ - 1));        
+    // Save data
+        c_DataStorageGeneral_->set_ExperimentDataEIS(
+            S_ExperimentDataEIS, i); 
+  }
 
-        // Store voltage
-        S_ExperimentData.fVoltage = c_DataStorageLocal_->
-            get_PotentialSteps(iCurrentStep);
+  uiCountData = uiImpResCount; 
+  //AppIMPCfg.FreqofData = AppIMPCfg.SweepCurrFreq;
+  /* Calculate next frequency point */
+    
+ 
+    c_DataStorageLocal_->set_CurrentFrequency(fNextFrequency);
+    AD5940_SweepNext(c_DataStorageLocal_->get_S_Sweep_Config(), &fNextFrequency);
+    c_DataStorageLocal_->set_NextFrequency(fNextFrequency);
 
-        // Store cycle number
-        S_ExperimentData.iCycle = 1 + c_DataStorageLocal_->get_StepNumber();       
 
-        // Data point number
-        S_ExperimentData.iMeasurmentPair = 1 + iStepCounter_;
-
-        // Save time stamp
-        S_ExperimentData.fTimeStamp = millis();
-
-        // Save data
-        c_DataStorageGeneral_->set_ExperimentData(
-            S_ExperimentData, this->funGetDataPosition(iStepCounter_)); 
-
-        // Increase step counter
-        iStepCounter_++;
-
-        // Reset variables
-        iSumSamples = 0;
-        iCountSamples = 0;
-    }
     return EC_NO_ERROR;
 }
 
@@ -333,22 +316,17 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
             S_WakeUpTimer_Config.WuptEn = bTRUE;
 
             // Specifiy how many sequences are used (A = 1 | B = 2 | ...)
-            S_WakeUpTimer_Config.WuptEndSeq = WUPTENDSEQ_B;
+            S_WakeUpTimer_Config.WuptEndSeq = WUPTENDSEQ_A;
 
             // Define order and type of sequences
-            S_WakeUpTimer_Config.WuptOrder[0] = SEQID_1;
-            S_WakeUpTimer_Config.WuptOrder[1] = SEQID_2;
+            S_WakeUpTimer_Config.WuptOrder[0] = SEQID_0;
 
             // Define how long a sequence should run
             // = LFOSCFrequency (in Hz) * Time (in seconds)
-            S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1] = 1;
-            S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1] = 
-                    (uint32_t)(c_DataStorageGeneral_->get_LFOSCFrequency() * 
-                    c_DataStorageLocal_->get_Scanrate() / 1000.0) - 1;
-            S_WakeUpTimer_Config.SeqxSleepTime[SEQID_2] = 
-                    S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1];
-            S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_2] = 
-                    S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1];
+            S_WakeUpTimer_Config.SeqxSleepTime[SEQID_0] = 4;
+            S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_0] = (uint32_t)1600-4;
+
+           
 
             // Config wake-up timer
             AD5940_WUPTCfg(&S_WakeUpTimer_Config);        
@@ -357,6 +335,9 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
         case FREISTAT_STOP_TIMER:{
             // Stop wake up timer
             AD5940_WUPTCtrl(bFALSE);
+            // Update system and experiment status
+            c_DataSoftwareStorage_->set_SystemStatus(FREISTAT_EXP_COMPLETED);
+            c_DataStorageLocal_->set_ExperimentState(EC_METHOD_STATE_0);
             break;
         }
         default:
@@ -370,143 +351,24 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
  * 
  * @returns: Error code encoded as integer
  *****************************************************************************/
-int C_Execute_EIS::funUpdateSequence(){
-    // Initialize variables
-    bool bSeqBlockUsed = c_DataStorageLocal_->get_SeqBlockUsed();
+int C_Execute_EIS::funUpdateSequence(uint32_t uiFiFoCount){
 
-    int iDacCurrentBlock = c_DataStorageLocal_->get_DacCurrentBlock();
-    int iDacSeqBlock0Address = c_DataStorageLocal_->get_DacSeqBlock0Address();
-    int iDacSeqBlock1Address = c_DataStorageLocal_->get_DacSeqBlock1Address();
-    int iSRAMAddress;
+    float fNextFrequency = c_DataStorageLocal_->get_NextFrequency();
 
-    const uint32_t *uiSequenceCommand;
-
-    uint32_t uiCurrAddr = 0;
-    uint32_t uiVbiasCode = 0;
-    uint32_t uiVzeroCode = 0;
-    uint32_t uiSequenceLength = 0;
-
-    uint32_t iCommandBuffer[AD5940_BUFFER_CA];
-
-    // Assign address of block 0 or block 1 to current block address
-    uiCurrAddr = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 
-                    iDacSeqBlock0Address : iDacSeqBlock1Address;
-
-    // Jump to next block
-    iSRAMAddress = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 
-                    iDacSeqBlock1Address : iDacSeqBlock0Address;
+    AD5940_WGFreqCtrlS(fNextFrequency, 16000);
 
 
-    // Calculate values for one sampling step of chronoamperometry
-    // Get current step number
-    int iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
+    if(c_DataStorageLocal_->get_NumberPoints() > 0)
+    {
+        c_DataStorageLocal_->set_BufferEntries(uiFiFoCount/4);
+        if(c_DataStorageLocal_->get_BufferEntries() >= c_DataStorageLocal_->get_NumberPoints())
+    {
+        funControlApplication(FREISTAT_STOP_TIMER);
 
-    // Get sampling rate
-    float fSamplingRate = c_DataStorageLocal_->get_Scanrate();
-
-    // Generate stop sequence if experiment is done
-    if (c_DataStorageLocal_->get_StepNumber() + 1 > c_DataStorageLocal_->get_Cycle()){
-        // Read the current values of the AFE Control register
-        uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
-        // Clear ADC conversion bit
-        AfeControlRegister &= ~AFECTRL_ADCCNV;
-        iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-        iCommandBuffer[1] = SEQ_STOP();
-        iCommandBuffer[2] = SEQ_NOP();
-
-        iCommandBuffer[3] = SEQ_NOP();
-        iCommandBuffer[4] = SEQ_NOP();
-        iCommandBuffer[5] = SEQ_NOP();
-
-        // Write command to SRAM
-        AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
-
-       return EC_NO_ERROR;
+        return EC_NO_ERROR;
     }
-
-    // Check if current step has to be changed
-    if (c_DataStorageLocal_->get_StepsRemaining() < fSamplingRate / 2){
-        // Check if new cycle begins
-        if (iCurrentStep + 1 >= c_DataStorageLocal_->get_BufferEntries()){
-            // Increment step number
-            c_DataStorageLocal_->set_StepNumber(
-                c_DataStorageLocal_->get_StepNumber() + 1);
-
-            // Update current step
-            c_DataStorageLocal_->set_CurrentStepNumber(0);
-
-            // Set remaining pulse length
-            c_DataStorageLocal_->set_StepsRemaining(
-                c_DataStorageLocal_->get_PulseDurations(0));                
-        }
-        else {
-            // Update current step
-            c_DataStorageLocal_->set_CurrentStepNumber(iCurrentStep + 1);
-
-            // Set remaining pulse length
-            c_DataStorageLocal_->set_StepsRemaining(
-                c_DataStorageLocal_->get_PulseDurations(iCurrentStep + 1));
-        }
-        // Get updated current step number
-        iCurrentStep = c_DataStorageLocal_->get_CurrentStepNumber();
-
     }
-
-    // Calculate DAC code
-    uiVzeroCode = (c_DataStorageLocal_->get_WePotentialHigh() - 
-                   AD5940_MIN_DAC_OUTPUT) / AD5940_6BIT_DAC_1LSB;
-    uiVbiasCode = (uiVzeroCode * 64 - 
-                   (c_DataStorageLocal_->get_PotentialSteps(iCurrentStep) / 
-                   AD5940_12BIT_DAC_1LSB));
-
-    // Ensure smooth transition when switching potential sign
-    if (uiVbiasCode < (uiVzeroCode * 64)){
-        uiVbiasCode--;
-    }
-            
-    // Clip DAC code for the 6-Bit and 12-Bit DAC
-    if (uiVbiasCode > 4095){
-        uiVbiasCode = 4095;
-    }
-    if (uiVzeroCode > 64){
-        uiVzeroCode = 64;
-    }
-
-    // Update remaining pulse length
-    c_DataStorageLocal_->set_StepsRemaining(
-        c_DataStorageLocal_->get_StepsRemaining() - fSamplingRate);
-
-
-    // Read the current values of the AFE Control register
-    uint32_t AfeControlRegister = AD5940_ReadReg(REG_AFE_AFECON);
-    // Clear ADC conversion bit
-    AfeControlRegister &= ~AFECTRL_ADCCNV;
-    iCommandBuffer[0] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-    iCommandBuffer[1] = SEQ_INT1();
-
-    // Enbale ADC conversion bit
-    AfeControlRegister |= AFECTRL_ADCCNV;
-    iCommandBuffer[2] = SEQ_WR(REG_AFE_AFECON, AfeControlRegister); 
-
-    iCommandBuffer[3] = SEQ_WR(REG_AFE_LPDACDAT0, uiVzeroCode << 12 | uiVbiasCode);
-    iCommandBuffer[4] = SEQ_WAIT(10);
-    iCommandBuffer[5] = SEQ_WR(bSeqBlockUsed ? REG_AFE_SEQ1INFO : 
-                        REG_AFE_SEQ2INFO, (iSRAMAddress << 
-                        BITP_AFE_SEQ1INFO_ADDR) | (AD5940_BUFFER_CA << 
-                        BITP_AFE_SEQ1INFO_LEN));
-
-    // Write command to SRAM
-    AD5940_SEQCmdWrite(uiCurrAddr, iCommandBuffer, AD5940_BUFFER_CA);
-    
-    // Switch between block 0 and block 1
-    iDacCurrentBlock = (iDacCurrentBlock == CURRENT_BLOCK_0) ? 
-                        CURRENT_BLOCK_1 : CURRENT_BLOCK_0; 
-                        
-    c_DataStorageLocal_->set_DacCurrentBlock(iDacCurrentBlock);
-
-    // Switch from block 0 -> 1 or 1 -> 0
-    bSeqBlockUsed = bSeqBlockUsed ? false : true;
-    c_DataStorageLocal_->set_SeqBlockUsed(bSeqBlockUsed);
+   
 
     return EC_NO_ERROR;
 }

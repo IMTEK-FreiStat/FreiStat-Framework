@@ -80,6 +80,7 @@ class C_Communication{
         int funSendErrorTelegram(int);
         int funSendCommandTelegram(char *);
         int funSendExperimentData(S_DataContainer, int);
+        int funSendExperimentDataEIS(S_DataContainerEIS, int);
         int funSetupSDcard();
         int funStopSDcard();
 

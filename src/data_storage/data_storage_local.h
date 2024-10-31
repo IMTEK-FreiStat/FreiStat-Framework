@@ -70,9 +70,11 @@ class C_DataStorageLocal{
         float   fWePotentialLow_;                       // LSV | CV | CA | DPV | NPV | SWV
         float   fStartFrequency_;                       //     |    |    |     |     |     | EIS
         float   fCurrentFrequency_;                     //     |    |    |     |     |     | EIS
+        float   fNextFrequency_;                        //     |    |    |     |     |     | EIS
         float   fStopFrequency_;                        //     |    |    |     |     |     | EIS
         float   fAcAmplitude_;                          //     |    |    |     |     |     | EIS
         float   fDcOffset_;                             //     |    |    |     |     |     | EIS
+        SoftSweepCfg_Type S_Sweep_Config_;              //     |    |    |     |     |     | EIS
 
         float   arrfPotentialSteps_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
         float   arrfPulseDurations_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
@@ -153,10 +155,12 @@ class C_DataStorageLocal{
 
         void set_StartFrequency(float);
         void set_CurrentFrequency(float);
+        void set_NextFrequency(float);
         void set_StopFrequency(float);
         void set_AcAmplitude(float);
         void set_DcOffset(float);
         void set_NumberPoints(int);
+        void set_S_Sweep_Config(SoftSweepCfg_Type);
         void set_SweepTyp(BoolFlag);
 
         /**********************************************************************
@@ -226,10 +230,12 @@ class C_DataStorageLocal{
 
         float get_StartFrequency();
         float get_CurrentFrequency();
+        float get_NextFrequency();
         float get_StopFrequency();
         float get_AcAmplitude();
         float get_DcOffset();
         int get_NumberPoints();
+        SoftSweepCfg_Type * get_S_Sweep_Config();
         BoolFlag get_SweepTyp();
 
         /**********************************************************************
