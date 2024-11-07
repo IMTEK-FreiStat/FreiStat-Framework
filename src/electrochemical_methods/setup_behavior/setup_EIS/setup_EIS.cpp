@@ -100,7 +100,7 @@ int C_Setup_EIS::funInitEIS(){
     S_FiFoConfig.FIFOSrc = FIFOSRC_DFT;
 
     // Get FIFO threshold
-    S_FiFoConfig.FIFOThresh = c_DataStorageGeneral_->get_FiFoThreshold();
+    S_FiFoConfig.FIFOThresh = 4;
 
     // Set FIFO to FIFO mode instead of stream mode
     S_FiFoConfig.FIFOMode = FIFOMODE_FIFO;
@@ -273,7 +273,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
 
     S_Sweep_Config.SweepStart = c_DataStorageLocal_->get_StartFrequency();
     S_Sweep_Config.SweepStop = c_DataStorageLocal_->get_StopFrequency();
-    S_Sweep_Config.SweepPoints = c_DataStorageLocal_->get_NumberPoints();
+    S_Sweep_Config.SweepPoints =  c_DataStorageLocal_->get_NumberPoints();
     S_Sweep_Config.SweepLog = c_DataStorageLocal_->get_SweepTyp();
 
     
@@ -288,6 +288,9 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     S_HSLoopConfig.HsDacCfg.HsDacUpdateRate = 7;
 
     S_HSLoopConfig.HsTiaCfg.DiodeClose = bFALSE;
+
+    c_DataStorageLocal_->set_AcAmplitude(800.0);
+    c_DataStorageLocal_->set_DcOffset(0);
 
     // With dc offset
     if( c_DataStorageLocal_->get_DcOffset() != 0.0f){   
@@ -322,12 +325,14 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
         AppIMPCfg.FreqofData = sin_freq;
     }*/
 
-    AD5940_SweepNext(& S_Sweep_Config, &fNext_Frequency);
+    //AD5940_SweepNext(& S_Sweep_Config, &fNext_Frequency);
 
-    c_DataStorageLocal_->set_NextFrequency(fNext_Frequency);
+    //c_DataStorageLocal_->set_NextFrequency(fNext_Frequency);
+   
 
-    S_HSLoopConfig.WgCfg.SinCfg.SinFreqWord = AD5940_WGFreqWordCal( c_DataStorageLocal_->get_CurrentFrequency(), AD5940_SYS_CLOCK_FREQ);
+    S_HSLoopConfig.WgCfg.SinCfg.SinFreqWord = AD5940_WGFreqWordCal( S_Sweep_Config.SweepStart, AD5940_SYS_CLOCK_FREQ);
     S_HSLoopConfig.WgCfg.SinCfg.SinAmplitudeWord = (uint32_t)(c_DataStorageLocal_->get_AcAmplitude() / 800.0f*2047 + 0.5f);
+    S_HSLoopConfig.WgCfg.SinCfg.SinOffsetWord = 0;
     S_HSLoopConfig.WgCfg.SinCfg.SinPhaseWord = 0;
 
     AD5940_HSLoopCfgS(&S_HSLoopConfig);
@@ -424,7 +429,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
 
     if (iErrorCode == AD5940ERR_OK){
         // Get sequence info 
-        S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
+        S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_0);
 
         // Set all members of the structure to 0
         AD5940_StructInit(&S_SequenceInfo, sizeof(S_SequenceInfo));
@@ -433,7 +438,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
         }
             
         // Set sequence ID to 1
-        S_SequenceInfo.SeqId = SEQID_1;
+        S_SequenceInfo.SeqId = SEQID_0;
 
         // Get sequener start adress in SRAM
         S_SequenceInfo.SeqRamAddr = c_DataStorageGeneral_->
@@ -446,7 +451,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
         S_SequenceInfo.SeqLen = uiSeqeuenceLength;
 
         // Save configuration
-        c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
+        c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_0);
 
         // Write to SRAM
         AD5940_SEQCmdWrite(S_SequenceInfo.SeqRamAddr, uiSequenceCommand, 
@@ -528,6 +533,10 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
 
     AD5940_EnterSleepS();/* Goto hibernate */
 
+        // Set starting address for execute sequence
+    uiCurrAddr = c_DataStorageGeneral_->get_SequenceInfo(SEQID_0).SeqRamAddr + 
+                 c_DataStorageGeneral_->get_SequenceInfo(SEQID_0).SeqLen;
+
     /* Sequence end. */
     iErrorCode = AD5940_SEQGenFetchSeq(&uiSequenceCommand, &uiSequenceLength);
     AD5940_SEQGenCtrl(bFALSE); /* Stop sequencer generator */
@@ -536,16 +545,16 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
         return iErrorCode;
     }
     // Get stored sequence info
-    S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_0);
-    S_SequenceInfo.SeqId = SEQID_0;
-    S_SequenceInfo.SeqRamAddr = uiCurrAddr + uiSequenceLength;
+    S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
+    S_SequenceInfo.SeqId = SEQID_1;
+    S_SequenceInfo.SeqRamAddr = uiCurrAddr;
     S_SequenceInfo.pSeqCmd = uiSequenceCommand;
     S_SequenceInfo.SeqLen = uiSequenceLength;
        // Save sequence info 
-    c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_0);
+    c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
 
     // Write command to SRAM
-    AD5940_SEQCmdWrite(S_SequenceInfo.SeqRamAddr, uiSequenceCommand, uiSequenceLength);
+    AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
     /* Write command to SRAM */
 
 

@@ -22,7 +22,6 @@ struct S_DataContainer{
 };
 
 struct S_DataContainerEIS{
-    int iCycle;
     int iMeasurmentPair;
     float fFrequency;
     float Magnitude;         /**< The magnitude in polar coordinate */

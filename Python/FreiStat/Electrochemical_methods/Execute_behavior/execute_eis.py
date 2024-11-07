@@ -155,9 +155,9 @@ class ExecuteEIS(ExecuteBehavior):
         # Initialize variables
         iDataPoint : int = 0
 
-        fCurrent : float = 0
-        fVoltage : float = 0
-        fTimeStamp : float = 0
+        frequency : float = 0
+        magnitude : float = 0
+        phase : float = 0
 
         strRun : str = ""
         strReadData : str = ""
@@ -173,13 +173,15 @@ class ExecuteEIS(ExecuteBehavior):
 
             # Read byte stream from serial connection and convert into string
             strReadData = self._serialConnection.read_Data("JSON").\
-                decode("utf-8")
+                decode("utf-8", "backslashreplace")
 
             print(strReadData)
 
             # Parse JSON string
             iCurrenPosition, bErrorflag, listReadData = \
             self._jsonParser.parse_JSON_string(listReadData, strReadData)
+
+            print(listReadData)
 
             # Check if system status is set to experiment startet
             if (self._dataSoftwareStorage.get_SystemStatus() ==
@@ -204,34 +206,19 @@ class ExecuteEIS(ExecuteBehavior):
 
             # Check if send telegram is a data telegram
             if (listReadData[0][0] == ("\"" + RUN + "\"")):
-                # Set reference time
-                if (self._referenceTime == -1):
-                    self._referenceTime = float(listReadData[1][1][3][1])
 
-                # Check if a new run started
-                if (strRun != listReadData[0][1]):
-                    # Export data storage object
-                    self._dataHandling.export_DataStorage()
-
-                    # Reset reference time
-                    self._referenceTime = float(listReadData[1][1][3][1]) 
-
-                    # Check if low performance mode is enabled
-                    if (self._lowPerformaneMode == True):
-                        print("Cycle: " + strRun)
 
                 # Get current run
                 strRun = listReadData[0][1]
 
                 # Get datapoint
-                iDataPoint = int(listReadData[1][1][0][1], 10)
+                frequency = float(listReadData[1][1][0][1])
 
                 # Convert data
-                fVoltage = float(listReadData[1][1][1][1])   
-                fCurrent = float(listReadData[1][1][2][1])          
-                fTimeStamp = float(listReadData[1][1][3][1]) - \
-                    self._referenceTime
-                
+                magnitude = float(listReadData[1][1][1][1])   
+                phase = float(listReadData[1][1][2][1])          
+               
+                """
                 # Add data to data storage
                 self._dataHandling.append_StoredData(
                         [int(strRun,10),
@@ -245,7 +232,7 @@ class ExecuteEIS(ExecuteBehavior):
                                 iDataPoint,
                                 fVoltage,
                                 fCurrent,
-                                fTimeStamp])
+                                fTimeStamp])"""
 
             # Check if send telegram is a command telegram
             elif (listReadData[0][0] == ("\"" + COMMAND_TELEGRAM + "\"")):

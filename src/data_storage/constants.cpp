@@ -238,7 +238,10 @@ const float PULSE_LENGTHS_F[] =     {4000, 3000, 3000};
 #define DATA_PAIR_NUMBER        "D"         // Number of the value pair inside a cycle
 #define VOLTAGE_VALUE           "V"         // Voltage value
 #define CURRENT_VALUE           "C"         // Current value           
-#define TIME_VALUE              "T"         // Time stamp  
+#define TIME_VALUE              "T"         // Time stamp
+#define FREQUENCY_VALUE         "F"         // Frequency 
+#define MAGNITUDE_VALUE         "A"         // Magnitude 
+#define PHASE_VALUE             "P"         // Magnitude 
 
 /******************************************************************************
  * Telegram: Command telegram types
