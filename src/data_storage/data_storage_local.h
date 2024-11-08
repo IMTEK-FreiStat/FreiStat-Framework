@@ -74,7 +74,7 @@ class C_DataStorageLocal{
         float   fStopFrequency_;                        //     |    |    |     |     |     | EIS
         float   fAcAmplitude_;                          //     |    |    |     |     |     | EIS
         float   fDcOffset_;                             //     |    |    |     |     |     | EIS
-        SoftSweepCfg_Type S_Sweep_Config_;              //     |    |    |     |     |     | EIS
+        SoftSweepCfg_Type* S_Sweep_Config_;              //     |    |    |     |     |     | EIS
 
         float   arrfPotentialSteps_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
         float   arrfPulseDurations_[EXPERIMENT_BUFFER]; //     |    | CA | DPV | NPV | SWV
@@ -160,7 +160,7 @@ class C_DataStorageLocal{
         void set_AcAmplitude(float);
         void set_DcOffset(float);
         void set_NumberPoints(int);
-        void set_S_Sweep_Config(SoftSweepCfg_Type);
+        void set_S_Sweep_Config(SoftSweepCfg_Type*);
         void set_SweepTyp(BoolFlag);
 
         /**********************************************************************

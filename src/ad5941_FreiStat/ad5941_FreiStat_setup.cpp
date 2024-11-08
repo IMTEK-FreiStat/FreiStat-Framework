@@ -192,7 +192,7 @@ void C_AD5940_Setup::funAD5940_Config(){
                    AFEINTSRC_DATAFIFOOF |     /* FIFO overflow              */
                    AFEINTSRC_CUSTOMINT0 |     /* Custom interrupt source 0  */
                    AFEINTSRC_CUSTOMINT1 |     /* Custom interrupt source 1  */
-                   
+                  
                    AFEINTSRC_ENDSEQ,          /* End of sequnece interrupt  */
                    bTRUE);
    

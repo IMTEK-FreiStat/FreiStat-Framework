@@ -181,8 +181,6 @@ class ExecuteEIS(ExecuteBehavior):
             iCurrenPosition, bErrorflag, listReadData = \
             self._jsonParser.parse_JSON_string(listReadData, strReadData)
 
-            print(listReadData)
-
             # Check if system status is set to experiment startet
             if (self._dataSoftwareStorage.get_SystemStatus() ==
                 FREISTAT_EXP_STARTED):

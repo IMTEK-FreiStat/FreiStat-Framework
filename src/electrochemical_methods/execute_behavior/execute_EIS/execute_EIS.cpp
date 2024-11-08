@@ -194,7 +194,7 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
-            //this->funUpdateSequence(uiFiFoCount);
+            this->funUpdateSequence(uiFiFoCount);
 
              AD5940_SleepKeyCtrlS(SLPKEY_UNLOCK);  /* Allow AFE to enter sleep mode. */
             

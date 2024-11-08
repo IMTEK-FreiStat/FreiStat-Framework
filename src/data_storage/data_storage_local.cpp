@@ -372,7 +372,7 @@ void C_DataStorageLocal::set_NumberPoints(int iNumPoints){
  * false for linear
  * @param bSweepTyp: Type of frequencysweep
  *****************************************************************************/
-void C_DataStorageLocal::set_S_Sweep_Config(SoftSweepCfg_Type S_Sweep_Config){
+void C_DataStorageLocal::set_S_Sweep_Config(SoftSweepCfg_Type * S_Sweep_Config){
     S_Sweep_Config_ = S_Sweep_Config;
 }
 
@@ -880,7 +880,7 @@ int C_DataStorageLocal::get_NumberPoints(){
  * @param bSweepTyp: Type of frequencysweep
  *****************************************************************************/
 SoftSweepCfg_Type * C_DataStorageLocal::get_S_Sweep_Config(){
-    return &S_Sweep_Config_;
+    return S_Sweep_Config_;
 }
 
 /******************************************************************************

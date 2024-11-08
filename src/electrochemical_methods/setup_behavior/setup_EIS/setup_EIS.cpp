@@ -91,7 +91,7 @@ int C_Setup_EIS::funInitEIS(){
 
     // Reconfigure FIFO, since the Rtia calibration can lead to data remnants
     // Disable FIFO
-    AD5940_FIFOCtrlS(FIFOSRC_DFT, bFALSE);
+    AD5940_FIFOCtrlS(FIFOSRC_SINC3, bFALSE);
 
     // Enable FIFO
     S_FiFoConfig.FIFOEn = bTRUE;
@@ -165,9 +165,6 @@ int C_Setup_EIS::funInitEIS(){
     // Save sequence info
     c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
 
-    // Disable sequencer
-    AD5940_SEQCtrlS(bFALSE); 
-    AD5940_WriteReg(REG_AFE_SEQCNT, 0);
     
     // Enable sequencer
     AD5940_SEQCtrlS(bTRUE); 
@@ -278,6 +275,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
 
     
     c_DataStorageLocal_->set_CurrentFrequency(S_Sweep_Config.SweepStart);
+    c_DataStorageLocal_->set_S_Sweep_Config(&S_Sweep_Config);
 
 
     /*************************************************************************/
@@ -288,9 +286,6 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     S_HSLoopConfig.HsDacCfg.HsDacUpdateRate = 7;
 
     S_HSLoopConfig.HsTiaCfg.DiodeClose = bFALSE;
-
-    c_DataStorageLocal_->set_AcAmplitude(800.0);
-    c_DataStorageLocal_->set_DcOffset(0);
 
     // With dc offset
     if( c_DataStorageLocal_->get_DcOffset() != 0.0f){   
@@ -305,9 +300,9 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     S_HSLoopConfig.HsTiaCfg.HstiaRtiaSel = HSTIARTIA_5K;
 
     S_HSLoopConfig.SWMatCfg.Dswitch = SWD_CE0;
-    S_HSLoopConfig.SWMatCfg.Pswitch = SWP_CE0;
-    S_HSLoopConfig.SWMatCfg.Nswitch = SWN_AIN1;
-    S_HSLoopConfig.SWMatCfg.Tswitch = SWT_TRTIA|SWT_AIN1;
+    S_HSLoopConfig.SWMatCfg.Pswitch = SWP_RE0;
+    S_HSLoopConfig.SWMatCfg.Nswitch = SWN_SE0;
+    S_HSLoopConfig.SWMatCfg.Tswitch = SWT_TRTIA|SWT_SE0LOAD;
 
     S_HSLoopConfig.WgCfg.WgType = WGTYPE_SIN;
     S_HSLoopConfig.WgCfg.GainCalEn = bTRUE;
@@ -517,9 +512,9 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     
     /* Configure matrix for external Rz */
     S_SWMatrix_Config.Dswitch = SWD_CE0;
-    S_SWMatrix_Config.Pswitch = SWP_CE0;
-    S_SWMatrix_Config.Nswitch = SWN_AIN1;
-    S_SWMatrix_Config.Tswitch = SWT_TRTIA|SWT_AIN1;
+    S_SWMatrix_Config.Pswitch = SWP_RE0;
+    S_SWMatrix_Config.Nswitch = SWN_SE0;
+    S_SWMatrix_Config.Tswitch = SWT_TRTIA|SWT_SE0LOAD;
     AD5940_SWMatrixCfgS(&S_SWMatrix_Config);
     AD5940_AFECtrlS(AFECTRL_ADCPWR|AFECTRL_WG, bTRUE);  /* Enable Waveform generator */
     AD5940_SEQGenInsert(SEQ_WAIT(16*10));  //delay for signal settling DFT_WAIT
