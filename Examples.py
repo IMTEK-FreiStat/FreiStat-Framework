@@ -239,10 +239,10 @@ def ExampleImplementation():
     elif (iExperiment == 8):
         # Run electrochemical impedance spectroscopy
 
-        strExportpath = Run_EIS().start(start_frequency= 1,
+        strExportpath = Run_EIS().start(start_frequency= 100,
                                         stop_frequency= 1000,
-                                        ac_amplitude= 0.4,
-                                        dc_offset = 0,
+                                        ac_amplitude= 0.1,
+                                        dc_offset = 0.1,
                                         num_points= 100,
                                         sweep_typ= True,
                                         MainsFilter = False,

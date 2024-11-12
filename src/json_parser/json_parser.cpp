@@ -1268,10 +1268,10 @@ int C_JSONParser::funHandleEISParameter(String strParameter, String strNumber){
         c_DataStorageLocal_->set_AcAmplitude(strNumber.toFloat());
     }
     else if (strParameter == DC_OFFSTET){
-        c_DataStorageLocal_->set_DcOffset(strNumber.toFloat());
+        c_DataStorageLocal_->set_DcOffset(-strNumber.toFloat());
     }
     else if (strParameter == NUM_POINTS){
-        c_DataStorageLocal_-> set_NumberPoints(strNumber.toInt());
+        c_DataStorageLocal_-> set_NumberPoints(strNumber.toInt()+1);
     }
     else if (strParameter == SWEEP_TYPE){
        

@@ -154,20 +154,40 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
         // Custom interrupt 1
         if (uiInterruptFlag & AFEINTSRC_CUSTOMINT1){
             // Reset interrupt flag
-            AD5940_INTCClrFlag(AFEINTSRC_CUSTOMINT1);
+       
             
+              if(AD5940_WakeUp(10) > 10)  /* Wakeup AFE by read register, read 10 times at most */
+                return AD5940ERR_WAKEUP;  /* Wakeup Failed */
+            AD5940_SleepKeyCtrlS(SLPKEY_LOCK);  /* Prohibit AFE to enter sleep mode. */
+
+            // Reset interrupt flag
+            AD5940_INTCClrFlag(AFEINTSRC_CUSTOMINT1);
+
             // Read amount of data which is currently stored in FIFO
             uiFiFoCount = AD5940_FIFOGetCnt();
 
             // Read data from FIFO and store in temporary buffer
             AD5940_FIFORd(c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
-
+            
+            
+            
             // Call the function to process data
             this->funProcessExperimentData(
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
             this->funUpdateSequence(uiFiFoCount);     
+            
+            if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
+                  // Control the application
+            this->funControlApplication(FREISTAT_STOP_TIMER);    
+
+            //disable AFE
+            AD5940_ShutDownS();
+
+            // Set interrupt flag
+            bEosInterruptOccured_ = true;
+            }
      
         }
 
@@ -197,6 +217,18 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
             this->funUpdateSequence(uiFiFoCount);
 
              AD5940_SleepKeyCtrlS(SLPKEY_UNLOCK);  /* Allow AFE to enter sleep mode. */
+
+             if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
+                  // Control the application
+            this->funControlApplication(FREISTAT_STOP_TIMER);    
+
+            //disable AFE
+            AD5940_ShutDownS();
+
+            // Set interrupt flag
+            bEosInterruptOccured_ = true;
+            }
+     
             
         }
         // General purpose timer 1 interrupt
@@ -219,7 +251,7 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
                  return 303;
         }
          // End of sequence interrupt
-        if (uiInterruptFlag & AFEINTSRC_ENDSEQ){
+        /*if (uiInterruptFlag & AFEINTSRC_ENDSEQ){
             // Reset interrupt flag
             AD5940_INTCClrFlag(AFEINTSRC_ENDSEQ);
 
@@ -240,9 +272,9 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
             AD5940_ShutDownS();
 
             // Set interrupt flag
-            bEosInterruptOccured_ = true;
-                 return 304;
-        }     
+            //bEosInterruptOccured_ = true;
+                
+        }     */
         // Update variable
         uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
     }
@@ -257,60 +289,60 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
 int C_Execute_EIS::funProcessExperimentData(uint32_t * pData, 
                                            uint32_t uiCountData){
     // Intialize variables
-    float fNextFrequency = c_DataStorageLocal_->get_NextFrequency();
+     S_DataContainerEIS S_ExperimentDataEIS;
     
-    uint32_t uiImpResCount = uiCountData/4;
-        
+    // uint32_t DataCount = *pDataCount;
+    uint32_t ImpResCount = uiCountData/4;
 
-    S_DataContainerEIS S_ExperimentDataEIS;
+
+
+    //*pDataCount = 0;
+
+    //DataCount = (DataCount/4)*4;/* We expect RCAL data together with Rz data. One DFT result has two data in FIFO, real part and imaginary part.  */
+
+    /* Convert DFT result to int32_t type */
+    for(uint32_t i=0; i<uiCountData; i++)
+    {
+        pData[i] &= 0x3ffff; /* @todo option to check ECC */
+        if(pData[i]&(1L<<17)) /* Bit17 is sign bit */
+        {
+        pData[i] |= 0xfffc0000; /* Data is 18bit in two's complement, bit17 is the sign bit */
+        }
+    }
+
     fImpPol_Type * const pOut = (fImpPol_Type*)pData;
     iImpCar_Type * pSrcData = (iImpCar_Type*)pData;
 
-
-
-    /* Convert DFT result to int32_t type */
-  for(uint32_t i=0; i<uiCountData; i++)
-  {
-    pData[i] &= 0x3ffff; /* @todo option to check ECC */
-    if(pData[i]&(1L<<17)) /* Bit17 is sign bit */
+    for(uint32_t i=0; i<ImpResCount; i++)
     {
-      pData[i] |= 0xfffc0000; /* Data is 18bit in two's complement, bit17 is the sign bit */
-    }
-  }
-  for(uint32_t i=0; i<uiImpResCount; i++)
-  {
-    iImpCar_Type *pDftRcal, *pDftRz;
+        iImpCar_Type *pDftRcal, *pDftRz;
 
-    pDftRcal = pSrcData++;
-    pDftRz = pSrcData++;
-    float RzMag,RzPhase;
-    float RcalMag, RcalPhase;
-    
-    RcalMag = sqrt((float)pDftRcal->Real*pDftRcal->Real+(float)pDftRcal->Image*pDftRcal->Image);
-    RcalPhase = atan2(-pDftRcal->Image,pDftRcal->Real);
-    RzMag = sqrt((float)pDftRz->Real*pDftRz->Real+(float)pDftRz->Image*pDftRz->Image);
-    RzPhase = atan2(-pDftRz->Image,pDftRz->Real);
+        pDftRcal = pSrcData++;
+        pDftRz = pSrcData++;
+        float RzMag,RzPhase;
+        float RcalMag, RcalPhase;
+        
+        RcalMag = sqrt((float)pDftRcal->Real*pDftRcal->Real+(float)pDftRcal->Image*pDftRcal->Image);
+        RcalPhase = atan2(-pDftRcal->Image,pDftRcal->Real);
+        RzMag = sqrt((float)pDftRz->Real*pDftRz->Real+(float)pDftRz->Image*pDftRz->Image);
+        RzPhase = atan2(-pDftRz->Image,pDftRz->Real);
 
-    RzMag = RcalMag/RzMag *10000;
-    RzPhase = RcalPhase - RzPhase;
-    
-    pOut[i].Magnitude = RzMag;
-    pOut[i].Phase = RzPhase;
+        RzMag = RcalMag/RzMag* AD5940_CAL_RESISTOR;
+        RzPhase = RcalPhase - RzPhase;
 
-    S_ExperimentDataEIS.fFrequency = c_DataStorageLocal_->get_CurrentFrequency();
-    S_ExperimentDataEIS.Magnitude = RzMag;
-    S_ExperimentDataEIS.Phase = RzPhase;
+        S_ExperimentDataEIS.fFrequency = c_DataStorageLocal_->get_CurrentFrequency();
+        S_ExperimentDataEIS.Magnitude = RzMag;
+        S_ExperimentDataEIS.Phase = RzPhase;
 
-    // Data point number
-        S_ExperimentDataEIS.iMeasurmentPair = 1 + iStepCounter_;
+        // Data point number
+            S_ExperimentDataEIS.iMeasurmentPair = 1 + iStepCounter_;
 
-    // Save data
-        c_DataStorageGeneral_->set_ExperimentDataEIS(
-            S_ExperimentDataEIS, this->funGetDataPosition(iStepCounter_));
-            iStepCounter_ ++; 
+        // Save data
+            c_DataStorageGeneral_->set_ExperimentDataEIS(
+                S_ExperimentDataEIS, this->funGetDataPosition(iStepCounter_));
+                iStepCounter_ ++; 
   }
 
-  uiCountData = uiImpResCount; 
   //AppIMPCfg.FreqofData = AppIMPCfg.SweepCurrFreq;
   /* Calculate next frequency point */
     
@@ -380,9 +412,17 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
 int C_Execute_EIS::funUpdateSequence(uint32_t uiFiFoCount){
 
     float fNextFrequency;
-    SoftSweepCfg_Type* S_Sweep_Config = c_DataStorageLocal_->get_S_Sweep_Config();
+    SoftSweepCfg_Type S_Sweep_Config;
 
-    AD5940_SweepNext(S_Sweep_Config, &fNextFrequency);
+    S_Sweep_Config.SweepEn = bTRUE;
+    S_Sweep_Config.SweepIndex = iStepCounter_;
+
+    S_Sweep_Config.SweepStart = c_DataStorageLocal_->get_StartFrequency();
+    S_Sweep_Config.SweepStop = c_DataStorageLocal_->get_StopFrequency();
+    S_Sweep_Config.SweepPoints =  c_DataStorageLocal_->get_NumberPoints();
+    S_Sweep_Config.SweepLog = c_DataStorageLocal_->get_SweepTyp();
+
+    AD5940_SweepNext(&S_Sweep_Config, &fNextFrequency);
 
     AD5940_WGFreqCtrlS(fNextFrequency, AD5940_SYS_CLOCK_FREQ);
     c_DataStorageLocal_->set_CurrentFrequency(fNextFrequency);

@@ -267,6 +267,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     // Config Sweep
 
     S_Sweep_Config.SweepEn = bTRUE;
+    S_Sweep_Config.SweepIndex = 0;
 
     S_Sweep_Config.SweepStart = c_DataStorageLocal_->get_StartFrequency();
     S_Sweep_Config.SweepStop = c_DataStorageLocal_->get_StopFrequency();
@@ -371,9 +372,8 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     // Set positive input channel of ADC to LPTIA0 positive input mode
     S_DSPConfig.ADCBaseCfg.ADCMuxP = ADCMUXP_HSTIA_P;
 
-    c_DataStorageLocal_->set_AdcPgaGain(ADCPGA_1);
     // Get gain of programmable gain amplifier
-    S_DSPConfig.ADCBaseCfg.ADCPga = c_DataStorageLocal_->get_AdcPgaGain();
+    S_DSPConfig.ADCBaseCfg.ADCPga = ADCPGA_1;
 
     AD5940_StructInit(&S_DSPConfig.ADCDigCompCfg, sizeof(S_DSPConfig.ADCDigCompCfg));
 
@@ -482,8 +482,8 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     S_Clk_Info.DataType = DATATYPE_DFT;
     S_Clk_Info.DftSrc = DFTSRC_SINC3;
     S_Clk_Info.DataCount = 1L<<(DFTNUM_16384+2); /* 2^(DFTNUMBER+2) */
-    S_Clk_Info.ADCSinc2Osr = c_DataStorageLocal_->get_AdcOsrSinc2();
-    S_Clk_Info.ADCSinc3Osr = c_DataStorageLocal_->get_AdcOsrSinc2();
+    S_Clk_Info.ADCSinc2Osr = ADCSINC2OSR_22;
+    S_Clk_Info.ADCSinc3Osr = ADCSINC3OSR_2;
     S_Clk_Info.ADCAvgNum = ADCAVGNUM_16;
     S_Clk_Info.RatioSys2AdcClk = 1;
     AD5940_ClksCalculate(&S_Clk_Info, &WaitClks);
