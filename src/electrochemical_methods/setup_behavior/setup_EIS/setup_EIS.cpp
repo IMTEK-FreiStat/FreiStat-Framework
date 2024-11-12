@@ -60,6 +60,8 @@ int C_Setup_EIS::funInitEIS(){
     HSLoopCfg_Type S_HSLoop_Config;
     DSPCfg_Type S_Dsp_Config;
 
+    AD5940_INTCCfg(AFEINTC_0, AFEINTSRC_GPT1INT_TRYBRK, bFALSE);
+
 
     // Wakeup AFE by reading register, read is tried 10 times at most
     if (AD5940_WakeUp(10) > 10){

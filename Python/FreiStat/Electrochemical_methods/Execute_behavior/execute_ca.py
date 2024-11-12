@@ -173,11 +173,11 @@ class ExecuteCA(ExecuteBehavior):
             # Read byte stream from serial connection and convert into string
             strReadData = self._serialConnection.read_Data("JSON").\
                 decode("utf-8")
-            print(strReadData)
+        
             # Parse read data string
             iCurrenPosition, bErrorflag, listReadData = \
             self._jsonParser.parse_JSON_string(listReadData, strReadData)
-            print(listReadData)
+           
             # Check if system status is set to experiment startet
             if (self._dataSoftwareStorage.get_SystemStatus() == 
                 FREISTAT_EXP_STARTED):
