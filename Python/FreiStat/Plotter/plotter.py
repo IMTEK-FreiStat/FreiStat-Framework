@@ -253,6 +253,10 @@ class Plotter:
         elif (self._experimentType == SWV):
             self._initPlot_DPV(self._experimentParameters)
 
+        # Eelectrochemical impedance spectroscopy
+       # elif (self._experimentType == EIS):
+        #    self._initPlot_EIS(self._experimentParameters)
+
     def _initPlot_OCP(self, listExperimentParameters : list) -> None:
         """
         Description
@@ -476,6 +480,43 @@ class Plotter:
         self._ax.axes.set_xlabel(PLOT_CV_X_LABEL)
         self._ax.axes.set_ylabel(PLOT_CV_Y_LABEL)
 
+    """
+    def _initPlot_EIS(self, listExperimentParameters : list) -> None:
+        
+        Description
+        -----------
+        Sub method of the initPlot method to initialize plots of the CV family.
+        This contains at the moment:
+            - Normal pulse voltammetry
+
+        Parameters
+        ----------
+        `listExperimentParameters` : list
+            List containing the experiment parameters for the specific method
+
+        
+        print(listExperimentParameters)
+        startFrequency : float = listExperimentParameters[1][1]
+        stopFrequency : float = listExperimentParameters[2][1]
+        ac_amplitude : float = listExperimentParameters[3][1]
+        dc_amplitude : float = listExperimentParameters[4][1]
+
+        fLimitRight : float = stopFrequency            
+        fLimitLeft : float =  startFrequency
+            
+        # Define window in x-direction
+        self._ax.set_xlim([fLimitLeft, fLimitRight])
+
+        
+        # Define window in y-direction                    
+        #self._ax.set_ylim([-0.9 * 1e6 / iLPTIARtiaSize - PADDING_CURRENT_UA, 
+        #                    0.9 * 1e6 / iLPTIARtiaSize + PADDING_CURRENT_UA])
+
+        # Load labels from constants.py
+        self._ax.axes.set_xlabel(PLOT_EIS_X_LABEL)
+        self._ax.axes.set_ylabel(PLOT_CV_Y_LABEL)
+       
+    """
     def _initAnimate(self):
         """
         Description
@@ -967,11 +1008,17 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[1]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                print("Cycle: " + str(listData[0]) + "\t - " +
-                    "Datapoint:  " + str(listData[1]) + "\t - \t" + 
-                    "Voltage: " + str(listData[2]) + " mV\t\t - \t" +
-                    "Current: " + str(listData[3]) + " \u03BCA\t\t - \t" +
-                    "Time: " + str(listData[4]) + " ms")
+                if(self._experimentType == EIS):
+                    print("Datapoint " + str(listData[0]) + "\t - " +
+                        "Frequency:  " + str(listData[2]) + "\t - \t" + 
+                        "Magnitude: " + str(listData[3]) + " in Ohm\t\t - \t" +
+                        "Phase: " + str(listData[4]) + " in rad")
+                else:
+                    print("Cycle: " + str(listData[0]) + "\t - " +
+                        "Datapoint:  " + str(listData[1]) + "\t - \t" + 
+                        "Voltage: " + str(listData[2]) + " mV\t\t - \t" +
+                        "Current: " + str(listData[3]) + " \u03BCA\t\t - \t" +
+                        "Time: " + str(listData[4]) + " ms")
 
         else :
             # Check if data is empty and return

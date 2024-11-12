@@ -121,7 +121,6 @@ class ExecuteEIS(ExecuteBehavior):
             iCurrenPosition, bErrorflag, listReadData = \
             self._jsonParser.parse_JSON_string(listReadData, strReadTelegram)
 
-            print(listReadData)
             # Compare code to previously send code
             if (int(listReadData[0][1]) != listCommandIDs[iIndex]):
                 return EC_EXECUTE + EC_EX_C_A_MISMATCH
@@ -133,8 +132,6 @@ class ExecuteEIS(ExecuteBehavior):
         if (bEnableReading == True):
             # Start thread to handle data exchange
             self._handleDataEIS(dataQueue)
-
-            print(listReadData)
 
         # No error occured
         return EC_NO_ERROR
@@ -175,7 +172,6 @@ class ExecuteEIS(ExecuteBehavior):
             strReadData = self._serialConnection.read_Data("JSON").\
                 decode("utf-8", "backslashreplace")
 
-            print(strReadData)
 
             # Parse JSON string
             iCurrenPosition, bErrorflag, listReadData = \
@@ -204,6 +200,15 @@ class ExecuteEIS(ExecuteBehavior):
 
             # Check if send telegram is a data telegram
             if (listReadData[0][0] == ("\"" + RUN + "\"")):
+               
+                # Check if a new run started
+                if (strRun != listReadData[0][1]):
+                    # Export data storage object
+                    self._dataHandling.export_DataStorage()  
+
+                    # Check if low performance mode is enabled
+                    if (self._lowPerformaneMode == True):
+                        print("Cycle: " + strRun)
 
 
                 # Get current run
@@ -216,21 +221,21 @@ class ExecuteEIS(ExecuteBehavior):
                 magnitude = float(listReadData[1][1][1][1])   
                 phase = float(listReadData[1][1][2][1])          
                
-                """
+                
                 # Add data to data storage
                 self._dataHandling.append_StoredData(
                         [int(strRun,10),
                         iDataPoint,
-                        fVoltage,
-                        fCurrent,
-                        fTimeStamp])
+                        frequency,
+                        magnitude,
+                        phase])
                 
                 # Add data to dataQueue
                 dataQueue.put([int(strRun,10),
                                 iDataPoint,
-                                fVoltage,
-                                fCurrent,
-                                fTimeStamp])"""
+                                frequency,
+                                magnitude,
+                                phase])
 
             # Check if send telegram is a command telegram
             elif (listReadData[0][0] == ("\"" + COMMAND_TELEGRAM + "\"")):

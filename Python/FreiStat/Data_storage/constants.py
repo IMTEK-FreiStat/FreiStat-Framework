@@ -303,6 +303,9 @@ DE_TAG_TOTAL_TIME       = "Total time in ms"
 DE_TAG_SEQ_CYCLE        = "Sequence Cycle"
 DE_TAG_SEQ_TIME         = "Sequence time in ms"
 DE_TAG_VOLTAGE          = "Voltage in mV"
+DE_TAG_FREQUENCY        = "Frequency in Hz"
+DE_TAG_MAGNITUDE        = "Magnitude in Ohm"
+DE_TAG_PHASE            = "Phase in rad"
 
 """-----------------------------------------------------------------------------
 | Data export: Labels
@@ -326,6 +329,13 @@ FREISTAT_CV_LABEL_SEQ   = [DE_TAG_SEQ_CYCLE, DE_TAG_CYCLE, DE_TAG_DATAPOINT,
 FREISTAT_CA_LABEL_SEQ   = [DE_TAG_SEQ_CYCLE, DE_TAG_CYCLE, DE_TAG_DATAPOINT, 
                            DE_TAG_VOLTAGE, DE_TAG_CURRENT, DE_TAG_CYCLE_TIME, 
                            DE_TAG_SEQ_TIME, DE_TAG_TOTAL_TIME]
+
+FREISTAT_EIS_LABEL      = [ DE_TAG_DATAPOINT,  DE_TAG_FREQUENCY,
+                           DE_TAG_MAGNITUDE, DE_TAG_PHASE]
+                           
+FREISTAT_EIS_LABEL_SEQ   = [DE_TAG_SEQ_CYCLE, DE_TAG_DATAPOINT, DE_TAG_FREQUENCY,
+                           DE_TAG_MAGNITUDE, DE_TAG_PHASE,  
+                           DE_TAG_SEQ_TIME]
 
 """-----------------------------------------------------------------------------
 | Plotter
