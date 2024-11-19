@@ -332,13 +332,6 @@ void C_DataStorageLocal::set_CurrentFrequency(float fCurrentFrequency){
  * @brief Setter method for saving stop frqeuency
  * @param fStopFrequncy: Stop frequency
  *****************************************************************************/
-void C_DataStorageLocal::set_NextFrequency(float fNextFrequency){
-    fNextFrequency_ = fNextFrequency;
-}
-/******************************************************************************
- * @brief Setter method for saving stop frqeuency
- * @param fStopFrequncy: Stop frequency
- *****************************************************************************/
 void C_DataStorageLocal::set_StopFrequency(float fStopFrequncy){
     fStopFrequency_ = fStopFrequncy;
 }
@@ -367,15 +360,6 @@ void C_DataStorageLocal::set_NumberPoints(int iNumPoints){
     iNumPoints_ = iNumPoints;
 }
 
-/******************************************************************************
- * @brief Setter method for saving thr type of frequencysweep true fpr log 
- * false for linear
- * @param bSweepTyp: Type of frequencysweep
- *****************************************************************************/
-void C_DataStorageLocal::set_S_Sweep_Config(SoftSweepCfg_Type * S_Sweep_Config){
-    S_Sweep_Config_ = S_Sweep_Config;
-}
-
 
 /******************************************************************************
  * @brief Setter method for saving thr type of frequencysweep true fpr log 
@@ -385,6 +369,8 @@ void C_DataStorageLocal::set_S_Sweep_Config(SoftSweepCfg_Type * S_Sweep_Config){
 void C_DataStorageLocal::set_SweepTyp(BoolFlag bSweepTyp){
     bSweepType_ = bSweepTyp;
 }
+
+
 
 /******************************************************************************
  * Getter methods
@@ -835,13 +821,6 @@ float C_DataStorageLocal::get_CurrentFrequency(){
     return fCurrentFrequency_;
 }
 
-/******************************************************************************
- * @brief Getter method for saving stop frqeuency
- * @param fStopFrequncy: Stop frequency
- *****************************************************************************/
-float C_DataStorageLocal::get_NextFrequency(){
-    return fNextFrequency_;
-}
 
 /******************************************************************************
  * @brief Getter method for saving stop frqeuency
@@ -873,14 +852,6 @@ float C_DataStorageLocal::get_DcOffset(){
  *****************************************************************************/
 int C_DataStorageLocal::get_NumberPoints(){
     return iNumPoints_;
-}
-/******************************************************************************
- * @brief Getter method for saving thr type of frequencysweep true fpr log 
- * false for linear
- * @param bSweepTyp: Type of frequencysweep
- *****************************************************************************/
-SoftSweepCfg_Type * C_DataStorageLocal::get_S_Sweep_Config(){
-    return S_Sweep_Config_;
 }
 
 /******************************************************************************

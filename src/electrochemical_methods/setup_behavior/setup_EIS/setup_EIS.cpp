@@ -56,9 +56,6 @@ int C_Setup_EIS::funInitEIS(){
     FIFOCfg_Type S_FiFoConfig;
     SEQCfg_Type S_SequencerConfig;
     SEQInfo_Type S_SequenceInfo;
-    AFERefCfg_Type S_AFE_ReConfig;
-    HSLoopCfg_Type S_HSLoop_Config;
-    DSPCfg_Type S_Dsp_Config;
 
     AD5940_INTCCfg(AFEINTC_0, AFEINTSRC_GPT1INT_TRYBRK, bFALSE);
 
@@ -167,6 +164,12 @@ int C_Setup_EIS::funInitEIS(){
     // Save sequence info
     c_DataStorageGeneral_->set_SequenceInfo(S_SequenceInfo, SEQID_1);
 
+    uint32_t arruiSeqWaitAddr[2];   
+    arruiSeqWaitAddr[0] = c_DataStorageGeneral_->get_SeqWaitAddr(0);
+    arruiSeqWaitAddr[1] = c_DataStorageGeneral_->get_SeqWaitAddr(1);
+
+    c_DataStorageGeneral_->checkFrequency(c_DataStorageLocal_->get_CurrentFrequency(),
+                                                S_SequenceInfo, arruiSeqWaitAddr);
     
     // Enable sequencer
     AD5940_SEQCtrlS(bTRUE); 
@@ -175,7 +178,7 @@ int C_Setup_EIS::funInitEIS(){
     c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccured(false);
     
     // Set AFE to low power mode
-    AD5940_AFEPwrBW(AFEPWR_HP, AFEBW_250KHZ);
+    AD5940_AFEPwrBW(AFEPWR_LP, AFEBW_250KHZ);
 
     return EC_NO_ERROR;
 }
@@ -278,8 +281,6 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
 
     
     c_DataStorageLocal_->set_CurrentFrequency(S_Sweep_Config.SweepStart);
-    c_DataStorageLocal_->set_S_Sweep_Config(&S_Sweep_Config);
-
 
     /*************************************************************************/
     // Configure high speed loop
@@ -310,22 +311,7 @@ int C_Setup_EIS::funSequencerInitializationSequence(){
     S_HSLoopConfig.WgCfg.WgType = WGTYPE_SIN;
     S_HSLoopConfig.WgCfg.GainCalEn = bTRUE;
     S_HSLoopConfig.WgCfg.OffsetCalEn = bTRUE;
-    //if(AppIMPCfg.SweepCfg.SweepEn == bTRUE)
-    //{
-    //    AppIMPCfg.FreqofData = AppIMPCfg.SweepCfg.SweepStart;
-    //   AppIMPCfg.SweepCurrFreq = AppIMPCfg.SweepCfg.SweepStart;
-    //      AD5940_SweepNext(&AppIMPCfg.SweepCfg, &AppIMPCfg.SweepNextFreq);
-    //    sin_freq = AppIMPCfg.SweepCurrFreq;
-    //}
-    /*else
-    {
-        sin_freq = AppIMPCfg.SinFreq;
-        AppIMPCfg.FreqofData = sin_freq;
-    }*/
-
-    //AD5940_SweepNext(& S_Sweep_Config, &fNext_Frequency);
-
-    //c_DataStorageLocal_->set_NextFrequency(fNext_Frequency);
+ 
    
 
     S_HSLoopConfig.WgCfg.SinCfg.SinFreqWord = AD5940_WGFreqWordCal( S_Sweep_Config.SweepStart, AD5940_SYS_CLOCK_FREQ);
@@ -481,6 +467,8 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     SWMatrixCfg_Type S_SWMatrix_Config;
     ClksCalInfo_Type S_Clk_Info;
 
+    uint32_t arruiSeqWaitAddr;  
+
     S_Clk_Info.DataType = DATATYPE_DFT;
     S_Clk_Info.DftSrc = DFTSRC_SINC3;
     S_Clk_Info.DataCount = 1L<<(DFTNUM_16384+2); /* 2^(DFTNUMBER+2) */
@@ -507,7 +495,12 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     //delay for signal settling DFT_WAIT
     AD5940_SEQGenInsert(SEQ_WAIT(16*10));
     AD5940_AFECtrlS(AFECTRL_ADCCNV|AFECTRL_DFT, bTRUE);  /* Start ADC convert and DFT */
-    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks));
+    
+    AD5940_SEQGenFetchSeq(NULL, &arruiSeqWaitAddr); /* Record the start address of the next command. */
+
+    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks/2));
+    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks/2));
+    c_DataStorageGeneral_->set_SeqWaitAddr(arruiSeqWaitAddr, 0);
     //wait for first data ready
     AD5940_AFECtrlS(AFECTRL_ADCPWR|AFECTRL_ADCCNV|AFECTRL_DFT|AFECTRL_WG, bFALSE);  /* Stop ADC convert and DFT */
 
@@ -521,7 +514,13 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     AD5940_AFECtrlS(AFECTRL_ADCPWR|AFECTRL_WG, bTRUE);  /* Enable Waveform generator */
     AD5940_SEQGenInsert(SEQ_WAIT(16*10));  //delay for signal settling DFT_WAIT
     AD5940_AFECtrlS(AFECTRL_ADCCNV|AFECTRL_DFT, bTRUE);  /* Start ADC convert and DFT */
-    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks));  /* wait for first data ready */
+
+    AD5940_SEQGenFetchSeq(NULL, &arruiSeqWaitAddr); /* Record the start address of the next command. */
+
+    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks/2));
+    AD5940_SEQGenInsert(SEQ_WAIT(WaitClks/2));
+    c_DataStorageGeneral_->set_SeqWaitAddr(arruiSeqWaitAddr, 1);
+    //wait for first data ready
     AD5940_AFECtrlS(AFECTRL_ADCCNV|AFECTRL_DFT|AFECTRL_WG|AFECTRL_ADCPWR, bFALSE);  /* Stop ADC convert and DFT */
     AD5940_AFECtrlS(AFECTRL_HSTIAPWR|AFECTRL_INAMPPWR|AFECTRL_EXTBUFPWR|\
             AFECTRL_WG|AFECTRL_DACREFPWR|AFECTRL_HSDACPWR|\
@@ -553,8 +552,6 @@ int C_Setup_EIS::funSequencerExecuteSequence(){
     // Write command to SRAM
     AD5940_SEQCmdWrite(uiCurrAddr, uiSequenceCommand, uiSequenceLength);
     /* Write command to SRAM */
-
-
 
 
     return EC_NO_ERROR;

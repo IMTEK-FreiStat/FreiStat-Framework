@@ -119,6 +119,16 @@ void C_DataStorageGeneral::set_SequenceInfo(SEQInfo_Type S_SequenceInfo,
 }
 
 /******************************************************************************
+ * @brief Setter method for saving the Sequence info
+ * @returns: Sequence info
+ *****************************************************************************/
+void C_DataStorageGeneral::set_SeqWaitAddr(uint32_t uiSeqWaitAddr, 
+                                            int iSeqWaitAddrID){
+    arruiSeqWaitAddr[iSeqWaitAddrID] = uiSeqWaitAddr;
+}
+
+
+/******************************************************************************
  * @brief Setter method for saving experiment data from specific position
  * in data storage
  * @param S_ExperimentData: Experiment data which should be stored
@@ -278,6 +288,14 @@ SEQInfo_Type C_DataStorageGeneral::get_SequenceInfo(int iSequenceID){
 }
 
 /******************************************************************************
+ * @brief Setter method for saving the Sequence info
+ * @returns: Sequence info
+ *****************************************************************************/
+uint32_t C_DataStorageGeneral::get_SeqWaitAddr(int iSeqWaitAddrID){
+    return arruiSeqWaitAddr[iSeqWaitAddrID];
+}
+
+/******************************************************************************
  * @brief Getter method for returning experiment data from specific position
  * in data storage
  * @param iPosition: Position from which data should be read
@@ -312,5 +330,143 @@ int C_DataStorageGeneral::get_SendDataCounter(){
 uint32_t * C_DataStorageGeneral::get_SampleBuffer(){
     return arruiSampleBuffer_;
 }
+
+
+void C_DataStorageGeneral::checkFrequency(float freq,  SEQInfo_Type S_SequenceInfo, 
+    uint32_t arruiSeqWaitAddr[2])
+{
+  ADCFilterCfg_Type filter_cfg;
+  DFTCfg_Type dft_cfg;
+  HSDACCfg_Type hsdac_cfg;
+  uint32_t WaitClks;
+  ClksCalInfo_Type clks_cal;
+  FreqParams_Type freq_params;
+  uint32_t SeqCmdBuff[32];
+  uint32_t SRAMAddr = 0;
+  float fAdcClkFreq = 16000000;
+
+
+  /* Step 1: Check Frequency */
+  freq_params = AD5940_GetFreqParameters(freq);
+  
+    if(freq < 0.51){
+                /* Update HSDAC update rate */
+        hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
+        hsdac_cfg.HsDacGain = HSDACGAIN_1;
+        hsdac_cfg.HsDacUpdateRate = 0x1B;
+        AD5940_HSDacCfgS(&hsdac_cfg);
+        AD5940_HSRTIACfgS(HSTIARTIA_40K); //set as per load current range
+        
+        /*Update ADC rate */
+        filter_cfg.ADCRate = ADCRATE_800KHZ;
+        fAdcClkFreq = 16e6;
+        
+        /* Change clock to 16MHz oscillator */
+        AD5940_HPModeEn(bFALSE);
+        }
+    else if(freq < 5 ){
+        /* Update HSDAC update rate */
+        hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;// AppIMPCfg.ExcitBufGain;
+        hsdac_cfg.HsDacGain = HSDACGAIN_1;//AppIMPCfg.HsDacGain;
+        hsdac_cfg.HsDacUpdateRate = 0x1B;
+        AD5940_HSDacCfgS(&hsdac_cfg);
+        AD5940_HSRTIACfgS(HSTIARTIA_40K); //set as per load current range
+        
+        /*Update ADC rate */
+        filter_cfg.ADCRate = ADCRATE_800KHZ;
+        fAdcClkFreq = 16e6;
+        
+        /* Change clock to 16MHz oscillator */
+        AD5940_HPModeEn(bFALSE);
+        
+    }
+    else if(freq < 450){
+        /* Update HSDAC update rate */
+        hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
+        hsdac_cfg.HsDacGain = HSDACGAIN_1;  
+        
+        hsdac_cfg.HsDacUpdateRate = 0x1B;
+        AD5940_HSDacCfgS(&hsdac_cfg);
+        AD5940_HSRTIACfgS(HSTIARTIA_5K); //set as per load current range
+        
+        /*Update ADC rate */
+        filter_cfg.ADCRate = ADCRATE_800KHZ;
+        fAdcClkFreq = 16e6;
+        
+        /* Change clock to 16MHz oscillator */
+        AD5940_HPModeEn(bFALSE);
+    }
+    else if(freq<80000){
+           /* Update HSDAC update rate */
+        hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
+        hsdac_cfg.HsDacGain = HSDACGAIN_1;
+        hsdac_cfg.HsDacUpdateRate = 0x1B;
+        AD5940_HSDacCfgS(&hsdac_cfg);
+        AD5940_HSRTIACfgS(HSTIARTIA_5K); //set as per load current range
+        
+        /*Update ADC rate */
+        filter_cfg.ADCRate = ADCRATE_800KHZ;
+        fAdcClkFreq = 16e6;
+        
+        /* Change clock to 16MHz oscillator */
+        AD5940_HPModeEn(bFALSE);
+    }
+        /* High power mode */
+	else if(freq >= 80000){
+		  /* Update HSDAC update rate */
+        hsdac_cfg.ExcitBufGain = EXCITBUFGAIN_2;
+        hsdac_cfg.HsDacGain = HSDACGAIN_1;
+        hsdac_cfg.HsDacUpdateRate = 0x07;
+        AD5940_HSDacCfgS(&hsdac_cfg);
+        AD5940_HSRTIACfgS(HSTIARTIA_5K); //set as per load current range
+        
+        /*Update ADC rate */
+        filter_cfg.ADCRate = ADCRATE_1P6MHZ;
+        fAdcClkFreq = 32e6;
+        
+        /* Change clock to 32MHz oscillator */
+        AD5940_HPModeEn(bTRUE);
+	}
+  
+  /* Step 2: Adjust ADCFILTERCON and DFTCON to set optimumn SINC3, SINC2 and DFTNUM settings  */
+  filter_cfg.ADCAvgNum = ADCAVGNUM_16;  /* Don't care because it's disabled */ 
+  filter_cfg.ADCSinc2Osr = freq_params.ADCSinc2Osr;
+  filter_cfg.ADCSinc3Osr = freq_params.ADCSinc3Osr;
+  filter_cfg.BpSinc3 = bFALSE;
+  filter_cfg.BpNotch = bTRUE;
+  filter_cfg.Sinc2NotchEnable = bTRUE;
+  dft_cfg.DftNum = freq_params.DftNum;
+  dft_cfg.DftSrc = freq_params.DftSrc;
+  dft_cfg.HanWinEn = bTRUE;
+  AD5940_ADCFilterCfgS(&filter_cfg);
+  AD5940_DFTCfgS(&dft_cfg);
+  
+  /* Step 3: Calculate clocks needed to get result to FIFO and update sequencer wait command */
+  clks_cal.DataType = DATATYPE_DFT;
+  clks_cal.DftSrc = freq_params.DftSrc;
+  clks_cal.DataCount = 1L<<(freq_params.DftNum+2); /* 2^(DFTNUMBER+2) */
+  clks_cal.ADCSinc2Osr = freq_params.ADCSinc2Osr;
+  clks_cal.ADCSinc3Osr = freq_params.ADCSinc3Osr;
+  clks_cal.ADCAvgNum = 0;
+  clks_cal.RatioSys2AdcClk = AD5940_SYS_CLOCK_FREQ/ fAdcClkFreq;
+  AD5940_ClksCalculate(&clks_cal, &WaitClks);		
+
+
+  SRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[0];
+
+  
+  SeqCmdBuff[0] =SEQ_WAIT(WaitClks/2);
+  SeqCmdBuff[1] =SEQ_WAIT(WaitClks/2);
+  
+  AD5940_SEQCmdWrite(SRAMAddr, SeqCmdBuff, 2);   
+
+  SRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[1];
+  
+  SeqCmdBuff[0] =SEQ_WAIT(WaitClks/2);    
+  SeqCmdBuff[1] =SEQ_WAIT(WaitClks/2);
+  
+  AD5940_SEQCmdWrite(SRAMAddr, SeqCmdBuff, 2);
+}
+
 
 #endif /* data_storage_general_CPP */

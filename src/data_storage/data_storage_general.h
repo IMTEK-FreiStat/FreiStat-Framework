@@ -80,6 +80,9 @@ class C_DataStorageGeneral{
          **********************************************************************/
         SEQInfo_Type S_SequenceInfo_[AD5940_NUM_SEQ_COMMANDS];
 
+        uint32_t arruiSeqWaitAddr[2];   
+
+
     public:
         // Constructor
         C_DataStorageGeneral();
@@ -127,6 +130,8 @@ class C_DataStorageGeneral{
          * 
          **********************************************************************/
         void set_SequenceInfo(SEQInfo_Type, int);
+
+        void set_SeqWaitAddr(uint32_t, int);
 
         /**********************************************************************
          * Getter methods
@@ -184,6 +189,14 @@ class C_DataStorageGeneral{
          * 
          **********************************************************************/
         SEQInfo_Type get_SequenceInfo(int);
+
+        uint32_t get_SeqWaitAddr(int);
+
+        void checkFrequency(float freq,  SEQInfo_Type S_SequenceInfo, uint32_t arruiSeqWaitAddr[2]);
+
+        
+
+
         
 };
 #endif /* data_storage_general_H */

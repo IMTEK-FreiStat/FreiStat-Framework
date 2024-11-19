@@ -169,18 +169,14 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
             // Read data from FIFO and store in temporary buffer
             AD5940_FIFORd(c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
             
-            
-            
             // Call the function to process data
             this->funProcessExperimentData(
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
-            this->funUpdateSequence(uiFiFoCount);     
+            this->funUpdateSequence();     
             
-            if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
-                  // Control the application
-            this->funControlApplication(FREISTAT_STOP_TIMER);    
+            if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){  
 
             //disable AFE
             AD5940_ShutDownS();
@@ -207,74 +203,26 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
             // Read data from FIFO and store in temporary buffer
             AD5940_FIFORd(c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
             
-            
-            
             // Call the function to process data
             this->funProcessExperimentData(
                 c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
 
             // Create next sequence
-            this->funUpdateSequence(uiFiFoCount);
+            this->funUpdateSequence();
 
-             AD5940_SleepKeyCtrlS(SLPKEY_UNLOCK);  /* Allow AFE to enter sleep mode. */
+            AD5940_SleepKeyCtrlS(SLPKEY_UNLOCK);  /* Allow AFE to enter sleep mode. */
 
              if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
-                  // Control the application
-            this->funControlApplication(FREISTAT_STOP_TIMER);    
 
-            //disable AFE
-            AD5940_ShutDownS();
+                //disable AFE
+                AD5940_ShutDownS();
 
-            // Set interrupt flag
-            bEosInterruptOccured_ = true;
+                // Set interrupt flag
+                bEosInterruptOccured_ = true;
             }
      
             
         }
-        // General purpose timer 1 interrupt
-        if (uiInterruptFlag & AFEINTSRC_GPT1INT_TRYBRK){
-            // Reset interrupt flag
-            AD5940_INTCClrFlag(AFEINTSRC_GPT1INT_TRYBRK);
-
-            // Turn on LED on AD5940 board
-            AD5940_AGPIOClr(AGPIO_Pin1);
-                return 302;
-        }
-        // FIFO overflow interrupt
-        if (uiInterruptFlag & AFEINTSRC_CMDFIFOOF)
-        {
-            // Reset interrupt flag
-            AD5940_INTCClrFlag(AFEINTSRC_CMDFIFOOF);
-
-            // Turn on LED on AD5940 board
-            AD5940_AGPIOClr(AGPIO_Pin1);
-                 return 303;
-        }
-         // End of sequence interrupt
-        /*if (uiInterruptFlag & AFEINTSRC_ENDSEQ){
-            // Reset interrupt flag
-            AD5940_INTCClrFlag(AFEINTSRC_ENDSEQ);
-
-            // Read amount of data which is currently stored in FIFO
-            uiFiFoCount = AD5940_FIFOGetCnt();
-
-            // Read data from FIFO and store in temporary buffer
-            AD5940_FIFORd(c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
-
-            // Call the function to process data
-            this->funProcessExperimentData(
-                c_DataStorageGeneral_->get_SampleBuffer(), uiFiFoCount);
-
-            // Control the application
-            this->funControlApplication(FREISTAT_STOP_TIMER);    
-
-            //disable AFE
-            AD5940_ShutDownS();
-
-            // Set interrupt flag
-            //bEosInterruptOccured_ = true;
-                
-        }     */
         // Update variable
         uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
     }
@@ -295,11 +243,6 @@ int C_Execute_EIS::funProcessExperimentData(uint32_t * pData,
     uint32_t ImpResCount = uiCountData/4;
 
 
-
-    //*pDataCount = 0;
-
-    //DataCount = (DataCount/4)*4;/* We expect RCAL data together with Rz data. One DFT result has two data in FIFO, real part and imaginary part.  */
-
     /* Convert DFT result to int32_t type */
     for(uint32_t i=0; i<uiCountData; i++)
     {
@@ -310,7 +253,6 @@ int C_Execute_EIS::funProcessExperimentData(uint32_t * pData,
         }
     }
 
-    fImpPol_Type * const pOut = (fImpPol_Type*)pData;
     iImpCar_Type * pSrcData = (iImpCar_Type*)pData;
 
     for(uint32_t i=0; i<ImpResCount; i++)
@@ -343,8 +285,7 @@ int C_Execute_EIS::funProcessExperimentData(uint32_t * pData,
                 iStepCounter_ ++; 
   }
 
-  //AppIMPCfg.FreqofData = AppIMPCfg.SweepCurrFreq;
-  /* Calculate next frequency point */
+
     
 
     return EC_NO_ERROR;
@@ -409,10 +350,12 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
  * 
  * @returns: Error code encoded as integer
  *****************************************************************************/
-int C_Execute_EIS::funUpdateSequence(uint32_t uiFiFoCount){
+int C_Execute_EIS::funUpdateSequence(){
 
     float fNextFrequency;
+    uint32_t arruiSeqWaitAddr[2];
     SoftSweepCfg_Type S_Sweep_Config;
+    SEQInfo_Type S_SequenceInfo;
 
     S_Sweep_Config.SweepEn = bTRUE;
     S_Sweep_Config.SweepIndex = iStepCounter_;
@@ -425,20 +368,16 @@ int C_Execute_EIS::funUpdateSequence(uint32_t uiFiFoCount){
     AD5940_SweepNext(&S_Sweep_Config, &fNextFrequency);
 
     AD5940_WGFreqCtrlS(fNextFrequency, AD5940_SYS_CLOCK_FREQ);
+
     c_DataStorageLocal_->set_CurrentFrequency(fNextFrequency);
+    
+    S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
+    arruiSeqWaitAddr[0] = c_DataStorageGeneral_->get_SeqWaitAddr(0);
+    arruiSeqWaitAddr[1] = c_DataStorageGeneral_->get_SeqWaitAddr(1);
 
-/*
-    if(c_DataStorageLocal_->get_NumberPoints() > 0)
-    {
-       // c_DataStorageLocal_->set_BufferEntries(uiFiFoCount/4);
-        if(c_DataStorageLocal_->get_BufferEntries() >= c_DataStorageLocal_->get_NumberPoints())
-    {
-        funControlApplication(FREISTAT_STOP_TIMER);
 
-        return EC_NO_ERROR;
-    }
-    }
-   */
+    c_DataStorageGeneral_->checkFrequency(fNextFrequency,
+                                                S_SequenceInfo, arruiSeqWaitAddr);
 
     return EC_NO_ERROR;
 }
