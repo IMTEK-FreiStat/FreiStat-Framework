@@ -1,8 +1,8 @@
 /******************************************************************************
  * @brief: Header file containing the subclass (C_Setup) C_Setup_EIS which 
- * defines the behavior of setting up an cyclic voltammetry
+ * defines the behavior of setting up an electrocemical impedance spectroscopy.
  * 
- * @author: Mark Jasper
+ * @author: Cedric Neumann
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 
@@ -19,7 +19,7 @@
  * @brief: Abstract class for setup_EIS behavior which inherits from class
  * setup behavior
  * 
- * @author: Mark Jasper
+ * @author: Cedric Neumann
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 

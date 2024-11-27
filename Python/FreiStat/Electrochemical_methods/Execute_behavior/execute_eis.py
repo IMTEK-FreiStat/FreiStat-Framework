@@ -4,13 +4,13 @@ electrochemical impedance spectroscopy.
 
 """
 
-__author__ = "Mark Jasper"
+__author__ = "Cedirc Neumann"
 __contact__ = "University of Freiburg, IMTEK, Jochen Kieninger"
 __credits__ = "Mark Jasper"
 
 __version__ = "1.0.0"
 __maintainer__ = "Mark Jasper"
-__email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
+__email__ = "mark.jasper@imtek.uni-freiburg.de, mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
 import multiprocessing as mp

@@ -6,11 +6,11 @@ electrochemical impedance spectroscopy.
 
 __author__ = "Cedic Neumann"
 __contact__ = "University of Freiburg, IMTEK, Jochen Kieninger"
-__credits__ = "Cedirc Neumann"
+__credits__ = "Mark Jasper"
 
 __version__ = "1.0.0"
 __maintainer__ = "Cedirc Neumann"
-__email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
+__email__ = "cedric.neumann@mars.uni-freiburg.de, mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
 
@@ -120,18 +120,11 @@ class SetupEIS(SetupBehavior):
         # Initialize variables
         iErrorCode : int = EC_NO_ERROR
 
-        #start_frequency : float = 0
-        #stop_frequency : float = 0
-
         max_frequency = 250e3
         min_frequncy = 0.0149
         
-        #ac_amplitude : float = 0
-
         min_ac_amplitude = 0
         max_ac_amplitude = 800
-
-        #dc_offset : float = 0
 
         min_dc_offset = -2700
         max_dc_offset = 2700

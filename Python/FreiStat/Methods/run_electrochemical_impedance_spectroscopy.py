@@ -4,13 +4,13 @@ voltammetry.
 
 """
 
-__author__ = "Mark Jasper"
+__author__ = "Cedric Neumann"
 __contact__ = "University of Freiburg, IMTEK, Jochen Kieninger"
 __credits__ = "Mark Jasper"
 
 __version__ = "1.0.0"
-__maintainer__ = "Mark Jasper"
-__email__ = "mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
+__maintainer__ = "Cedric Neumann"
+__email__ = "cedric.neumann@mars.uni-freiburg.de, mark.jasper@imtek.uni-freiburg.de, kieninger@imtek.uni-freiburg.de"
 
 # Import dependencies
 import multiprocessing  as mp
@@ -102,9 +102,7 @@ class Run_EIS(Run_Electrochemical_Method):
         # Intialize variables
         bSerialBuffer = b""
 
-        iPosition : int = 0
-
-        listPulse_Lengths : list = []     
+        iPosition : int = 0 
 
         # Convert parameters from SI-units to internal units
         ac_amplitude = ac_amplitude * 1000.0

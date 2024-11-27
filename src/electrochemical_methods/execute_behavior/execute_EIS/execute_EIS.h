@@ -1,8 +1,8 @@
 /******************************************************************************
  * @brief: Header file containing the subclass (C_Execute) C_Execute_EIS which 
- * defines the behavior of executing an chronoamperometry
+ * defines the behavior of executing an electrocemical impedance spectroscopy.
  * 
- * @author: Mark Jasper
+ * @author: Cedric Neumann
  * @version: V 1.0.0
  * @date: 19.01.2022
  *   
@@ -19,7 +19,7 @@
  * @brief: Abstract class for execute_EIS behavior which inherits from class
  * execute behavior
  * 
- * @author: Mark Jasper
+ * @author: Cedric Neumann
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 
