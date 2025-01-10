@@ -28,7 +28,7 @@ C_Execute_NPV::C_Execute_NPV(){}
  *****************************************************************************/
 int C_Execute_NPV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Initialize variables
-    bEosInterruptOccured_ = false;
+    bEosInterruptOccurred_ = false;
 
     iStepCounter_ = 0;   
    
@@ -53,7 +53,7 @@ int C_Execute_NPV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     C_Communication * c_Communication = c_DataSoftwareStorage_->
         get_Communication();
 
-    // Prepare telegram strucutre
+    // Prepare telegram structure
     c_Communication->funConstructPrefixes(chrExperimentType_);
 
     // Set system status to experiment running
@@ -64,11 +64,11 @@ int C_Execute_NPV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
     // Loop while experiment is running
     while (c_DataSoftwareStorage_->get_SystemStatus() == FREISTAT_EXP_RUNNING){
-        // Check if interrupt has occured
-        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccured()){
+        // Check if interrupt has occurred
+        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccurred()){
             // Clear interrupt flag
             c_DataSoftwareStorage_->get_AD5940Setup()->
-                set_InterruptOccured(false);
+                set_InterruptOccurred(false);
 
             // Call interrupt service routine
             this->funInterruptServiceRoutine();
@@ -90,8 +90,8 @@ int C_Execute_NPV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
             }
         }
         // Check if experiment is completed
-        // Check if end of sequence interrupt occured
-        if (bEosInterruptOccured_ == true){
+        // Check if end of sequence interrupt occurred
+        if (bEosInterruptOccurred_ == true){
             // Get send data counter
             int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
 
@@ -128,8 +128,8 @@ int C_Execute_NPV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 }
 
 /******************************************************************************
- * @brief Method for implementing interrupt service routine for chrono-
- * amperometry
+ * @brief Method for implementing interrupt service routine for normal
+ * pulse voltammetry
  * 
  * @return: Returns error code                                        
  *****************************************************************************/
@@ -152,7 +152,7 @@ int C_Execute_NPV::funInterruptServiceRoutine(){
     uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
 
     // Loop until no interrupts are there which need to be handled
-    // Reason for looping is that interrupts could occure while an interrupt is
+    // Reason for looping is that interrupts could occur while an interrupt is
     // still handled
     while (uiInterruptFlag != 0){
         // Custom interrupt 1
@@ -232,7 +232,7 @@ int C_Execute_NPV::funInterruptServiceRoutine(){
             AD5940_ShutDownS();
 
             // Set interrupt flag
-            bEosInterruptOccured_ = true;
+            bEosInterruptOccurred_ = true;
         }     
         // Update variable
         uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
@@ -247,7 +247,7 @@ int C_Execute_NPV::funInterruptServiceRoutine(){
  *****************************************************************************/
 int C_Execute_NPV::funProcessExperimentData(uint32_t * pData, 
                                             uint32_t uiCountData){
-    // Intialize variables
+    // Initialize variables
     float fVoltage = 0;
         
     uint32_t iCountSamples = 0;
@@ -301,7 +301,7 @@ int C_Execute_NPV::funProcessExperimentData(uint32_t * pData,
         S_ExperimentData.iCycle = 1 + c_DataStorageLocal_->get_StepNumber();       
 
         // Data point number
-        S_ExperimentData.iMeasurmentPair = 1 + iStepCounter_;
+        S_ExperimentData.iMeasurementPair = 1 + iStepCounter_;
 
         // Save time stamp
         S_ExperimentData.fTimeStamp = millis();
@@ -317,9 +317,9 @@ int C_Execute_NPV::funProcessExperimentData(uint32_t * pData,
 }
 
 /******************************************************************************
- * @brief Method for starting and stoping the CA sequence and the configuration
+ * @brief Method for starting and stopping  the CA sequence and the configuration
  * of the Wake-up timer which is used to time the sequence of different 
- * sequences of the chronoamperometry
+ * sequences of the normal pulse voltammetry
  * @param uiCommand: Integer coded command to start and stop the CA
  * 
  * @return: Error code encoded as integer

@@ -225,14 +225,12 @@ class ExecuteEIS(ExecuteBehavior):
                 # Add data to data storage
                 self._dataHandling.append_StoredData(
                         [int(strRun,10),
-                        iDataPoint,
                         frequency,
                         magnitude,
                         phase])
                 
                 # Add data to dataQueue
                 dataQueue.put([int(strRun,10),
-                                iDataPoint,
                                 frequency,
                                 magnitude,
                                 phase])

@@ -5,7 +5,7 @@
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 
- * @copyright MIT Liscene
+ * @copyright MIT License
  * 
  *  Copyright (c) 2022 University of Freiburg, IMTEK
  *
@@ -47,13 +47,13 @@ void setup(){
 
 void loop(){
     /***************************************************************************/
-    // HARDWARE INITALIZATION
+    // HARDWARE INITIALIZATION
     // Create an object for the setup of the AD5940-Chip
     C_AD5940_Setup c_AD5940_Setup = C_AD5940_Setup();
     c_AD5940_Setup.Begin();  
 
     /***************************************************************************/
-    // SOFTWARE INITALIZATION
+    // SOFTWARE INITIALIZATION
     // Create an object data software handling in which all references and 
     // program related parameters are stored
     C_DataSoftwareStorage c_DataSoftwareStorage = C_DataSoftwareStorage();
@@ -98,7 +98,7 @@ void loop(){
     // RUN FREISTAT
     // Loop forever
     while (true){
-        // Intialize variables
+        // Initialize variables
         int iErrorCode = 0;
         int iParseResult = 0;
         int iSequencePosition = 0;
@@ -296,7 +296,6 @@ void loop(){
                 // Send telegram that experiment is completed and that 
                 // FreiStat stopped
                 c_Communication.funSendCommandTelegram(FREISTAT_STOP_STR);
-
                 c_DataSoftwareStorage.set_DataStorageLocal(c_ReferenceDataStorageLocal);
 
                 // Delete chain of local data storage objects to free memory

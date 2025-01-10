@@ -27,7 +27,7 @@ C_Interface::C_Interface(){}
  * 
  *****************************************************************************/ 
 void C_Interface::begin(){
-	// Intialize interface text
+	// Initialize interface text
 	strcpy(chrarrEcMethods[0], CA);
 	strcpy(chrarrEcMethods[1], LSV);
 	strcpy(chrarrEcMethods[2], CV);

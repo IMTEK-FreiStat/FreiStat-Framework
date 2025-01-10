@@ -44,7 +44,7 @@ int C_Execute_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Get reference to serial communication object
     C_Communication * c_Communication = c_DataSoftwareStorage_->get_Communication();
 
-    // Prepare telegram strucutre
+    // Prepare telegram structure
     c_Communication->funConstructPrefixes(chrExperimentType_);
 
     // Do precalucations for the LSV
@@ -61,10 +61,10 @@ int C_Execute_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
     // Loop while experiment is running
     while (c_DataSoftwareStorage_->get_SystemStatus() == FREISTAT_EXP_RUNNING){   
-        // Check if interrupt has occured
-        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccured()){
+        // Check if interrupt has occurred
+        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccurred()){
             // Clear interrupt flag
-            c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccured(false);
+            c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccurred(false);
 
             // Call interrupt service routine
             this->funInterruptServiceRoutine();
@@ -121,11 +121,11 @@ int C_Execute_LSV::funInterruptServiceRoutine(){
     uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
 
     // Loop until no interrupts are there which need to be handled
-    // Reason for looping is that interrupts could occure while an interrupt is
+    // Reason for looping is that interrupts could occur while an interrupt is
     // still handled
     while (uiInterruptFlag != 0)
     {
-        // Custom interrupt 1 occured (New voltage step)
+        // Custom interrupt 1 occurred (New voltage step)
         if (uiInterruptFlag & AFEINTSRC_CUSTOMINT1){
             // Clear flag for custom interrupt 1
             AD5940_INTCClrFlag(AFEINTSRC_CUSTOMINT1);
@@ -219,7 +219,7 @@ int C_Execute_LSV::funInterruptServiceRoutine(){
  *****************************************************************************/
 int C_Execute_LSV::funProcessExperimentData(uint32_t * pData, 
                                             uint32_t uiCountData){             
-    // Intialize variables
+    // Initialize variables
     float fVoltage = 0;
 
     uint64_t iSumSamples = 0;
@@ -256,7 +256,7 @@ int C_Execute_LSV::funProcessExperimentData(uint32_t * pData,
                                         iCurrentStep - 1));
 
         // Data point number
-        S_ExperimentData.iMeasurmentPair = 1 + iCurrentStep;
+        S_ExperimentData.iMeasurementPair = 1 + iCurrentStep;
 
         // Store cycle number
         S_ExperimentData.iCycle = 1 + iCurrentStep / 
@@ -278,7 +278,7 @@ int C_Execute_LSV::funProcessExperimentData(uint32_t * pData,
 /******************************************************************************
  * @brief Method for controlling the timing of the CV sequence
  * @param uiCommand: Command encoded as an integer for e.g., starting and 
- *                   stopping the CV.
+ *                   stopping  the CV.
  * 
  * @return: Error code encoded as integer 
  *****************************************************************************/
@@ -297,7 +297,7 @@ int C_Execute_LSV::funControlApplication(uint32_t uiCommand){
         // Enable wake-up timer
         S_WakeUpTimer_Config.WuptEn = bTRUE;
 
-        // Specifiy how many sequences are used (A = 1 | B = 2 | ...)
+        // Specify how many sequences are used (A = 1 | B = 2 | ...)
         S_WakeUpTimer_Config.WuptEndSeq = WUPTENDSEQ_D;
 
         // Define order and type of sequences

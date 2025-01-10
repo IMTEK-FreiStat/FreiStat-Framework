@@ -41,7 +41,7 @@ class C_AD5940_Setup{
         SEQCfg_Type S_SequencerConfig_;
 
         // Static variables
-        static bool bInterruptOccured_;
+        static bool bInterruptOccurred_;
 
         // Methods
         void funAD5940_InitMCU();
@@ -58,10 +58,10 @@ class C_AD5940_Setup{
         void Begin();
 
         // Setter
-        void set_InterruptOccured(bool);
+        void set_InterruptOccurred(bool);
 
         // Getter
-        bool get_InterruptOccured();
+        bool get_InterruptOccurred();
 
         float get_LFOSCFrequency();
 };

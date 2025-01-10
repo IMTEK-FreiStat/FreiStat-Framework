@@ -42,7 +42,7 @@ int C_Setup_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
  * @brief Check if stored parameters are valid for chronoamperometry
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -223,7 +223,7 @@ int C_Setup_CA::funInitCA(){
     AD5940_SEQCtrlS(bTRUE); 
 
     // Clear interrupt flag
-    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccured(false);
+    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccurred(false);
     
     // Set AFE to low power mode
     AD5940_AFEPwrBW(AFEPWR_LP, AFEBW_250KHZ);
@@ -236,7 +236,7 @@ int C_Setup_CA::funInitCA(){
  * commands to the SRAM
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -480,7 +480,7 @@ int C_Setup_CA::funSequencerInitializationSequence(){
         // Set sequence ID to 1
         S_SequenceInfo.SeqId = SEQID_0;
 
-        // Get sequener start adress in SRAM
+        // Get sequener start address in SRAM
         S_SequenceInfo.SeqRamAddr = c_DataStorageGeneral_->
             get_SeqStartAddress();
 
@@ -498,7 +498,7 @@ int C_Setup_CA::funSequencerInitializationSequence(){
                            uiSeqeuenceLength);
     }
     else {
-        // Error occured
+        // Error occurred
         return iErrorCode;
     }
     return EC_NO_ERROR;

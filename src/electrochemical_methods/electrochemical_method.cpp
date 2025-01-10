@@ -87,7 +87,7 @@ int C_ElectrochemicalMethod::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage
         c_SetupBehavior_ = new C_Setup_SWV();
         c_ExecuteBehavior_ = new C_Execute_SWV();
     }
-    // Electrocemical impedance spectroscopy
+    // Square wave voltammetry
     else if (strcmp(chrExperimentType_, EIS) == 0 && ENABLE_EIS){
         // Create behavior objects, save references and execute starting method
         c_SetupBehavior_ = new C_Setup_EIS();

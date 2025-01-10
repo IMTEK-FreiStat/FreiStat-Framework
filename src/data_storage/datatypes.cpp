@@ -15,14 +15,14 @@
 // Struct containing the experiment data
 struct S_DataContainer{
     int iCycle;
-    int iMeasurmentPair;
+    int iMeasurementPair;
     float fVoltage;
     float fCurrent;
     float fTimeStamp;
 };
 
 struct S_DataContainerEIS{
-    int iMeasurmentPair;
+    int iMeasurementPair;
     float fFrequency;
     float Magnitude;         /**< The magnitude in polar coordinate */
     float Phase;             /**< The phase in polar coordinate */

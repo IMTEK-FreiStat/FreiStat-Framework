@@ -1010,9 +1010,9 @@ class Plotter:
             elif (self._strMode == FREISTAT_STANDALONE):
                 if(self._experimentType == EIS):
                     print("Datapoint " + str(listData[0]) + "\t - " +
-                        "Frequency:  " + str(listData[2]) + "\t - \t" + 
-                        "Magnitude: " + str(listData[3]) + " in Ohm\t\t - \t" +
-                        "Phase: " + str(listData[4]) + " in rad")
+                        "Frequency:  " + str(listData[1]) + "\t - \t" + 
+                        "Magnitude: " + str(listData[2]) + " in Ohm\t\t - \t" +
+                        "Phase: " + str(listData[3]) + " in rad")
                 else:
                     print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint:  " + str(listData[1]) + "\t - \t" + 

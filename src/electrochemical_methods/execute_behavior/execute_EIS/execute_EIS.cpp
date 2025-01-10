@@ -1,10 +1,11 @@
 /******************************************************************************
  * @brief: Source file containing the subclass (C_Execute) C_Execute_EIS which 
- * defines the behavior of executing an electrocemical impedance spectroscopy.
+ * defines the behavior of executing and stopping electrochemical impedance
+ * spectroscopy
  * 
  * @author: Cedric Neumann
  * @version: V 1.0.0
- * @date: 19.01.2022
+ * @date: 10.01.2025
  * 
  *****************************************************************************/
 
@@ -27,10 +28,10 @@ C_Execute_EIS::C_Execute_EIS(){}
  * 
  *****************************************************************************/
 int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
-   
     // Initialize variables
-    bEosInterruptOccured_ = false;
+    bEosInterruptOccurred_ = false;
     int iErrorCode = 0;
+
     iStepCounter_ = 0;   
 
     // Save reference of data software storage object
@@ -51,27 +52,28 @@ int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     C_Communication * c_Communication = c_DataSoftwareStorage_->
         get_Communication();
 
-    // Prepare telegram strucutre
+    // Prepare telegram structure
     c_Communication->funConstructPrefixes(chrExperimentType_);
 
     // Set system status to experiment running
     c_DataSoftwareStorage_->set_SystemStatus(FREISTAT_EXP_RUNNING);
 
     // Control the application
-    iErrorCode= this->funControlApplication(FREISTAT_START_TIMER); 
-    
+    iErrorCode= this->funControlApplication(FREISTAT_START_TIMER);      
+if (iErrorCode != 0) {
+            return iErrorCode;
+           }
     // Loop while experiment is running
     while (c_DataSoftwareStorage_->get_SystemStatus() == FREISTAT_EXP_RUNNING){
-        // Check if interrupt has occured
-        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccured()){
+        // Check if interrupt has occurred
+        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccurred()){
             // Clear interrupt flag
             c_DataSoftwareStorage_->get_AD5940Setup()->
-                set_InterruptOccured(false);
+                set_InterruptOccurred(false);
 
             // Call interrupt service routine
            iErrorCode = this->funInterruptServiceRoutine();
 
-           // Check for error 
            if (iErrorCode != 0) {
             return iErrorCode;
            }
@@ -80,8 +82,7 @@ int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
         // Get send data counter
         int iSendDataCounter = c_DataStorageGeneral_->get_SendDataCounter();
 
-        // If data needs to be send, write to serial port
-        if (iStepCounter_ > iSendDataCounter ){
+       if (iStepCounter_ > iSendDataCounter ){
             S_DataContainerEIS S_ExperimentDataEIS = c_DataStorageGeneral_->
             get_ExperimentDataEIS(this->funGetDataPosition(iSendDataCounter));
 
@@ -95,8 +96,8 @@ int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
             
        }
         // Check if experiment is completed
-        // Check if end of sequence interrupt occured
-        if (bEosInterruptOccured_ == true){
+        // Check if end of sequence interrupt occurred
+        if (bEosInterruptOccurred_ == true){
             // Check if step counter is equal to maximal amount of values and
             // send data counter is equal to step counter
             S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
@@ -126,12 +127,17 @@ int C_Execute_EIS::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     c_DataStorageLocal_->set_CurrentStepNumber(0);
     c_DataStorageLocal_->set_StepNumber(0);
 
+    // Check for error
+    if (iErrorCode != 0) {
+        return iErrorCode;
+        }
+
     return 0;
 }
 
 /******************************************************************************
- * @brief Method for implementing interrupt service routine for chrono-
- * amperometry
+ * @brief Method for implementing interrupt service routine for electrochemical
+ * impedance spectroscopy
  * 
  * @return: Returns error code                                        
  *****************************************************************************/
@@ -144,20 +150,21 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
     uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
 
     // Loop until no interrupts are there which need to be handled
-    // Reason for looping is that interrupts could occure while an interrupt is
+    // Reason for looping is that interrupts could occur while an interrupt is
     // still handled
     while (uiInterruptFlag != 0){
         // Custom interrupt 1
         if (uiInterruptFlag & AFEINTSRC_CUSTOMINT1){
             // Reset interrupt flag
        
-            // Try to wake up AFE by reading at most 10 times
+            // Wakeup AFE by read register, read 10 times at most
             if(AD5940_WakeUp(10) > 10){
-                return EC_EXECUTE + EC_EX_WAKEUP_AFE_ERR;
-                }
+                // Wakeup failed 
+                return AD5940ERR_WAKEUP;
+                }  
 
-            //Prohibit AFE to enter sleep mode.
-            AD5940_SleepKeyCtrlS(SLPKEY_LOCK); 
+            // Prohibit AFE to enter sleep mode.   
+            AD5940_SleepKeyCtrlS(SLPKEY_LOCK);  
 
             // Reset interrupt flag
             AD5940_INTCClrFlag(AFEINTSRC_CUSTOMINT1);
@@ -175,13 +182,13 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
             // Create next sequence
             this->funUpdateSequence();     
             
+            // Check if frequency sweep is completed
             if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){  
-
             //disable AFE
             AD5940_ShutDownS();
 
             // Set interrupt flag
-            bEosInterruptOccured_ = true;
+            bEosInterruptOccurred_ = true;
             }
      
         }
@@ -189,9 +196,14 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
         // FIFO threshold interrupt
           if (uiInterruptFlag & AFEINTSRC_DATAFIFOTHRESH){
 
-            if(AD5940_WakeUp(10) > 10)  /* Wakeup AFE by read register, read 10 times at most */
-                return AD5940ERR_WAKEUP;  /* Wakeup Failed */
-            AD5940_SleepKeyCtrlS(SLPKEY_LOCK);  /* Prohibit AFE to enter sleep mode. */
+            // Wakeup AFE by read register, read 10 times at most
+            if(AD5940_WakeUp(10) > 10){
+                // Wakeup failed 
+                return AD5940ERR_WAKEUP;
+                }  
+
+            // Prohibit AFE to enter sleep mode.   
+            AD5940_SleepKeyCtrlS(SLPKEY_LOCK); 
 
             // Reset interrupt flag
             AD5940_INTCClrFlag(AFEINTSRC_DATAFIFOTHRESH);
@@ -211,16 +223,15 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
 
             AD5940_SleepKeyCtrlS(SLPKEY_UNLOCK);  /* Allow AFE to enter sleep mode. */
 
-             if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
+            // Check if frequency sweep is completed
+            if ( c_DataStorageLocal_->get_NumberPoints() - 1 <= iStepCounter_){
 
-                //disable AFE
-                AD5940_ShutDownS();
+            //disable AFE
+            AD5940_ShutDownS();
 
-                // Set interrupt flag
-                bEosInterruptOccured_ = true;
+            // Set interrupt flag
+            bEosInterruptOccurred_ = true;
             }
-     
-            
         }
         // Update variable
         uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
@@ -235,18 +246,21 @@ int C_Execute_EIS::funInterruptServiceRoutine(){
  *****************************************************************************/
 int C_Execute_EIS::funProcessExperimentData(uint32_t * pData, 
                                            uint32_t uiCountData){
-    // Intialize variables
-     S_DataContainerEIS S_ExperimentDataEIS;
+    // Initialize struct
+    S_DataContainerEIS S_ExperimentDataEIS;
+    
+    // Initialize variables
     uint32_t ImpResCount = uiCountData/4;
-
 
     // Convert DFT result to int32_t type 
     for(uint32_t i=0; i<uiCountData; i++)
     {
-        pData[i] &= 0x3ffff; 
-        if(pData[i]&(1L<<17)) /* Bit17 is sign bit */
+        pData[i] &= 0x3ffff;
+        // Bit17 is sign bit
+        if(pData[i]&(1L<<17)) 
         {
-        pData[i] |= 0xfffc0000; /* Data is 18bit in two's complement, bit17 is the sign bit */
+        // Data is 18bit in two's complement, bit17 is the sign bit
+        pData[i] |= 0xfffc0000; 
         }
     }
 
@@ -261,36 +275,36 @@ int C_Execute_EIS::funProcessExperimentData(uint32_t * pData,
         float RzMag,RzPhase;
         float RcalMag, RcalPhase;
         
-        //Calculate RcalMag, RcalPhase, RzMag and RzPhase
+        // Calculating the magnitude and phase
         RcalMag = sqrt((float)pDftRcal->Real*pDftRcal->Real+(float)pDftRcal->Image*pDftRcal->Image);
         RcalPhase = atan2(-pDftRcal->Image,pDftRcal->Real);
         RzMag = sqrt((float)pDftRz->Real*pDftRz->Real+(float)pDftRz->Image*pDftRz->Image);
         RzPhase = atan2(-pDftRz->Image,pDftRz->Real);
-
-        // Calculate output RzMag and RzPhase 
         RzMag = RcalMag/RzMag* AD5940_CAL_RESISTOR;
         RzPhase = RcalPhase - RzPhase;
-        
-        // Store frequency, magnitue and phase into the export struct
+
+        //Storing the frequency, magnitude and phase
         S_ExperimentDataEIS.fFrequency = c_DataStorageLocal_->get_CurrentFrequency();
         S_ExperimentDataEIS.Magnitude = RzMag;
         S_ExperimentDataEIS.Phase = RzPhase;
 
-        // Data point number
-        S_ExperimentDataEIS.iMeasurmentPair = 1 + iStepCounter_;
+        // Storing data point number
+        S_ExperimentDataEIS.iMeasurementPair = 1 + iStepCounter_;
 
         // Save data
         c_DataStorageGeneral_->set_ExperimentDataEIS(
-                S_ExperimentDataEIS, this->funGetDataPosition(iStepCounter_));
-                iStepCounter_ ++; 
+            S_ExperimentDataEIS, this->funGetDataPosition(iStepCounter_));
+        
+        // increment step counter
+        iStepCounter_ ++; 
   }
     return EC_NO_ERROR;
 }
 
 /******************************************************************************
- * @brief Method for starting and stoping the EIS sequence and the configuration
+ * @brief Method for starting and stopping  the EIS sequence and the configuration
  * of the Wake-up timer which is used to time the sequence of different 
- * sequences of the chronoamperometry
+ * sequences of the electrochemical impedance spectroscopy
  * 
  * @param uiCommand: Integer coded command to start and stop the EIS
  * 
@@ -301,23 +315,22 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
     WUPTCfg_Type S_WakeUpTimer_Config;
 
     // Try to wake up AFE by reading at most 10 times
-    if (AD5940_WakeUp(10) > 10)
+    if (AD5940_WakeUp(10) > 10){
         return EC_EXECUTE + EC_EX_WAKEUP_AFE_ERR;
-
+    }
     // Operate depending on the command
     switch (uiCommand){
         case FREISTAT_START_TIMER:{
             // Enable wake-up timer
             S_WakeUpTimer_Config.WuptEn = bTRUE;
 
-            // Specifiy how many sequences are used (A = 1 | B = 2 | ...)
+            // Specify how many sequences are used (A = 1 | B = 2 | ...)
             S_WakeUpTimer_Config.WuptEndSeq = WUPTENDSEQ_A;
 
             // Define order and type of sequences
             S_WakeUpTimer_Config.WuptOrder[0] = SEQID_1;
 
             // Define how long a sequence should run
-            // = LFOSCFrequency (in Hz) * Time (in seconds)
             S_WakeUpTimer_Config.SeqxSleepTime[SEQID_1] = 4;
             S_WakeUpTimer_Config.SeqxWakeupTime[SEQID_1] = (uint32_t)1600-4;
 
@@ -345,14 +358,15 @@ int C_Execute_EIS::funControlApplication(uint32_t uiCommand){
  * @returns: Error code encoded as integer
  *****************************************************************************/
 int C_Execute_EIS::funUpdateSequence(){
-
-    // Initialize variables
+     // Initialize variables
     float fNextFrequency;
     uint32_t arruiSeqWaitAddr[2];
+
+    // Initialize structs
     SoftSweepCfg_Type S_Sweep_Config;
     SEQInfo_Type S_SequenceInfo;
 
-    // Configer Sweep struct
+    // Config sweep struct
     S_Sweep_Config.SweepEn = bTRUE;
     S_Sweep_Config.SweepIndex = iStepCounter_;
     S_Sweep_Config.SweepStart = c_DataStorageLocal_->get_StartFrequency();
@@ -368,7 +382,7 @@ int C_Execute_EIS::funUpdateSequence(){
 
     // Update current frequency
     c_DataStorageLocal_->set_CurrentFrequency(fNextFrequency);
-    
+
     // Get execute sequence
     S_SequenceInfo = c_DataStorageGeneral_->get_SequenceInfo(SEQID_1);
 
@@ -377,8 +391,9 @@ int C_Execute_EIS::funUpdateSequence(){
     arruiSeqWaitAddr[1] = c_DataStorageGeneral_->get_SeqWaitAddr(1);
 
     // Check filtersettings and wait command for new frequency
-    c_DataStorageGeneral_->checkFrequency(fNextFrequency,
-                                        S_SequenceInfo, arruiSeqWaitAddr);
+    c_DataStorageGeneral_->funCheckFrequency(fNextFrequency,
+                                                S_SequenceInfo, arruiSeqWaitAddr);
+
     return EC_NO_ERROR;
 }
 

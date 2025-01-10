@@ -42,7 +42,7 @@ int C_Setup_LSV::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
  * @brief Check if stored parameters are valid for cyclic voltammetry
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -284,7 +284,7 @@ int C_Setup_LSV::funInitLSV(){
     AD5940_SEQCtrlS(bTRUE); 
 
     // Clear interrupt flag
-    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccured(false);
+    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccurred(false);
 
     // Set AFE to low power mode
     AD5940_AFEPwrBW(AFEPWR_LP, AFEBW_250KHZ);
@@ -297,7 +297,7 @@ int C_Setup_LSV::funInitLSV(){
  * commands to the SRAM
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -524,7 +524,7 @@ int C_Setup_LSV::funSequencerInitializationSequence(){
         // Set sequence ID to 3
         S_SequenceInfo.SeqId = SEQID_3;
 
-        // Get sequener start adress in SRAM
+        // Get sequener start address in SRAM
         S_SequenceInfo.SeqRamAddr = c_DataStorageGeneral_->get_SeqStartAddress();
 
         // Save pointer to sequencer commands stored in the MCU
@@ -543,7 +543,7 @@ int C_Setup_LSV::funSequencerInitializationSequence(){
         AD5940_SEQInfoCfg(&S_SequenceInfo);
     }
     else {
-        // Error occured while creating sequence
+        // Error occurred while creating sequence
         return iErrorCode;
     }
     return EC_NO_ERROR;
@@ -581,7 +581,7 @@ int C_Setup_LSV::funSequencerADCControl(){
     // Stop the sequence generator
     AD5940_SEQGenCtrl(bFALSE);
 
-    // Check if error occured
+    // Check if error occurred
     if (iErrorCode == AD5940ERR_OK){
         // Get sequence info 
         SEQInfo_Type S_SequenceInfo = c_DataStorageGeneral_->
@@ -598,7 +598,7 @@ int C_Setup_LSV::funSequencerADCControl(){
         // Set sequence ID to 2            
         S_SequenceInfo.SeqId = SEQID_2;
 
-        // Get sequener start adress in SRAM        
+        // Get sequener start address in SRAM        
         S_SequenceInfo.SeqRamAddr = 
         c_DataStorageGeneral_->get_SequenceInfo(SEQID_3).SeqRamAddr + 
         c_DataStorageGeneral_->get_SequenceInfo(SEQID_3).SeqLen;
@@ -619,7 +619,7 @@ int C_Setup_LSV::funSequencerADCControl(){
         AD5940_SEQInfoCfg(&S_SequenceInfo);
     }
     else {
-        // Error occured
+        // Error occurred
         return iErrorCode;
     }
     return EC_NO_ERROR;

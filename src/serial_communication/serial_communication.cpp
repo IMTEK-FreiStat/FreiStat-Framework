@@ -57,7 +57,7 @@ int C_Communication::funEstablishCommunication(){
         // Configure WiFi pins
         WiFi.setPins(8,7,4,2);
 
-        // Intialize variables
+        // Initialize variables
         int iStatus = WL_IDLE_STATUS;
 
         IPaddress  = IPAddress(WiFiIPOCTET_1, WiFiIPOCTET_2, WiFiIPOCTET_3, WiFiIPOCTET_4);
@@ -94,7 +94,7 @@ int C_Communication::funSetupSDcard(){
     // Check if FreiStat runs in Standalone or WLAN mode 
     #if WiFiEnabled || FREISTAT_STANDALONE
 
-    // Intialize variables
+    // Initialize variables
     char chrIntBuff[5];
 
     int iCounter = 0;
@@ -159,7 +159,7 @@ int C_Communication::funStopSDcard(){
 
     // Check if WLAN mode is enabled
     if (WiFiEnabled){
-        // Intialize variables
+        // Initialize variables
         char chrBuff[128];
 
         // Open the file for reading
@@ -176,7 +176,7 @@ int C_Communication::funStopSDcard(){
                 sizeof(chrIntBuff));
             strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
             strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
-            strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+            strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
                 sizeof(chrIntBuff));
             strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
 
@@ -280,7 +280,7 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
             sizeof(chrIntBuff));
         strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
         strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
 
@@ -304,7 +304,7 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
             sizeof(chrIntBuff));
         strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
         strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
 
@@ -334,7 +334,7 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
@@ -356,7 +356,7 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
@@ -425,7 +425,7 @@ int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDat
     switch (iEcMethod){
     case EIS_I:
         strncpy(chrBuff, chrPrefix1_, sizeof(chrPrefix1_));
-        strncat(chrBuff, itoa(S_ExperimentDataEIS.iMeasurmentPair, chrIntBuff, 10),
+        strncat(chrBuff, itoa(S_ExperimentDataEIS.iMeasurementPair, chrIntBuff, 10),
           sizeof(chrIntBuff));
         strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
         strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix1_));
@@ -450,7 +450,7 @@ int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDat
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
@@ -472,7 +472,7 @@ int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDat
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
-        strncat(chrBuff, itoa(S_ExperimentData.iMeasurmentPair, chrIntBuff, 10), 
+        strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, ",", sizeof(","));
 
@@ -527,7 +527,7 @@ int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDat
  * @return Error code
  *****************************************************************************/ 
 int C_Communication::funSendAcknowledgeTelegram(){
-    // Intialize variables
+    // Initialize variables
     char chrBuffer[8];
     char chrStr[8];
     
@@ -552,7 +552,7 @@ int C_Communication::funSendAcknowledgeTelegram(){
  * @return Error code
  *****************************************************************************/ 
 int C_Communication::funSendErrorTelegram(int iErrorCode){
-    // Intialize variables
+    // Initialize variables
     char chrBuffer[128];
     char chrStr[16];
 

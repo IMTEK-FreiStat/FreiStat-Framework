@@ -192,11 +192,7 @@ class C_DataStorageGeneral{
 
         uint32_t get_SeqWaitAddr(int);
 
-        void checkFrequency(float freq,  SEQInfo_Type S_SequenceInfo, uint32_t arruiSeqWaitAddr[2]);
+        void funCheckFrequency(float freq,  SEQInfo_Type S_SequenceInfo, uint32_t arruiSeqWaitAddr[2]);
 
-        
-
-
-        
 };
 #endif /* data_storage_general_H */

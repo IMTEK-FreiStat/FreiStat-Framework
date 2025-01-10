@@ -48,7 +48,7 @@ int C_Setup_OCP::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
  *        potential.
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -197,7 +197,7 @@ int C_Setup_OCP::funInitOCP(){
     AD5940_SEQCtrlS(bTRUE); 
 
     // Clear interrupt flag
-    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccured(false);
+    c_DataSoftwareStorage_->get_AD5940Setup()->set_InterruptOccurred(false);
 
     // Set AFE to low power mode
     AD5940_AFEPwrBW(AFEPWR_LP, AFEBW_250KHZ);
@@ -210,7 +210,7 @@ int C_Setup_OCP::funInitOCP(){
  * commands to the SRAM
  * @details: Defined error codes:
  * Error code   :       Definition
- * 0            :       No error occured
+ * 0            :       No error occurred
  * 21001        :       Wake up of AFE failed
  * 21002        :       Sample buffer to small
  * 21003        :       Sequence doenst fit into SRAM of sequencer
@@ -431,7 +431,7 @@ int C_Setup_OCP::funSequencerInitializationSequence(){
         // Set sequence ID to 3
         S_SequenceInfo.SeqId = SEQID_1;
 
-        // Get sequener start adress in SRAM
+        // Get sequener start address in SRAM
         S_SequenceInfo.SeqRamAddr = c_DataStorageGeneral_->get_SeqStartAddress();
 
         // Save pointer to sequencer commands stored in the MCU
@@ -450,7 +450,7 @@ int C_Setup_OCP::funSequencerInitializationSequence(){
         AD5940_SEQInfoCfg(&S_SequenceInfo);
     }
     else {
-        // Error occured while creating sequence
+        // Error occurred while creating sequence
         return iErrorCode;
     }
     return EC_NO_ERROR;
@@ -492,7 +492,7 @@ int C_Setup_OCP::funSequencerADCControl(){
     // Stop the sequence generator
     AD5940_SEQGenCtrl(bFALSE);
 
-    // Check if error occured
+    // Check if error occurred
     if (iErrorCode == AD5940ERR_OK){
         // Get sequence info 
         SEQInfo_Type S_SequenceInfo = c_DataStorageGeneral_->
@@ -509,7 +509,7 @@ int C_Setup_OCP::funSequencerADCControl(){
         // Set sequence ID to 2            
         S_SequenceInfo.SeqId = SEQID_2;
 
-        // Get sequener start adress in SRAM        
+        // Get sequener start address in SRAM        
         S_SequenceInfo.SeqRamAddr = 
         c_DataStorageGeneral_->get_SequenceInfo(SEQID_1).SeqRamAddr + 
         c_DataStorageGeneral_->get_SequenceInfo(SEQID_1).SeqLen;
@@ -530,7 +530,7 @@ int C_Setup_OCP::funSequencerADCControl(){
         AD5940_SEQInfoCfg(&S_SequenceInfo);
     }
     else {
-        // Error occured
+        // Error occurred
         return iErrorCode;
     }
     return EC_NO_ERROR;

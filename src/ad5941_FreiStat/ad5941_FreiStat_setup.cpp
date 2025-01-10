@@ -15,7 +15,7 @@
 #include "ad5941_FreiStat_setup.h"
 
 // Define static variable
-bool C_AD5940_Setup::bInterruptOccured_ = false;
+bool C_AD5940_Setup::bInterruptOccurred_ = false;
 
 /******************************************************************************
  * @brief Constructor of the class C_AD5940_Setup
@@ -28,10 +28,10 @@ C_AD5940_Setup::C_AD5940_Setup(){}
  * 
  *****************************************************************************/
 void C_AD5940_Setup::Begin(){
-    // Intialize variables
-    bInterruptOccured_ = false;
+    // Initialize variables
+    bInterruptOccurred_ = false;
 
-    // Intialize SPI, GPIOs and Interrupts
+    // Initialize SPI, GPIOs and Interrupts
     this->funAD5940_InitMCU();
 
     // Configure the AD5940 chip
@@ -240,7 +240,7 @@ void C_AD5940_Setup::funAD5940_Config(){
     // Define time for calibration of LFOSC
     S_LFOSCMeasure_.CalDuration = AD5940_LFOSC_CAL_TIME;
 
-    // Since sequencer is empty, use first adress for calibration commands
+    // Since sequencer is empty, use first address for calibration commands
     S_LFOSCMeasure_.CalSeqAddr = 0;        
 
     // Check system frequency at SYS_CLOCK definition section of this method
@@ -258,7 +258,7 @@ void C_AD5940_Setup::funAD5940_Config(){
  *****************************************************************************/
 void C_AD5940_Setup::funExt_Int0_Handler(){
     // Set interrupt flag
-    bInterruptOccured_ = true;
+    bInterruptOccurred_ = true;
 }
 
 /******************************************************************************
@@ -266,10 +266,10 @@ void C_AD5940_Setup::funExt_Int0_Handler(){
  *****************************************************************************/
 /******************************************************************************
  * @brief Setter method for setting interrupt flag
- * @param bInterruptOccured: Set/ reset interrupt flag
+ * @param bInterruptOccurred: Set/ reset interrupt flag
  *****************************************************************************/
-void C_AD5940_Setup::set_InterruptOccured(bool bInterruptOccured){
-    bInterruptOccured_ = bInterruptOccured;
+void C_AD5940_Setup::set_InterruptOccurred(bool bInterruptOccurred){
+    bInterruptOccurred_ = bInterruptOccurred;
 }
 
 /******************************************************************************
@@ -287,7 +287,7 @@ float C_AD5940_Setup::get_LFOSCFrequency(){
  * @brief Getter method for returning interrupt flag
  * @return: interrupt flag
  *****************************************************************************/
-bool C_AD5940_Setup::get_InterruptOccured(){
-    return bInterruptOccured_;
+bool C_AD5940_Setup::get_InterruptOccurred(){
+    return bInterruptOccurred_;
 }
 #endif /* ad5940_FreiStat_setup_CPP */

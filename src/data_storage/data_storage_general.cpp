@@ -195,7 +195,7 @@ unsigned int C_DataStorageGeneral::get_FiFoThreshold(){
 }
 
 /******************************************************************************
- * @brief Getter method for returning the defined starting adress of the 
+ * @brief Getter method for returning the defined starting address of the 
  * sequencer
  * @return: Returns defined squencer starting address
  *****************************************************************************/
@@ -332,109 +332,111 @@ uint32_t * C_DataStorageGeneral::get_SampleBuffer(){
 }
 
 /******************************************************************************
- * @brief  Method for setting the filtersettings and wait command for a given frequency.
+ * @brief  Method for setting the filtersettings and wait command for a given 
+ *         frequency.
  * @returns: void
  *****************************************************************************/
-void C_DataStorageGeneral::checkFrequency(float freq,  SEQInfo_Type S_SequenceInfo, 
+void C_DataStorageGeneral::funCheckFrequency(float fFreq,  SEQInfo_Type S_SequenceInfo, 
     uint32_t arruiSeqWaitAddr[2])
 {
-    // Initialize variables
-    ADCFilterCfg_Type filter_cfg;
-    DFTCfg_Type dft_cfg;
-    HSDACCfg_Type hsdac_cfg;
-    ClksCalInfo_Type clks_cal;
-    FreqParams_Type freq_params;
+    // Define structs
+    ADCFilterCfg_Type S_filterConfig;
+    DFTCfg_Type S_DftConfig;
+    HSDACCfg_Type S_HSDacConfig;
+    ClksCalInfo_Type S_ClksCalInfo;
+    FreqParams_Type S_FreqParams;
 
-    uint32_t SeqCmdBuff[32];
-    uint32_t SRAMAddr = 0;
+    // Initialize variables
+    uint32_t uiSeqCmdBuff[32];
+    uint32_t uiSRAMAddr = 0;
     float fAdcClkFreq = 16000000;
-    uint32_t WaitClks;
+    uint32_t uiWaitClks;
 
 
     // Step 1: Check frequency
-    freq_params = AD5940_GetFreqParameters(freq);
+    S_FreqParams = AD5940_GetFreqParameters(fFreq);
 
-        if(freq < 0.51){
+        if(fFreq < 0.51){
             // Update HSDAC update rate 
-            hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
-            hsdac_cfg.HsDacGain = HSDACGAIN_1;
-            hsdac_cfg.HsDacUpdateRate = 0x1B;
-            AD5940_HSDacCfgS(&hsdac_cfg);
+            S_HSDacConfig.ExcitBufGain =EXCITBUFGAIN_2;
+            S_HSDacConfig.HsDacGain = HSDACGAIN_1;
+            S_HSDacConfig.HsDacUpdateRate = 0x1B;
+            AD5940_HSDacCfgS(&S_HSDacConfig);
             //set as per load current range
             AD5940_HSRTIACfgS(HSTIARTIA_40K); 
             
             //Update ADC rate 
-            filter_cfg.ADCRate = ADCRATE_800KHZ;
+            S_filterConfig.ADCRate = ADCRATE_800KHZ;
             fAdcClkFreq = 16e6;
             
             // Change clock to 16MHz oscillator
             AD5940_HPModeEn(bFALSE);
             }
-        else if(freq < 5 ){
+        else if(fFreq < 5 ){
             // Update HSDAC update rate 
-            hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
-            hsdac_cfg.HsDacGain = HSDACGAIN_1;
-            hsdac_cfg.HsDacUpdateRate = 0x1B;
-            AD5940_HSDacCfgS(&hsdac_cfg);
+            S_HSDacConfig.ExcitBufGain =EXCITBUFGAIN_2;
+            S_HSDacConfig.HsDacGain = HSDACGAIN_1;
+            S_HSDacConfig.HsDacUpdateRate = 0x1B;
+            AD5940_HSDacCfgS(&S_HSDacConfig);
 
             // set as per load current range
             AD5940_HSRTIACfgS(HSTIARTIA_40K); 
             
             //Update ADC rate
-            filter_cfg.ADCRate = ADCRATE_800KHZ;
+            S_filterConfig.ADCRate = ADCRATE_800KHZ;
             fAdcClkFreq = 16e6;
             
             // Change clock to 16MHz oscillator 
             AD5940_HPModeEn(bFALSE);
             
         }
-        else if(freq < 450){
+        else if(fFreq < 450){
             // Update HSDAC update rate 
-            hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
-            hsdac_cfg.HsDacGain = HSDACGAIN_1;  
-            hsdac_cfg.HsDacUpdateRate = 0x1B;
-            AD5940_HSDacCfgS(&hsdac_cfg);
+            S_HSDacConfig.ExcitBufGain =EXCITBUFGAIN_2;
+            S_HSDacConfig.HsDacGain = HSDACGAIN_1;  
+            S_HSDacConfig.HsDacUpdateRate = 0x1B;
+            AD5940_HSDacCfgS(&S_HSDacConfig);
 
             // set as per load current range
             AD5940_HSRTIACfgS(HSTIARTIA_5K); 
             
             //Update ADC rate
-            filter_cfg.ADCRate = ADCRATE_800KHZ;
+            S_filterConfig.ADCRate = ADCRATE_800KHZ;
             fAdcClkFreq = 16e6;
             
             // Change clock to 16MHz oscillator
             AD5940_HPModeEn(bFALSE);
         }
-        else if(freq<80000){
+        else if(fFreq<80000){
             // Update HSDAC update rate 
-            hsdac_cfg.ExcitBufGain =EXCITBUFGAIN_2;
-            hsdac_cfg.HsDacGain = HSDACGAIN_1;
-            hsdac_cfg.HsDacUpdateRate = 0x1B;
-            AD5940_HSDacCfgS(&hsdac_cfg);
+            S_HSDacConfig.ExcitBufGain =EXCITBUFGAIN_2;
+            S_HSDacConfig.HsDacGain = HSDACGAIN_1;
+            S_HSDacConfig.HsDacUpdateRate = 0x1B;
+            AD5940_HSDacCfgS(&S_HSDacConfig);
 
             // set as per load current range
             AD5940_HSRTIACfgS(HSTIARTIA_5K); 
             
             //Update ADC rate 
-            filter_cfg.ADCRate = ADCRATE_800KHZ;
+            S_filterConfig.ADCRate = ADCRATE_800KHZ;
             fAdcClkFreq = 16e6;
             
             // Change clock to 16MHz oscillator 
             AD5940_HPModeEn(bFALSE);
         }
         // High power mode 
-        else if(freq >= 80000){
+        else if(fFreq >= 80000){
             // Update HSDAC update rate 
-            hsdac_cfg.ExcitBufGain = EXCITBUFGAIN_2;
-            hsdac_cfg.HsDacGain = HSDACGAIN_1;
-            hsdac_cfg.HsDacUpdateRate = 0x07;
-            AD5940_HSDacCfgS(&hsdac_cfg);
+            S_HSDacConfig.ExcitBufGain = EXCITBUFGAIN_2;
+            S_HSDacConfig.HsDacGain = HSDACGAIN_1;
+            S_HSDacConfig.HsDacUpdateRate = 0x07;
+            AD5940_HSDacCfgS(&S_HSDacConfig);
 
             // set as per load current range
             AD5940_HSRTIACfgS(HSTIARTIA_5K); 
             
             //Update ADC rate 
-            filter_cfg.ADCRate = ADCRATE_1P6MHZ;
+            S_filterConfig.ADCRate = ADCRATE_1P6MHZ;
             fAdcClkFreq = 32e6;
             
             // Change clock to 32MHz oscillator
@@ -442,43 +444,43 @@ void C_DataStorageGeneral::checkFrequency(float freq,  SEQInfo_Type S_SequenceIn
         }
 
     // Step 2: Adjust ADCFILTERCON and DFTCON to set optimumn SINC3, SINC2 and DFTNUM settings 
-    filter_cfg.ADCAvgNum = ADCAVGNUM_16;  
-    filter_cfg.ADCSinc2Osr = freq_params.ADCSinc2Osr;
-    filter_cfg.ADCSinc3Osr = freq_params.ADCSinc3Osr;
-    filter_cfg.BpSinc3 = bFALSE;
-    filter_cfg.BpNotch = bTRUE;
-    filter_cfg.Sinc2NotchEnable = bTRUE;
-    dft_cfg.DftNum = freq_params.DftNum;
-    dft_cfg.DftSrc = freq_params.DftSrc;
-    dft_cfg.HanWinEn = bTRUE;
-    AD5940_ADCFilterCfgS(&filter_cfg);
-    AD5940_DFTCfgS(&dft_cfg);
+    S_filterConfig.ADCAvgNum = ADCAVGNUM_16;  
+    S_filterConfig.ADCSinc2Osr = S_FreqParams.ADCSinc2Osr;
+    S_filterConfig.ADCSinc3Osr = S_FreqParams.ADCSinc3Osr;
+    S_filterConfig.BpSinc3 = bFALSE;
+    S_filterConfig.BpNotch = bTRUE;
+    S_filterConfig.Sinc2NotchEnable = bTRUE;
+    S_DftConfig.DftNum = S_FreqParams.DftNum;
+    S_DftConfig.DftSrc = S_FreqParams.DftSrc;
+    S_DftConfig.HanWinEn = bTRUE;
+    AD5940_ADCFilterCfgS(&S_filterConfig);
+    AD5940_DFTCfgS(&S_DftConfig);
 
     // Step 3: Calculate clocks needed to get result to FIFO and update sequencer wait command 
-    clks_cal.DataType = DATATYPE_DFT;
-    clks_cal.DftSrc = freq_params.DftSrc;
-    clks_cal.DataCount = 1L<<(freq_params.DftNum+2); // 2^(DFTNUMBER+2) 
-    clks_cal.ADCSinc2Osr = freq_params.ADCSinc2Osr;
-    clks_cal.ADCSinc3Osr = freq_params.ADCSinc3Osr;
-    clks_cal.ADCAvgNum = 0;
-    clks_cal.RatioSys2AdcClk = AD5940_SYS_CLOCK_FREQ/ fAdcClkFreq;
-    AD5940_ClksCalculate(&clks_cal, &WaitClks);		
+    S_ClksCalInfo.DataType = DATATYPE_DFT;
+    S_ClksCalInfo.DftSrc = S_FreqParams.DftSrc;
+    S_ClksCalInfo.DataCount = 1L<<(S_FreqParams.DftNum+2); // 2^(DFTNUMBER+2) 
+    S_ClksCalInfo.ADCSinc2Osr = S_FreqParams.ADCSinc2Osr;
+    S_ClksCalInfo.ADCSinc3Osr = S_FreqParams.ADCSinc3Osr;
+    S_ClksCalInfo.ADCAvgNum = 0;
+    S_ClksCalInfo.RatioSys2AdcClk = AD5940_SYS_CLOCK_FREQ/ fAdcClkFreq;
+    AD5940_ClksCalculate(&S_ClksCalInfo, &uiWaitClks);		
 
-    // Get adress of wait command in sequence
-    SRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[0];
-
-    // update wait command
-    SeqCmdBuff[0] =SEQ_WAIT(WaitClks/2);
-    SeqCmdBuff[1] =SEQ_WAIT(WaitClks/2);
-    AD5940_SEQCmdWrite(SRAMAddr, SeqCmdBuff, 2);   
-
-    // Get adress of wait command in sequence
-    SRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[1];
+    // Get address of wait command in sequence
+    uiSRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[0];
 
     // update wait command
-    SeqCmdBuff[0] =SEQ_WAIT(WaitClks/2);    
-    SeqCmdBuff[1] =SEQ_WAIT(WaitClks/2);
-    AD5940_SEQCmdWrite(SRAMAddr, SeqCmdBuff, 2);
+    uiSeqCmdBuff[0] =SEQ_WAIT(uiWaitClks/2);
+    uiSeqCmdBuff[1] =SEQ_WAIT(uiWaitClks/2);
+    AD5940_SEQCmdWrite(uiSRAMAddr, uiSeqCmdBuff, 2);   
+
+    // Get address of wait command in sequence
+    uiSRAMAddr = S_SequenceInfo.SeqRamAddr +  arruiSeqWaitAddr[1];
+
+    // update wait command
+    uiSeqCmdBuff[0] =SEQ_WAIT(uiWaitClks/2);    
+    uiSeqCmdBuff[1] =SEQ_WAIT(uiWaitClks/2);
+    AD5940_SEQCmdWrite(uiSRAMAddr, uiSeqCmdBuff, 2);
 }
 
 

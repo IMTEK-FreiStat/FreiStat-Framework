@@ -28,8 +28,8 @@ C_Execute_CA::C_Execute_CA(){}
  *****************************************************************************/
 int C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     // Initialize variables
-    bEosInterruptOccured_ = false;
-
+    bEosInterruptOccurred_ = false;
+    int iErrorCode = 0;
     iStepCounter_ = 0;   
 
     // Save reference of data software storage object
@@ -50,7 +50,7 @@ int C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
     C_Communication * c_Communication = c_DataSoftwareStorage_->
         get_Communication();
 
-    // Prepare telegram strucutre
+    // Prepare telegram structure
     c_Communication->funConstructPrefixes(chrExperimentType_);
 
     // Set system status to experiment running
@@ -61,14 +61,17 @@ int C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
 
     // Loop while experiment is running
     while (c_DataSoftwareStorage_->get_SystemStatus() == FREISTAT_EXP_RUNNING){
-        // Check if interrupt has occured
-        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccured()){
+        // Check if interrupt has occurred
+        if (c_DataSoftwareStorage_->get_AD5940Setup()->get_InterruptOccurred()){
             // Clear interrupt flag
             c_DataSoftwareStorage_->get_AD5940Setup()->
-                set_InterruptOccured(false);
+                set_InterruptOccurred(false);
 
             // Call interrupt service routine
-            this->funInterruptServiceRoutine();
+            iErrorCode = this->funInterruptServiceRoutine();
+            if (iErrorCode !=0){
+                return iErrorCode;
+            }
         }
             
         // Get send data counter
@@ -90,8 +93,8 @@ int C_Execute_CA::Begin(C_DataSoftwareStorage * c_DataSoftwareStorage){
         }
         
         // Check if experiment is completed
-        // Check if end of sequence interrupt occured
-        if (bEosInterruptOccured_ == true){
+        // Check if end of sequence interrupt occurred
+        if (bEosInterruptOccurred_ == true){
             // Check if step counter is equal to maximal amount of values and
             // send data counter is equal to step counter
             S_DataContainer S_ExperimentData = c_DataStorageGeneral_->
@@ -139,7 +142,7 @@ int C_Execute_CA::funInterruptServiceRoutine(){
     uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
 
     // Loop until no interrupts are there which need to be handled
-    // Reason for looping is that interrupts could occure while an interrupt is
+    // Reason for looping is that interrupts could occur while an interrupt is
     // still handled
     while (uiInterruptFlag != 0){
         // Custom interrupt 1
@@ -186,6 +189,7 @@ int C_Execute_CA::funInterruptServiceRoutine(){
 
             // Turn on LED on AD5940 board
             AD5940_AGPIOClr(AGPIO_Pin1);
+            return 302;
         }
         // FIFO overflow interrupt
         if (uiInterruptFlag & AFEINTSRC_CMDFIFOOF)
@@ -218,7 +222,7 @@ int C_Execute_CA::funInterruptServiceRoutine(){
             AD5940_ShutDownS();
 
             // Set interrupt flag
-            bEosInterruptOccured_ = true;
+            bEosInterruptOccurred_ = true;
         }     
         // Update variable
         uiInterruptFlag = AD5940_INTCGetFlag(AFEINTC_0);
@@ -233,7 +237,7 @@ int C_Execute_CA::funInterruptServiceRoutine(){
  *****************************************************************************/
 int C_Execute_CA::funProcessExperimentData(uint32_t * pData, 
                                            uint32_t uiCountData){
-    // Intialize variables
+    // Initialize variables
     float fVoltage = 0;
         
     uint32_t iCountSamples = 0;
@@ -290,7 +294,7 @@ int C_Execute_CA::funProcessExperimentData(uint32_t * pData,
         S_ExperimentData.iCycle = 1 + c_DataStorageLocal_->get_StepNumber();       
 
         // Data point number
-        S_ExperimentData.iMeasurmentPair = 1 + iStepCounter_;
+        S_ExperimentData.iMeasurementPair = 1 + iStepCounter_;
 
         // Save time stamp
         S_ExperimentData.fTimeStamp = millis();
@@ -310,7 +314,7 @@ int C_Execute_CA::funProcessExperimentData(uint32_t * pData,
 }
 
 /******************************************************************************
- * @brief Method for starting and stoping the CA sequence and the configuration
+ * @brief Method for starting and stopping  the CA sequence and the configuration
  * of the Wake-up timer which is used to time the sequence of different 
  * sequences of the chronoamperometry
  * 
@@ -332,7 +336,7 @@ int C_Execute_CA::funControlApplication(uint32_t uiCommand){
             // Enable wake-up timer
             S_WakeUpTimer_Config.WuptEn = bTRUE;
 
-            // Specifiy how many sequences are used (A = 1 | B = 2 | ...)
+            // Specify how many sequences are used (A = 1 | B = 2 | ...)
             S_WakeUpTimer_Config.WuptEndSeq = WUPTENDSEQ_B;
 
             // Define order and type of sequences

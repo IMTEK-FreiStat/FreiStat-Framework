@@ -27,7 +27,7 @@
 class C_Execute_SWV : public C_ExecuteBehavior{
     private:
         // Variables
-        bool bEosInterruptOccured_;
+        bool bEosInterruptOccurred_;
         
         uint32_t iStepCounter_;
 

@@ -1,8 +1,8 @@
 /******************************************************************************
  * @brief: Header file containing the subclass (C_Execute) C_Execute_EIS which 
- * defines the behavior of executing an electrocemical impedance spectroscopy.
+ * defines the behavior of executing an chronoamperometry
  * 
- * @author: Cedric Neumann
+ * @author: Mark Jasper
  * @version: V 1.0.0
  * @date: 19.01.2022
  *   
@@ -19,7 +19,7 @@
  * @brief: Abstract class for execute_EIS behavior which inherits from class
  * execute behavior
  * 
- * @author: Cedric Neumann
+ * @author: Mark Jasper
  * @version: V 1.0.0
  * @date: 19.01.2022
  * 
@@ -27,7 +27,7 @@
 class C_Execute_EIS : public C_ExecuteBehavior{
     private:
         // Variables
-        bool bEosInterruptOccured_;
+        bool bEosInterruptOccurred_;
         
         uint32_t iStepCounter_;
 
