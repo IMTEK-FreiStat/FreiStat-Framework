@@ -83,7 +83,7 @@ CV_NUM_PARAMETER        = 11            # CV setup parameters
 NPV_NUM_PARAMETER       = 12            # NPV setup parameters
 DPV_NUM_PARAMETER       = 12            # DPV setup parameters
 SWV_NUM_PARAMETER       = 12            # SWV setup parameters
-EIS_NUM_PARAMETER       = 9             # EIS setup parameters
+EIS_NUM_PARAMETER       = 6             # EIS setup parameters
 
 """-----------------------------------------------------------------------------
 | Configuration parameters: Abbreviations
@@ -127,7 +127,7 @@ START_POTENTIAL_F       = 0.5       # Default value for start potential in V
 STOP_POTENTIAL_F        = 0.9       # Default value for stop potential in V
 START_FREQUENCY_F       = 1         # Default value for start frequnecy in Hz
 STOP_FREQUENCY_F        = 100       # Default value for stop frequnecy in Hz
-AC_AMPLITUDE_F          = 10        # Default value for ac amplitude in mV
+AC_AMPLITUDE_F          = 0.1        # Default value for ac amplitude in mV
 DC_OFFSET_F             = 0         # Default value for dc offset in mV
 NUM_POINTS_I            = 101       # Default value for sample points
 LOWER_POTENTIAL_F       = -0.62     # Default value for lower turning potential in V

@@ -1335,3 +1335,119 @@ class Run_Sequence(Run_Electrochemical_Method):
             self._logger.warning("SWV setup failed: Error code: " + str(iErrorCode) +
                             " Check error list for further informations.")
             self._iSetupFailed = len(self._listEcMethod)
+
+    def add_EIS(self,
+              start_frequency : float = START_FREQUENCY_F ,
+              stop_frequency : float = STOP_FREQUENCY_F,
+              ac_amplitude : float = AC_AMPLITUDE_F,
+              dc_offset : float = DC_OFFSET_F,
+              num_points : int = NUM_POINTS_I,
+              sweep_typ : bool = True,
+              EnableOptimizer : bool = True) -> str :
+        """
+        Description
+        -----------
+        Start electrochemical impedance spectroscopy with defined parameters.
+        
+        Parameters
+        ----------
+        `start_frequency` : float
+            Frequency at which the sweep will start in Hz
+
+        `stop_frequency` : float
+            Frequency at which the sweep will start in Hz
+
+        `ac_amplitude` : float
+            Amplitude of the sinussignal in V
+
+        `dc_offset` : float
+            Offset of the sinussignal in V
+
+        `num_points` : int
+            number of sampled points
+
+        `sweep_type` : bool
+            true for a logarithmic sweep and false for a linear sweep.
+
+        `MainsFilter`: bool
+            Enable/ Disable 50 Hz/ 60 Hz mains filter. 
+            If enabled `Sinc2_Oversampling` must be defiend (Default: 667)
+
+        `Sinc2_Oversampling` : int
+            Oversampling rate of the Sinc 2 filter
+            Defiend OSR rates: [22, 44, 89, 178, 267, 533, 
+            640, 667, 800, 889, 1067, 1333]
+
+        `Sinc3_Oversampling` : int
+            Oversampling rate of the Sinc 3 filter
+            Defiend OSR rates: [0 (Disabled), 2, 4, 5]
+            Oversampling rate of 5 is not recommanded
+
+        `EnableOptimizer` : bool
+            Enables the optimizer, which tunes automatically the experiment
+            parameters to fit best the performance of the FreiStat
+
+        `LowPerformanceMode` : bool
+            Enables low performance mode of the FreiStat, which disables
+            plotting of the data
+
+        Return
+        ------
+        `ExportedFilePath` : string
+            Returns system path to the location where the experiment data and
+            experiment parameters where stored after the experiment
+
+        """
+
+        # Convert parameters from SI-units to internal units
+        ac_amplitude = ac_amplitude * 1000.0
+        dc_offset = dc_offset * 1000.0
+        
+        print(ac_amplitude)
+        print(dc_offset)
+        # Translate bool of sweep_type into integer
+        i_sweep_type = _encode_Bool_Flag(sweep_typ)
+
+        # Safe experiment parameters in correct list format for differential 
+        # pulse voltammetry
+        listTempExperimentParameters = [
+            [START_FREQUENCY, start_frequency],
+            [STOP_FREQUENCY, stop_frequency],
+            [AC_AMPLITUDE, ac_amplitude],
+            [DC_OFFSET, dc_offset],
+            [NUM_POINTS,  num_points],
+            [SWEEP_TYPE, i_sweep_type]
+        ]
+
+        # Check if optimizer is enabled
+        if (self._bEnableOptimizer == True):
+            # Optimize experiment parameters
+            # Create instance of the optimizer class
+            _Optimizer = Optimizer(self._logger, self._iCommunicationMode)
+
+            # Start optimization
+            iErrorcode = _Optimizer.start(EIS, listTempExperimentParameters)
+
+            # Check for error
+            if (iErrorcode != EC_NO_ERROR):
+                self._logger.warning("Optimizer: Failed - Errorcode: "  + 
+                                str(iErrorcode) +
+                                " - FreiStat tries to run experiment with user " + 
+                                "defined parameters")
+            else:
+                # Overwrite parameters with optimized ones
+                listTempExperimentParameters = _Optimizer.return_Parameters()
+
+         # Creating an object for general electrochemical methods
+        self._listEcMethod.append(ElectrochemicalMethod(
+            EIS, self._dataSoftwareStorage))
+        
+        # Execute setup for electrochemical methods
+        iErrorCode = self._listEcMethod[len(self._listEcMethod) - 1]. \
+            setup(listTempExperimentParameters)
+
+        # Check if setup was successfull
+        if(iErrorCode != 0):
+            self._logger.warning("EIS setup failed: Error code: " + str(iErrorCode) +
+                            " Check error list for further informations.")
+            self._iSetupFailed = len(self._listEcMethod)

@@ -215,22 +215,25 @@ class ExecuteEIS(ExecuteBehavior):
                 strRun = listReadData[0][1]
 
                 # Get datapoint
-                frequency = float(listReadData[1][1][0][1])
+                iDataPoint = int(listReadData[1][1][0][1])
+                frequency = float(listReadData[1][1][1][1])
 
                 # Convert data
-                magnitude = float(listReadData[1][1][1][1])   
-                phase = float(listReadData[1][1][2][1])          
+                magnitude = float(listReadData[1][1][2][1])   
+                phase = float(listReadData[1][1][3][1])          
                
                 
                 # Add data to data storage
                 self._dataHandling.append_StoredData(
                         [int(strRun,10),
+                        iDataPoint,
                         frequency,
                         magnitude,
                         phase])
                 
                 # Add data to dataQueue
                 dataQueue.put([int(strRun,10),
+                                iDataPoint,
                                 frequency,
                                 magnitude,
                                 phase])

@@ -40,9 +40,6 @@ class Run_EIS(Run_Electrochemical_Method):
               dc_offset : float = DC_OFFSET_F,
               num_points : int = NUM_POINTS_I,
               sweep_typ : bool = True,
-              MainsFilter : bool = False,
-              Sinc2_Oversampling : int = SINC2_OVERSAMPLING_I,
-              Sinc3_Oversampling : int = SINC3_OVERSAMPLING_I,
               EnableOptimizer : bool = True,
               LowPerformanceMode : bool = False) -> str :
         """
@@ -70,20 +67,6 @@ class Run_EIS(Run_Electrochemical_Method):
         `sweep_type` : bool
             true for a logarithmic sweep and false for a linear sweep.
 
-        `MainsFilter`: bool
-            Enable/ Disable 50 Hz/ 60 Hz mains filter. 
-            If enabled `Sinc2_Oversampling` must be defiend (Default: 667)
-
-        `Sinc2_Oversampling` : int
-            Oversampling rate of the Sinc 2 filter
-            Defiend OSR rates: [22, 44, 89, 178, 267, 533, 
-            640, 667, 800, 889, 1067, 1333]
-
-        `Sinc3_Oversampling` : int
-            Oversampling rate of the Sinc 3 filter
-            Defiend OSR rates: [0 (Disabled), 2, 4, 5]
-            Oversampling rate of 5 is not recommanded
-
         `EnableOptimizer` : bool
             Enables the optimizer, which tunes automatically the experiment
             parameters to fit best the performance of the FreiStat
@@ -108,20 +91,9 @@ class Run_EIS(Run_Electrochemical_Method):
         ac_amplitude = ac_amplitude * 1000.0
         dc_offset = dc_offset * 1000.0
 
-        # Translate Sinc2 oversampling rate into integer value
-        Sinc2_Oversampling = _encode_Sinc_Oversampling_Rate("Sinc2", 
-                                Sinc2_Oversampling, self._logger)
-
-        # Translate Sinc3 oversampling rate into integer value
-        Sinc3_Oversampling = _encode_Sinc_Oversampling_Rate("Sinc3",
-                                Sinc3_Oversampling, self._logger)
-
         
         # Translate bool of sweep_type into integer
         i_sweep_type = _encode_Bool_Flag(sweep_typ)
-
-        # Translate bool of MainsFilter into integer
-        iMainsFilter = _encode_Bool_Flag(MainsFilter)
 
 
         # Safe experiment parameters in correct list format for differential 
@@ -132,10 +104,7 @@ class Run_EIS(Run_Electrochemical_Method):
             [AC_AMPLITUDE, ac_amplitude],
             [DC_OFFSET, dc_offset],
             [NUM_POINTS,  num_points],
-            [SWEEP_TYPE, i_sweep_type],
-            [MAINS_FILTER, iMainsFilter],
-            [SINC2_OVERSAMPLING, Sinc2_Oversampling],
-            [SINC3_OVERSAMPLING ,Sinc3_Oversampling]
+            [SWEEP_TYPE, i_sweep_type]
         ]
 
         # Check if optimizer is enabled

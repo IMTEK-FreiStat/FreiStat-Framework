@@ -157,7 +157,7 @@ class Plotter:
                 self._lines.append(self._ax.plot([],[])[0])
 
             # Disable plotting of sequence
-            self._bPlotSequence : bool = True
+            self._bPlotSequence : bool = False
 
         # Single method should be plotted
         else :
@@ -987,6 +987,10 @@ class Plotter:
             
         """
         # Check for sequence mode
+        #print(self._bPlotSequence)
+        #print(self._strMode)
+        #print(listData)
+
         if (self._bPlotSequence == False):
             if (self._strMode == FREISTAT_BACKEND):
                 self._listBox.insert("end",
@@ -1009,16 +1013,21 @@ class Plotter:
 
             elif (self._strMode == FREISTAT_STANDALONE):
                 if(self._experimentType == EIS):
-                    print("Datapoint " + str(listData[0]) + "\t - " +
-                        "Frequency:  " + str(listData[1]) + "\t - \t" + 
-                        "Magnitude: " + str(listData[2]) + " in Ohm\t\t - \t" +
-                        "Phase: " + str(listData[3]) + " in rad")
+                    print("Cycle: " + str(listData[0]) + "\t - " +
+                        "Datapoint " + str(listData[1]) + "\t - " +
+                        "Frequency:  " + str(listData[2]) + "\t - \t" + 
+                        "Magnitude: " + str(listData[3]) + " in Ohm\t - \t" +
+                        "Phase: " + str(listData[4]) + " in rad")
                 else:
                     print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint:  " + str(listData[1]) + "\t - \t" + 
                         "Voltage: " + str(listData[2]) + " mV\t\t - \t" +
                         "Current: " + str(listData[3]) + " \u03BCA\t\t - \t" +
                         "Time: " + str(listData[4]) + " ms")
+            else :
+                # Check if data is empty and return
+                if (listData[8] == UNDEFIEND):
+                    return
 
         else :
             # Check if data is empty and return
@@ -1047,12 +1056,20 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[2]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                print("Sequence cycle:" + str(listData[0]) + "\t - " +
-                    "Cycle: " + str(listData[1]) + "\t - " +
-                    "Datapoint:  " + str(listData[2]) + "\t - \t" + 
-                    "Voltage: " + str(listData[3]) + " mV\t\t - \t" +
-                    "Current: " + str(listData[4]) + " \u03BCA\t\t - \t" +
-                    "Time: " + str(listData[5]) + " ms")
+                print(listData)
+                if(listData[5] == "EIS"):
+                     print("Cycle: " + str(listData[0]) + "\t - " +
+                        "Datapoint " + str(listData[1]) + "\t - " +
+                        "Frequency:  " + str(listData[2]) + "\t - \t" + 
+                        "Magnitude: " + str(listData[3]) + " in Ohm\t\t - \t" +
+                        "Phase: " + str(listData[4]) + " in rad")
+                else:
+                    print("Sequence cycle:" + str(listData[0]) + "\t - " +
+                        "Cycle: " + str(listData[1]) + "\t - " +
+                        "Datapoint:  " + str(listData[2]) + "\t - \t" + 
+                        "Voltage: " + str(listData[3]) + " mV\t - \t" +
+                        "Current: " + str(listData[4]) + " \u03BCA\t\t - \t" +
+                        "Time: " + str(listData[5]) + " ms")
 
     def dataGenerator(self):
         """

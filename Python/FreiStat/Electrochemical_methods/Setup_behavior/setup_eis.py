@@ -138,9 +138,6 @@ class SetupEIS(SetupBehavior):
             [DC_OFFSET, min_dc_offset, max_dc_offset],
             [NUM_POINTS,1],
             [SWEEP_TYPE, 0, 1 ],
-            [MAINS_FILTER, 0, 1],
-            [SINC2_OVERSAMPLING, ADCSINC2OSR_DISABLED, ADCSINC2OSR_1333],
-            [SINC3_OVERSAMPLING, ADCSINC3OSR_DISABLED, ADCSINC3OSR_2]
         ]
     
         # Check if list of Parameters is in correct format

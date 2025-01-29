@@ -235,9 +235,10 @@ int C_Communication::funConstructPrefixes(char * chrEcMethod){
      else if (strcmp(chrEcMethod, EIS) == 0){
         c_JSONParser_->funWrapObjectChar(chrPrefix1_, RUN, true);
         c_JSONParser_->funWrapObjectChar(chrPrefix2_, MEASUREMENTS, false);
-        c_JSONParser_->funWrapObjectChar(chrPrefix3_, FREQUENCY_VALUE, true);
-        c_JSONParser_->funWrapObjectChar(chrPrefix4_, MAGNITUDE_VALUE, false);
-        c_JSONParser_->funWrapObjectChar(chrPrefix5_, PHASE_VALUE, false); 
+        c_JSONParser_->funWrapObjectChar(chrPrefix3_, DATA_PAIR_NUMBER, true);
+        c_JSONParser_->funWrapObjectChar(chrPrefix4_, FREQUENCY_VALUE, false);
+        c_JSONParser_->funWrapObjectChar(chrPrefix5_, MAGNITUDE_VALUE, false);
+        c_JSONParser_->funWrapObjectChar(chrPrefix6_, PHASE_VALUE, false); 
     }  
     return EC_NO_ERROR;
 }
@@ -282,12 +283,12 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
         strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
         strncat(chrBuff, itoa(S_ExperimentData.iMeasurementPair, chrIntBuff, 10), 
             sizeof(chrIntBuff));
-        strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix4_));
 
         dtostrf(S_ExperimentData.fVoltage, 7, 5, chrFloatBuff);
 
         strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
-        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix5_));
         strncat(chrBuff, itoa(S_ExperimentData.fTimeStamp, chrIntBuff, 10), 
             sizeof(chrIntBuff));
         strncat(chrBuff, "}}", sizeof("}}"));
@@ -311,7 +312,7 @@ int C_Communication::funSendExperimentData(S_DataContainer S_ExperimentData,
         dtostrf(S_ExperimentData.fVoltage, 7, 5, chrFloatBuff);
 
         strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
-        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix5_));
 
         dtostrf(S_ExperimentData.fCurrent, 7, 5, chrFloatBuff);
 
@@ -425,16 +426,19 @@ int C_Communication::funSendExperimentDataEIS(S_DataContainerEIS S_ExperimentDat
     switch (iEcMethod){
     case EIS_I:
         strncpy(chrBuff, chrPrefix1_, sizeof(chrPrefix1_));
+        strncat(chrBuff, itoa(S_ExperimentDataEIS.iCycle, chrIntBuff, 10), 
+            sizeof(chrIntBuff));
+        strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
+        strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix3_));
         strncat(chrBuff, itoa(S_ExperimentDataEIS.iMeasurementPair, chrIntBuff, 10),
           sizeof(chrIntBuff));
-        strncat(chrBuff, chrPrefix2_, sizeof(chrPrefix2_));
-        strncat(chrBuff, chrPrefix3_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix4_));
         dtostrf(S_ExperimentDataEIS.fFrequency, 7, 5, chrFloatBuff);
         strncat(chrBuff,chrFloatBuff, sizeof(chrFloatBuff));
-        strncat(chrBuff, chrPrefix4_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix5_));
         dtostrf(S_ExperimentDataEIS.Magnitude, 7, 5, chrFloatBuff);
         strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
-        strncat(chrBuff, chrPrefix5_, sizeof(chrPrefix1_));
+        strncat(chrBuff, chrPrefix6_, sizeof(chrPrefix6_));
         dtostrf(S_ExperimentDataEIS.Phase, 7, 5, chrFloatBuff);
          strncat(chrBuff, chrFloatBuff, sizeof(chrFloatBuff));
         strncat(chrBuff, "}}", sizeof("}}"));

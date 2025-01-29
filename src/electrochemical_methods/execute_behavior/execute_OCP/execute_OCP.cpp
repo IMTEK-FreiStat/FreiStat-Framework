@@ -248,9 +248,10 @@ int C_Execute_OCP::funProcessExperimentData(uint32_t * pData,
     // Check if samples were collected
     if (uiCountData > 0){                                                            
         // Turn it into a voltage (unit of ADCReferenceVoltage -> mV)
-        S_ExperimentData.fVoltage = AD5940_ADCCode2Volt(uint32_t(float(
-            iSumSamples / uiCountData) + 0.5), iAdcPgaGain_, 
-            fAdcReferenceVoltage_);
+        S_ExperimentData.fVoltage = 0.8;
+        //AD5940_ADCCode2Volt(uint32_t(float(
+        //    iSumSamples / uiCountData) + 0.5), iAdcPgaGain_, 
+        //    fAdcReferenceVoltage_);
 
         // Data point number
         S_ExperimentData.iMeasurementPair = 1 + iCurrentStep;

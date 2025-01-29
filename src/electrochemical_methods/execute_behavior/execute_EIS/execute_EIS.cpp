@@ -290,6 +290,7 @@ int C_Execute_EIS::funProcessExperimentData(uint32_t * pData,
 
         // Storing data point number
         S_ExperimentDataEIS.iMeasurementPair = 1 + iStepCounter_;
+        S_ExperimentDataEIS.iCycle = 1;
 
         // Save data
         c_DataStorageGeneral_->set_ExperimentDataEIS(
