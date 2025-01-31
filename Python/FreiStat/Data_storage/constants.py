@@ -365,6 +365,9 @@ PLOT_OCP_Y_LABEL        = "Voltage in mV"       # Label for the y-axis of the OC
 PLOT_CV_X_LABEL         = "Voltage in mV"       # Label for the x-axis of the CV-plot
 PLOT_CV_Y_LABEL         = "Current in \u03BCA"  # Label for the y-axis of the CV-plot
 
+PLOT_EIS_X_LABEL         = "Z' in \u03A9"       # Label for the x-axis of the EIS-plot
+PLOT_EIS_Y_LABEL         = "Z'' in \u03A9"      # Label for the y-axis of the EIS-plot
+
 """-----------------------------------------------------------------------------
 | Error Codes : General
 |   

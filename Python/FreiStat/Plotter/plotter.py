@@ -17,6 +17,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure, SubplotParams
 import matplotlib.pyplot as plt
 from tkinter.ttk import Style
+import numpy as np
 
 # Import internal dependencies
 from ..Data_storage.constants import *
@@ -72,6 +73,8 @@ class Plotter:
         self._listfTime : list = []
         self._listfVoltage : list = []
         self._listStoredData : list = []
+        self._listfRealNumber : list = []
+        self._listfImagNumber : list = []
 
         self._process = process
 
@@ -186,7 +189,6 @@ class Plotter:
                 self._iLine2DCounter = self._experimentParameters[6][1]
 
             elif (self._experimentType == CA):
-
                 # Create entry for every cycle to separate data
                 for iIndex in range (self._experimentParameters[3][1]):
                     self._listfTime.append([])
@@ -202,6 +204,10 @@ class Plotter:
                     self._listfVoltage.append([])
 
                 self._iLine2DCounter = self._experimentParameters[3][1]
+            
+            elif (self._experimentType == EIS):
+                # Create entry for every cycle to separate data             
+                self._iLine2DCounter = 1
 
             # Check if self._iLine2DCounter is larger than "10" and limit 
             # maximum amount of lines in the plot
@@ -254,8 +260,8 @@ class Plotter:
             self._initPlot_DPV(self._experimentParameters)
 
         # Eelectrochemical impedance spectroscopy
-       # elif (self._experimentType == EIS):
-        #    self._initPlot_EIS(self._experimentParameters)
+        elif (self._experimentType == EIS):
+            self._initPlot_EIS(self._experimentParameters)
 
     def _initPlot_OCP(self, listExperimentParameters : list) -> None:
         """
@@ -480,9 +486,9 @@ class Plotter:
         self._ax.axes.set_xlabel(PLOT_CV_X_LABEL)
         self._ax.axes.set_ylabel(PLOT_CV_Y_LABEL)
 
-    """
+    
     def _initPlot_EIS(self, listExperimentParameters : list) -> None:
-        
+        """
         Description
         -----------
         Sub method of the initPlot method to initialize plots of the CV family.
@@ -494,29 +500,27 @@ class Plotter:
         `listExperimentParameters` : list
             List containing the experiment parameters for the specific method
 
-        
-        print(listExperimentParameters)
-        startFrequency : float = listExperimentParameters[1][1]
-        stopFrequency : float = listExperimentParameters[2][1]
-        ac_amplitude : float = listExperimentParameters[3][1]
-        dc_amplitude : float = listExperimentParameters[4][1]
+        """
+        startFrequency : float = listExperimentParameters[0][1]
+        stopFrequency : float = listExperimentParameters[1][1]
+        ac_amplitude : float = listExperimentParameters[2][1]
+        dc_amplitude : float = listExperimentParameters[3][1]
 
         fLimitRight : float = stopFrequency            
         fLimitLeft : float =  startFrequency
             
         # Define window in x-direction
-        self._ax.set_xlim([fLimitLeft, fLimitRight])
+        self._ax.set_xlim([0, 130000])
 
         
         # Define window in y-direction                    
-        #self._ax.set_ylim([-0.9 * 1e6 / iLPTIARtiaSize - PADDING_CURRENT_UA, 
-        #                    0.9 * 1e6 / iLPTIARtiaSize + PADDING_CURRENT_UA])
+        self._ax.set_ylim([0, 100000])
 
         # Load labels from constants.py
         self._ax.axes.set_xlabel(PLOT_EIS_X_LABEL)
-        self._ax.axes.set_ylabel(PLOT_CV_Y_LABEL)
+        self._ax.axes.set_ylabel(PLOT_EIS_Y_LABEL)
        
-    """
+
     def _initAnimate(self):
         """
         Description
@@ -548,7 +552,6 @@ class Plotter:
         while (dataQueue.empty() == False):
             listTemp : list = dataQueue.get()
             self._listStoredData.append(listTemp)
-
             self._insertDataInOutput(listTemp)
 
         # Check if sequence or single method should be plotted
@@ -624,13 +627,12 @@ class Plotter:
 
                     # Check cycle
                     self._iCycle = listCurrentData[0]
-
                     # Append data to data lists
                     self._listfCurrent[self._iCycle - 1].append(
                         listCurrentData[3])
                     self._listfTime[self._iCycle - 1].append(
                         listCurrentData[4])
-
+                    
                 # Update displayed data
                 if (len(self._listfCurrent[self._iCycle - 1]) > 0):
                     # Update Current vs time plot
@@ -698,7 +700,33 @@ class Plotter:
                     self._ax.legend(title= PLOT_LEGEND_NAME, 
                                     bbox_to_anchor=(1.05, 1), 
                                     loc='upper left')
+            # Electrochemical impedance spectrocopy 
+            elif (self._experimentType == EIS):
+                # Update data lists
+                for iData in range(len(self._listStoredData)):
+                    # Pop oldest data from list
+                    listCurrentData = self._listStoredData.pop(0)
 
+                    # Check cycle
+                    magnitude = listCurrentData[3]
+                    phase = listCurrentData[4]
+
+                    Re = magnitude * np.cos(phase)
+                    Im = magnitude * np.sin(phase)
+                    self._iCycle = listCurrentData[0]
+
+                    # Append data to data lists
+                    self._listfRealNumber.append(Re)
+                    self._listfImagNumber.append(-Im)
+
+                # Update displayed data
+                if (len(self._listfRealNumber) > 0):
+                    # Update Current vs time plot
+
+                    self._lines[ (self._iCycle - 1) % self._iLine2DCounter]. \
+                        set_data(self._listfRealNumber, 
+                                 self._listfImagNumber)  
+                    
         # Plot sequence
         elif (self._bPlotSequence == True):
             # Update data lists
@@ -1145,6 +1173,8 @@ class Plotter:
         elif (strMethod == NPV or strMethod == DPV or strMethod == SWV):
             fStepTime = (listExperimentParameters[4][1][0] + \
                          listExperimentParameters[4][1][1]) / 2000
+        elif (strMethod == EIS):
+            fStepTime = 1 / (listExperimentParameters[0][1])
         return fStepTime
 
     def _calculateDatapoints(self, strMethod : str, 
@@ -1200,6 +1230,10 @@ class Plotter:
                                   listExperimentParameters[1][1]) / \
                               listExperimentParameters[2][1] * \
                               listExperimentParameters[6][1] * 2)
+
+        elif (strMethod == EIS):
+            iDatapoints = listExperimentParameters[4][1]
+
         return iDatapoints
 
     def set_listBox(self, listBox) -> None :
