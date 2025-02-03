@@ -41,7 +41,8 @@ class Run_EIS(Run_Electrochemical_Method):
               num_points : int = NUM_POINTS_I,
               sweep_typ : bool = True,
               EnableOptimizer : bool = True,
-              LowPerformanceMode : bool = False) -> str :
+              LowPerformanceMode : bool = False,
+              axes_lim: tuple = (10000, 10000)) -> str :
         """
         Description
         -----------
@@ -75,6 +76,9 @@ class Run_EIS(Run_Electrochemical_Method):
             Enables low performance mode of the FreiStat, which disables
             plotting of the data
 
+        `axes_lim` : tuple
+            Axes limits for live plot in (x_max, y_max)
+
         Return
         ------
         `ExportedFilePath` : string
@@ -104,7 +108,8 @@ class Run_EIS(Run_Electrochemical_Method):
             [AC_AMPLITUDE, ac_amplitude],
             [DC_OFFSET, dc_offset],
             [NUM_POINTS,  num_points],
-            [SWEEP_TYPE, i_sweep_type]
+            [SWEEP_TYPE, i_sweep_type],
+            [AXES_LIMITS, axes_lim]
         ]
 
         # Check if optimizer is enabled

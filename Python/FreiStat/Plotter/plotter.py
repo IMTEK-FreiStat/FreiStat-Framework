@@ -506,15 +506,15 @@ class Plotter:
         ac_amplitude : float = listExperimentParameters[2][1]
         dc_amplitude : float = listExperimentParameters[3][1]
 
-        fLimitRight : float = stopFrequency            
-        fLimitLeft : float =  startFrequency
+        fLimitRight : float = listExperimentParameters[6][1][0]            
+        fLimitLeft : float =  listExperimentParameters[6][1][1]    
             
         # Define window in x-direction
-        self._ax.set_xlim([0, 130000])
+        self._ax.set_xlim([0, fLimitRight])
 
         
         # Define window in y-direction                    
-        self._ax.set_ylim([0, 100000])
+        self._ax.set_ylim([0, fLimitLeft])
 
         # Load labels from constants.py
         self._ax.axes.set_xlabel(PLOT_EIS_X_LABEL)

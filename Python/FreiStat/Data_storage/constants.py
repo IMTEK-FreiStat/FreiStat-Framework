@@ -116,6 +116,7 @@ FIXED_WE_POTENTIAL      = "pFWP"        # Parameter fixed working electrorde pot
 MAINS_FILTER            = "pMF"         # Parameter 50 Hz/ 60 Hz mains filter enabled
 SINC2_OVERSAMPLING      = "pOS2"        # Parameter oversampling rate sinc2 filter
 SINC3_OVERSAMPLING      = "pOS3"        # Parameter oversampling rate sinc3 filter
+AXES_LIMITS             = "pAxs"        # Parameeter axes limits
 
 """-----------------------------------------------------------------------------
 | Configuration parameters: Default values

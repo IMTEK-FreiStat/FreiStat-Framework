@@ -66,5 +66,5 @@ dic_configParameters = {
     SINC2_OVERSAMPLING  : ["Sinc2 Oversampling rate",
                            "Oversampling rate sinc2 filter encoded as integer"],
     SINC3_OVERSAMPLING  : ["Sinc3 Oversampling rate",
-                           "Oversampling rate sinc3 filter encoded as integer"]               
+                           "Oversampling rate sinc3 filter encoded as integer"]
 }

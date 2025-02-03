@@ -50,24 +50,7 @@ class SetupEIS(SetupBehavior):
         sweep_Typ : bool
             true for a logarithmic sweep and false for a linear sweep.
 
-        LPTIA_Resistor : int
-            Size of the low power transimpendance amplifier resistor which is
-            used to measure the current. Range 200 - 512000 ohm.
-
-        MainsFilter: bool
-            Enable/ Disable 50 Hz/ 60 Hz mains filter. 
-            If enabled `Sinc2_Oversampling` must be defiend (Default: 667)
-
-        Sinc2_Oversampling : int
-            Oversampling rate of the Sinc 2 filter
-            Defiend OSR rates: [22, 44, 89, 178, 267, 533, 
-            640, 667, 800, 889, 1067, 1333]
-
-        Sinc3_Oversampling : int
-            Oversampling rate of the Sinc 3 filter
-            Defiend OSR rates: [0 (Disabled), 2, 4, 5]
-            Oversampling rate of 5 is not recommanded
-
+    
         Parameters
         ----------
         `listExperimentParameters`: list
@@ -137,8 +120,12 @@ class SetupEIS(SetupBehavior):
             [AC_AMPLITUDE, min_ac_amplitude, max_ac_amplitude],
             [DC_OFFSET, min_dc_offset, max_dc_offset],
             [NUM_POINTS,1],
-            [SWEEP_TYPE, 0, 1 ],
+            [SWEEP_TYPE, 0, 1 ]
         ]
+
+        listExperimentParameters = listExperimentParameters[0:-1]
+
+        print(listExperimentParameters)
     
         # Check if list of Parameters is in correct format
         if (len(listExperimentParameters) != EIS_NUM_PARAMETER):
