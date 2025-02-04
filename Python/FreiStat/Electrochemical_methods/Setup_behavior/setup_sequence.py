@@ -33,11 +33,6 @@ class SetupSequence(SetupBehavior):
         -----------
         Setup method for conducting a sequence of electrochemical methods.
 
-        List of required parameters
-        ----------
-        Cycle : int                  
-            Amount of cycles the CV should run
-
         Parameters
         ----------
         `listExperimentParameters`: list

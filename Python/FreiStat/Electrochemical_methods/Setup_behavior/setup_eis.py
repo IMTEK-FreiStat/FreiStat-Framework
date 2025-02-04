@@ -124,8 +124,6 @@ class SetupEIS(SetupBehavior):
         ]
 
         listExperimentParameters = listExperimentParameters[0:-1]
-
-        print(listExperimentParameters)
     
         # Check if list of Parameters is in correct format
         if (len(listExperimentParameters) != EIS_NUM_PARAMETER):

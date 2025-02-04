@@ -195,10 +195,68 @@ class ExecuteSequence(ExecuteBehavior):
                 # Export data storage object
                 self._dataHandling.export_DataStorage()      
                 break    
+            
+            if (listReadData[0][0] == ("\"" + RUN + "\"") and
+                 listReadData[1][1][1][0] == ("\"F\"")):
 
-            #print(listReadData)
+                # Check if a new run started
+                if (strRun != listReadData[0][1]):
+                    # Export data storage object
+                    self._dataHandling.export_DataStorage()
+
+                    # Check if low performance mode is enabled
+                    if (self._lowPerformaneMode == True):
+                        print("Cycle: " + strRun)
+
+                # Check if new method has started
+                if (iDataPoint > int(listReadData[0][1])):
+                    # Catching case a method only has one cycle
+                    # Export data storage object
+                    self._dataHandling.export_DataStorage()
+
+
+                    # Check if new sequence cycle has started
+                    if (iMethodCount % (self._dataHandling.\
+                        get_SequenceLength() - 1) == 0):
+                        # Increase sequence cycle
+                        iSequenceCycle += 1
+
+                    # Increase method counter
+                    iMethodCount += 1
+
+                    # Move to next data storage element
+                    self._dataHandling.move_next_DataObject()
+                
+                # Get current run
+                strRun = listReadData[0][1]
+             
+
+                iDataPoint = int(listReadData[0][1])
+                # Get datapoint
+                frequency = float(listReadData[1][1][1][1])
+
+                # Convert data
+                magnitude = float(listReadData[1][1][2][1])   
+                phase = float(listReadData[1][1][3][1])          
+        
+                # Add data to data storage
+                self._dataHandling.append_StoredData(
+                        [iSequenceCycle,
+                        int(strRun,10),
+                        frequency,
+                        magnitude,
+                        phase])
+                
+                # Add data to dataQueue
+                dataQueue.put([iSequenceCycle,
+                                int(strRun,10),
+                                frequency,
+                                magnitude,
+                                phase,
+                                self._dataHandling.get_ExperimentType()])
+
             # Check if send telegram is a data telegram
-            if (listReadData[0][0] == ("\"" + RUN + "\"") and listReadData[1][1][0][0] == ("\"D\"")):
+            elif (listReadData[0][0] == ("\"" + RUN + "\"")):
                 # Set reference time for the whole experiment
                 if (self._referenceTime == -1):
                     self._referenceTime = float(listReadData[1][1][3][1])
@@ -287,61 +345,6 @@ class ExecuteSequence(ExecuteBehavior):
                                 self._referenceTime,
                                 self._dataHandling.get_ExperimentType()])
 
-            elif (listReadData[0][0] == ("\"" + RUN + "\"") and
-                 listReadData[1][1][0][0] == ("\"F\"")):
-
-                # Check if a new run started
-                if (strRun != listReadData[0][1]):
-                    # Export data storage object
-                    self._dataHandling.export_DataStorage()
-
-                    # Check if low performance mode is enabled
-                    if (self._lowPerformaneMode == True):
-                        print("Cycle: " + strRun)
-
-                # Check if new method has started
-                if (iDataPoint > int(listReadData[0][1])):
-                    # Catching case a method only has one cycle
-                    # Export data storage object
-                    self._dataHandling.export_DataStorage()
-
-
-                    # Check if new sequence cycle has started
-                    if (iMethodCount % (self._dataHandling.\
-                        get_SequenceLength() - 1) == 0):
-                        # Increase sequence cycle
-                        iSequenceCycle += 1
-
-                    # Increase method counter
-                    iMethodCount += 1
-
-                    # Move to next data storage element
-                    self._dataHandling.move_next_DataObject()
-
-                iDataPoint = int(listReadData[0][1])
-                # Get datapoint
-                frequency = float(listReadData[1][1][0][1])
-
-                # Convert data
-                magnitude = float(listReadData[1][1][1][1])   
-                phase = float(listReadData[1][1][2][1])          
-               
-                
-                # Add data to data storage
-                self._dataHandling.append_StoredData(
-                        [iSequenceCycle,
-                        int(strRun,10),
-                        frequency,
-                        magnitude,
-                        phase])
-                
-                # Add data to dataQueue
-                dataQueue.put([iSequenceCycle,
-                                int(strRun,10),
-                                frequency,
-                                magnitude,
-                                phase,
-                                self._dataHandling.get_ExperimentType()])
 
             # Check if send telegram is a command telegram
             elif (listReadData[0][0] == ("\"" + COMMAND_TELEGRAM + "\"")):

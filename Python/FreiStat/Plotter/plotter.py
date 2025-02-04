@@ -1015,10 +1015,6 @@ class Plotter:
             
         """
         # Check for sequence mode
-        #print(self._bPlotSequence)
-        #print(self._strMode)
-        #print(listData)
-
         if (self._bPlotSequence == False):
             if (self._strMode == FREISTAT_BACKEND):
                 self._listBox.insert("end",
@@ -1040,12 +1036,15 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[1]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                if(self._experimentType == EIS):
+                if(listData[5] == "EIS"):
                     print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint " + str(listData[1]) + "\t - " +
                         "Frequency:  " + str(listData[2]) + "\t - \t" + 
                         "Magnitude: " + str(listData[3]) + " in Ohm\t - \t" +
                         "Phase: " + str(listData[4]) + " in rad")
+                # Check if data is empty and return
+                elif (listData[8] == UNDEFIEND):
+                    return
                 else:
                     print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint:  " + str(listData[1]) + "\t - \t" + 
@@ -1059,7 +1058,7 @@ class Plotter:
 
         else :
             # Check if data is empty and return
-            if (listData[8] == UNDEFIEND):
+            if (listData[5] == UNDEFIEND):
                 return
 
             if (self._strMode == FREISTAT_BACKEND):
@@ -1084,7 +1083,6 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[2]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                print(listData)
                 if(listData[5] == "EIS"):
                      print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint " + str(listData[1]) + "\t - " +

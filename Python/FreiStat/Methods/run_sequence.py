@@ -210,7 +210,9 @@ class Run_Sequence(Run_Electrochemical_Method):
             for iPosition in range(len(listTempParameters)):
                 if (listTempParameters[iPosition][0] == CYCLE):
                     iCycle = listTempParameters[iPosition][1]
-
+                
+                elif listTempParameters[iPosition][0] == START_FREQUENCY:
+                    iCycle = 1
             # Append parameters
             listTempExperimentParameters[len(listTempExperimentParameters) - 1]. \
                 append([self._dataHandling.get_ExperimentType(), iCycle, 
@@ -801,7 +803,6 @@ class Run_Sequence(Run_Electrochemical_Method):
             [SINC2_OVERSAMPLING, Sinc2_Oversampling],
             [SINC3_OVERSAMPLING ,Sinc3_Oversampling]
         ]
-        print(listTempExperimentParameters)
         # Check if optimizer is enabled
         if (self._bEnableOptimizer == True):
             # Optimize experiment parameters
@@ -1343,6 +1344,7 @@ class Run_Sequence(Run_Electrochemical_Method):
               dc_offset : float = DC_OFFSET_F,
               num_points : int = NUM_POINTS_I,
               sweep_typ : bool = True,
+              axes_lim: tuple = (10000, 10000),
               EnableOptimizer : bool = True) -> str :
         """
         Description
@@ -1369,20 +1371,6 @@ class Run_Sequence(Run_Electrochemical_Method):
         `sweep_type` : bool
             true for a logarithmic sweep and false for a linear sweep.
 
-        `MainsFilter`: bool
-            Enable/ Disable 50 Hz/ 60 Hz mains filter. 
-            If enabled `Sinc2_Oversampling` must be defiend (Default: 667)
-
-        `Sinc2_Oversampling` : int
-            Oversampling rate of the Sinc 2 filter
-            Defiend OSR rates: [22, 44, 89, 178, 267, 533, 
-            640, 667, 800, 889, 1067, 1333]
-
-        `Sinc3_Oversampling` : int
-            Oversampling rate of the Sinc 3 filter
-            Defiend OSR rates: [0 (Disabled), 2, 4, 5]
-            Oversampling rate of 5 is not recommanded
-
         `EnableOptimizer` : bool
             Enables the optimizer, which tunes automatically the experiment
             parameters to fit best the performance of the FreiStat
@@ -1403,8 +1391,6 @@ class Run_Sequence(Run_Electrochemical_Method):
         ac_amplitude = ac_amplitude * 1000.0
         dc_offset = dc_offset * 1000.0
         
-        print(ac_amplitude)
-        print(dc_offset)
         # Translate bool of sweep_type into integer
         i_sweep_type = _encode_Bool_Flag(sweep_typ)
 
@@ -1416,7 +1402,8 @@ class Run_Sequence(Run_Electrochemical_Method):
             [AC_AMPLITUDE, ac_amplitude],
             [DC_OFFSET, dc_offset],
             [NUM_POINTS,  num_points],
-            [SWEEP_TYPE, i_sweep_type]
+            [SWEEP_TYPE, i_sweep_type],
+            [AXES_LIMITS, axes_lim]
         ]
 
         # Check if optimizer is enabled
@@ -1441,7 +1428,6 @@ class Run_Sequence(Run_Electrochemical_Method):
          # Creating an object for general electrochemical methods
         self._listEcMethod.append(ElectrochemicalMethod(
             EIS, self._dataSoftwareStorage))
-        
         # Execute setup for electrochemical methods
         iErrorCode = self._listEcMethod[len(self._listEcMethod) - 1]. \
             setup(listTempExperimentParameters)
