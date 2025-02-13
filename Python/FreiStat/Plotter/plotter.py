@@ -1036,7 +1036,7 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[1]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                if(listData[5] == "EIS"):
+                if(len(listData) <= 6):
                     print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint " + str(listData[1]) + "\t - " +
                         "Frequency:  " + str(listData[2]) + "\t - \t" + 
@@ -1083,7 +1083,7 @@ class Plotter:
                 self._progressBar['value'] = 100/ self._iDataPoints * listData[2]
 
             elif (self._strMode == FREISTAT_STANDALONE):
-                if(listData[5] == "EIS"):
+                if(len(listData) <= 6):
                      print("Cycle: " + str(listData[0]) + "\t - " +
                         "Datapoint " + str(listData[1]) + "\t - " +
                         "Frequency:  " + str(listData[2]) + "\t - \t" + 
